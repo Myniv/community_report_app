@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "309990585762",
+    "project_id": "communityreportapp",
+    "storage_bucket": "communityreportapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:309990585762:android:77d8627d31b4e72e51eefb",
+        "android_client_info": {
+          "package_name": "com.example.community_report_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "309990585762-jr40kjr47aq6tdhvmsplaje675q3figh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.community_report_app",
+            "certificate_hash": "e9340c92bb59e5ac80bbad9251c0f31b875f047d"
+          }
+        },
+        {
+          "client_id": "309990585762-21f0q5ossb8edva37vek3mfcibldmke6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIOyUg9tFdXVxOGXiymgwkMbT7VBJnYmI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "309990585762-21f0q5ossb8edva37vek3mfcibldmke6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
