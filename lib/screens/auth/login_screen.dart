@@ -1,3 +1,4 @@
+import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/provider/auth_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/routes.dart';
@@ -29,15 +30,32 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               Image.asset("assets/images/logo.png", height: 100),
               const SizedBox(height: 20),
+              Center(
+                child: Text(
+                  "Welcome Back",
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF249A00),
+                  ),
+                ),
+              ),
 
               // EMAIL INPUT
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.email),
+                  prefixIcon: const Icon(
+                    Icons.email,
+                    color: CustomTheme.primaryColor,
+                  ),
                   hintText: "Email",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: CustomTheme.primaryColor),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 10,
@@ -52,10 +70,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.lock),
+                  prefixIcon: const Icon(
+                    Icons.lock,
+                    color: CustomTheme.primaryColor,
+                  ),
                   hintText: "Password",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: CustomTheme.primaryColor),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 10,
@@ -70,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[800],
+                    backgroundColor: CustomTheme.primaryColor,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   onPressed: () async {
@@ -84,10 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     if (success && profileProvider.profile != null) {
                       if (profileProvider.profile!.role == "admin") {
-                        Navigator.pushReplacementNamed(
-                          context,
-                          AppRoutes.home,
-                        );
+                        Navigator.pushReplacementNamed(context, AppRoutes.home);
                       } else {
                         Navigator.pushReplacementNamed(context, AppRoutes.home);
                       }
@@ -113,6 +135,14 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    side: const BorderSide(
+                      color: CustomTheme.primaryColor,
+                      style: BorderStyle.solid,
+                      width: 2,
+                    ),
+                  ),
                   icon: Image.asset(
                     "assets/images/google_logo.png", // logo google
                     height: 20,

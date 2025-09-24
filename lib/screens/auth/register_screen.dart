@@ -1,3 +1,4 @@
+import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/provider/auth_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/routes.dart';
@@ -97,7 +98,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade800,
+                    backgroundColor: CustomTheme.primaryColor,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   onPressed: _isLoading
@@ -157,7 +158,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Text(
                       "Login",
                       style: TextStyle(
-                        color: Colors.blue.shade800,
+                        color: CustomTheme.primaryColor,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

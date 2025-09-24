@@ -1,6 +1,7 @@
 import 'package:community_report_app/provider/auth_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/screens/auth/login_screen.dart';
+import 'package:community_report_app/screens/auth/login_test.dart';
 import 'package:community_report_app/screens/auth/register_screen.dart';
 import 'package:community_report_app/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -85,6 +86,7 @@ class _MainScreenState extends State<MainScreen> {
     final List<Widget> _screens = [
       HomeScreen(),
       LoginScreen(),
+      // LoginTest(),
       RegisterScreen(),
     ];
     return Scaffold(
