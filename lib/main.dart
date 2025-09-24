@@ -6,6 +6,9 @@ import 'package:community_report_app/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +20,15 @@ void main() async {
       apiKey: 'AIzaSyCIOyUg9tFdXVxOGXiymgwkMbT7VBJnYmI', //Web API Key
       appId: '1:309990585762:android:77d8627d31b4e72e51eefb',
     ), // App ID
+  );
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: false,
+  );
+  await Supabase.initialize(
+    url: 'https://ltvskbkhdfgvkveqaxpg.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0dnNrYmtoZGZndmt2ZXFheHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1MjU3NjUsImV4cCI6MjA3MzEwMTc2NX0.i2YH6LvyAwkreZ11f-NbUkQBq7oQ5xuKHqe9sIEWhGE',
+    //bucketname : profile_photos_community_app
   );
 
   runApp(
