@@ -8,6 +8,9 @@ class ProfileProvider extends ChangeNotifier {
   Profile? _profile;
   Profile? get profile => _profile;
 
+  Profile? _otherUserProfile;
+  Profile? get otherUserProfile => _otherUserProfile;
+
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -31,6 +34,24 @@ class ProfileProvider extends ChangeNotifier {
         lastNameController.text = _profile!.last_name ?? '';
         phoneController.text = _profile!.phone ?? '';
         locationController.text = _profile!.location ?? '';
+      }
+      notifyListeners();
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // load profile from Firestore
+  Future<void> loadProfileOtherUser(String uid) async {
+    _setLoading(true);
+    try {
+      _otherUserProfile = await _profileService.getUserProfile(uid);
+
+      if (_otherUserProfile != null) {
+        frontNameController.text = _otherUserProfile!.front_name ?? '';
+        lastNameController.text = _otherUserProfile!.last_name ?? '';
+        phoneController.text = _otherUserProfile!.phone ?? '';
+        locationController.text = _otherUserProfile!.location ?? '';
       }
       notifyListeners();
     } finally {
