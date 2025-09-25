@@ -41,52 +41,27 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              // EMAIL INPUT
-              TextField(
+              // Email
+              CustomTheme().customTextField(
+                context: context,
                 controller: _emailController,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(
-                    Icons.email,
-                    color: CustomTheme.primaryColor,
-                  ),
-                  hintText: "Email",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: CustomTheme.primaryColor),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 15,
-                  ),
-                ),
+                label: "Email",
+                hint: "Insert email",
+                icon: Icons.email,
+                iconColor: CustomTheme.green,
+                keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 15),
 
-              // PASSWORD INPUT
-              TextField(
+              // Password
+              CustomTheme().customTextField(
+                context: context,
                 controller: _passwordController,
+                label: "Password",
+                hint: "Insert password",
+                icon: Icons.lock,
+                iconColor: CustomTheme.green,
                 obscureText: true,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(
-                    Icons.lock,
-                    color: CustomTheme.primaryColor,
-                  ),
-                  hintText: "Password",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: CustomTheme.primaryColor),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 15,
-                  ),
-                ),
               ),
               const SizedBox(height: 20),
 
@@ -95,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: CustomTheme.primaryColor,
+                    backgroundColor: CustomTheme.green,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   onPressed: () async {
@@ -138,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     side: const BorderSide(
-                      color: CustomTheme.primaryColor,
+                      color: CustomTheme.green,
                       style: BorderStyle.solid,
                       width: 2,
                     ),
