@@ -22,7 +22,11 @@ class AuthService {
   }
 
   // Register with Email & Password
-  Future<User?> registerWithEmail(String email, String password) async {
+  Future<User?> registerWithEmail(
+    String email,
+    String password,
+    Profile registProfile,
+  ) async {
     try {
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
@@ -33,7 +37,12 @@ class AuthService {
         final profile = Profile(
           uid: user.uid,
           email: user.email!,
-          username: user.email!.split('@')[0],
+          username: registProfile.username,
+          front_name: registProfile.front_name,
+          last_name: registProfile.last_name,
+          phone: registProfile.phone,
+          location: registProfile.location,
+          created_at: registProfile.created_at,
           role: "member",
         );
         await _profileService.createUserProfile(profile);
