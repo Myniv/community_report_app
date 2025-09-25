@@ -1,5 +1,6 @@
 import 'package:community_report_app/models/profile.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
+import 'package:community_report_app/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,8 +16,8 @@ class ProfileScreen extends StatelessWidget {
       child: Scaffold(
         body: Column(
           children: [
-            buildProfileSection(profile),
-            const SizedBox(height: 130),
+            SizedBox(height: 260, child: buildProfileSection(profile, context)),
+            const SizedBox(height: 60),
             const TabBar(
               labelColor: Colors.black,
               unselectedLabelColor: Colors.grey,
@@ -27,20 +28,17 @@ class ProfileScreen extends StatelessWidget {
               ],
             ),
 
-            // Konten tab (flexible, isi layar)
+            // ✅ Konten tab
             Expanded(
               child: TabBarView(
                 children: [
-                  // contoh dummy posts
                   ListView.builder(
                     padding: const EdgeInsets.only(bottom: 16),
-                    itemCount:
-                        10, // jumlah dummy post (nanti bisa pakai data asli)
+                    itemCount: 10,
                     itemBuilder: (context, index) {
                       return buildPostSection(profile, context);
                     },
                   ),
-                  // contoh dummy likes
                   ListView.builder(
                     itemCount: 5,
                     itemBuilder: (context, index) {
@@ -61,7 +59,7 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-Widget buildProfileSection(Profile? profile) {
+Widget buildProfileSection(Profile? profile, BuildContext context) {
   return Stack(
     clipBehavior: Clip.none,
     children: [
@@ -70,7 +68,7 @@ Widget buildProfileSection(Profile? profile) {
         top: 130,
         left: 30,
         right: 30,
-        child: buildProfileHeader(profile),
+        child: buildProfileHeader(profile, context),
       ),
     ],
   );
@@ -80,8 +78,9 @@ Widget buildCoverProfile() {
   return Container(height: 195, color: const Color(0xFFD9D9D9));
 }
 
-Widget buildProfileHeader(Profile? profile) {
+Widget buildProfileHeader(Profile? profile, BuildContext context) {
   return Stack(
+    clipBehavior: Clip.none,
     children: [
       Column(
         children: [
@@ -113,25 +112,38 @@ Widget buildProfileHeader(Profile? profile) {
           ),
         ],
       ),
-      Positioned(right: 0, top: 90, child: buildEditProfileButton()),
+
+      Positioned(
+        right: 0,
+        top: 90,
+        child: Material(
+          color: Colors.transparent,
+          child: buildEditProfileButton(context),
+        ),
+      ),
     ],
   );
 }
 
-Widget buildEditProfileButton() {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-    decoration: ShapeDecoration(
-      color: const Color(0xFF249A00),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-    ),
-    child: const Text(
-      'Edit Profile',
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 15,
-        fontFamily: 'Roboto',
-        fontWeight: FontWeight.w400,
+Widget buildEditProfileButton(BuildContext context) {
+  return GestureDetector(
+    onTap: () {
+      Navigator.pushNamed(context, AppRoutes.editProfile);
+    },
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: ShapeDecoration(
+        color: const Color(0xFF249A00),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+      ),
+      child: const Text(
+        'Edit Profile',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          fontFamily: 'Roboto',
+          fontWeight: FontWeight.w400,
+        ),
       ),
     ),
   );

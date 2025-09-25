@@ -73,7 +73,7 @@ class ProfileProvider extends ChangeNotifier {
         front_name: frontNameController.text,
         last_name: lastNameController.text,
         phone: phoneController.text,
-        location: locationController.text,
+        location: profile!.location,
         photo: _profile!.photo,
         role: _profile!.role,
       );
@@ -84,6 +84,50 @@ class ProfileProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
+  }
+
+  // update profile ke Firestore
+  Future<void> updateOtherProfile() async {
+    if (_otherUserProfile == null) return;
+    if (!formKey.currentState!.validate()) return;
+
+    _setLoading(true);
+    try {
+      final updated = Profile(
+        uid: _otherUserProfile!.uid,
+        email: _otherUserProfile!.email,
+        username: _otherUserProfile!.username,
+        front_name: frontNameController.text,
+        last_name: lastNameController.text,
+        phone: phoneController.text,
+        location: otherUserProfile!.location,
+        photo: _otherUserProfile!.photo,
+        role: _otherUserProfile!.role,
+      );
+
+      await _profileService.updateUserProfile(updated);
+      _otherUserProfile = updated;
+      notifyListeners();
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  void setLocation(String? value, String? uid) {
+    if (uid != null) {
+      _otherUserProfile!.location = value;
+    } else {
+      _profile!.location = value;
+    }
+    notifyListeners();
+  }
+
+  bool validateForm(String? profileId) {
+    final isValid = formKey.currentState?.validate() ?? false;
+
+    notifyListeners();
+
+    return isValid;
   }
 
   void clearProfile() {

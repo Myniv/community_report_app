@@ -1,10 +1,8 @@
+import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/widgets/image_picker_form.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hr_attendance_tracker/providers/employee_provider.dart';
-import 'package:hr_attendance_tracker/widgets/image_picker_form.dart';
-import 'package:hr_attendance_tracker/widgets/text_form_field.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +16,15 @@ class UpdateProfileScreen extends StatefulWidget {
 }
 
 class FormScreenState extends State<UpdateProfileScreen> {
+  final CustomTheme _customTheme = CustomTheme();
+  final locationItem = const [
+    "Binong Permai",
+    "Bintaro",
+    "Kalibata",
+    "Karawaci",
+    "Kemanggisan Baru",
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -96,12 +103,12 @@ class FormScreenState extends State<UpdateProfileScreen> {
                       // Judul Form
                       Center(
                         child: Text(
-                          "Profile Form",
-                          style: Theme.of(context).textTheme.headlineLarge
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF004966),
-                              ),
+                          "Edit Profile",
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF249A00),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -119,82 +126,102 @@ class FormScreenState extends State<UpdateProfileScreen> {
                             : profileProvider.profile?.photo,
                       ),
                       const SizedBox(height: 50),
-                      // Full Name
-                      CustomTextFormField(
-                        label: 'Full Name',
-                        controller: profileProvider.fullNameController,
-                        keyboardType: TextInputType.multiline,
+                      // Front Name
+                      CustomTheme().customTextField(
+                        context: context,
+                        controller: profileProvider.frontNameController,
+                        label: "Front Name",
+                        hint: "Insert front name",
+                        icon: Icons.person,
+                        iconColor: CustomTheme.green,
+                        keyboardType: TextInputType.name,
                         validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'full name cannot be empty';
+                          if (value == null || value.trim().isEmpty) {
+                            return "Please insert front name";
                           }
-
-                          if (value.length < 3) {
-                            return 'minimal 3 characters';
+                          if (value.trim().length < 3) {
+                            return "Front name must be at least 3 characters";
                           }
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16),
-                      // email
-                      CustomTextFormField(
-                        label: 'Email',
-                        controller: profileProvider.emailController,
-                        keyboardType: TextInputType.emailAddress,
+
+                      const SizedBox(height: 20),
+
+                      // Last Name
+                      CustomTheme().customTextField(
+                        context: context,
+                        controller: profileProvider.lastNameController,
+                        label: "Last Name",
+                        hint: "Insert last name",
+                        icon: Icons.person,
+                        iconColor: CustomTheme.green,
+                        keyboardType: TextInputType.name,
                         validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Email cannot be empty';
+                          if (value == null || value.trim().isEmpty) {
+                            return "Please insert last name";
                           }
-
-                          if (!value.contains('@')) {
-                            return 'Enter a valid email';
+                          if (value.trim().length < 3) {
+                            return "Last name must be at least 3 characters";
                           }
-
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16),
 
-                      TextFormField(
+                      const SizedBox(height: 20),
+
+                      // Phone
+                      CustomTheme().customTextField(
+                        context: context,
                         inputFormatters: [phoneFormatter],
                         controller: profileProvider.phoneController,
-                        keyboardType: TextInputType.phone,
-                        decoration: InputDecoration(
-                          labelText: 'Phone Number',
-                          border: const OutlineInputBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(14.0),
-                            ),
-                          ),
-                        ),
+                        label: "Phone",
+                        hint: "Insert phone",
+                        icon: Icons.phone,
+                        iconColor: CustomTheme.green,
+                        keyboardType: TextInputType.name,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Phone number cannot be empty';
                           }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      // location
-                      CustomTextFormField(
-                        label: 'Location',
-                        controller: profileProvider.locationController,
-                        keyboardType: TextInputType.multiline,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'location cannot be empty';
+
+                          final digitsOnly = value.replaceAll(
+                            RegExp(r'\D'),
+                            '',
+                          );
+                          final requiredDigits =
+                              phoneFormatter
+                                  .getMask()!
+                                  .split('')
+                                  .where((c) => c == '#')
+                                  .length +
+                              2;
+                          if (digitsOnly.length < requiredDigits) {
+                            return 'Phone number must be complete';
                           }
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16),
-
-                      // Bio
-                      CustomTextFormField(
-                        label: 'Bio',
-                        controller: profileProvider.bioController,
-                        keyboardType: TextInputType.multiline,
-                        // maxLines: 3,
+                      const SizedBox(height: 20),
+                      // location
+                      _customTheme.customDropdown<String>(
+                        context: context,
+                        icon: Icons.location_on,
+                        value: widget.profileId != null
+                            ? profileProvider.otherUserProfile?.location
+                            : profileProvider.profile?.location,
+                        items: locationItem,
+                        label: "Location",
+                        hint: "Select Location",
+                        onChanged: (value) {
+                          profileProvider.setLocation(value, widget.profileId);
+                        },
+                        validator: (value) {
+                          if (value == null) {
+                            return "Please select a location";
+                          }
+                          return null;
+                        },
                       ),
 
                       const SizedBox(height: 20),
@@ -203,88 +230,115 @@ class FormScreenState extends State<UpdateProfileScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey,
-                            ),
-                            onPressed: () async {
-                              final shouldUpdate = await showDialog<bool>(
-                                context: context,
-                                builder: (ctx) => AlertDialog(
-                                  title: const Text('Cancel'),
-                                  content: const Text('Discard changes?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(ctx).pop(false),
-                                      child: const Text('No'),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () =>
-                                          Navigator.of(ctx).pop(true),
-                                      child: const Text('Yes'),
-                                    ),
-                                  ],
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.grey,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 6,
                                 ),
-                              );
-
-                              if (!context.mounted) return;
-                              if (shouldUpdate == true) {
-                                // profileProvider.resetForm();
-                                Navigator.pop(context);
-                              }
-                            },
-                            child: const Text('Cancel'),
-                          ),
-                          const SizedBox(width: 25),
-                          ElevatedButton(
-                            onPressed: () async {
-                              if (profileProvider.validateForm(
-                                widget.profileId,
-                              )) {
-                                widget.profileId != null
-                                    ? await profileProvider
-                                          .updateOtherEmployee()
-                                    : await profileProvider.updateEmployee();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Profile updated successfully!',
-                                    ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: () async {
+                                final shouldUpdate = await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text('Cancel'),
+                                    content: const Text('Discard changes?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(ctx).pop(false),
+                                        child: const Text('No'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () =>
+                                            Navigator.of(ctx).pop(true),
+                                        child: const Text('Yes'),
+                                      ),
+                                    ],
                                   ),
                                 );
-                                if (!profileProvider.previousPositionEntries
-                                    .contains(
-                                      profileProvider.positionController.text,
-                                    )) {
-                                  profileProvider.savedEmployeePosition(
-                                    profileProvider.positionController.text,
+
+                                if (!context.mounted) return;
+                                if (shouldUpdate == true) {
+                                  Navigator.pop(context);
+                                }
+                              },
+                              child: const Text('Cancel'),
+                            ),
+                          ),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: CustomTheme.green,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: () async {
+                                try {
+                                  if (profileProvider.validateForm(
+                                    widget.profileId,
+                                  )) {
+                                    widget.profileId != null
+                                        ? await profileProvider
+                                              .updateOtherProfile()
+                                        : await profileProvider.updateProfile();
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Profile updated successfully!',
+                                        ),
+                                      ),
+                                    );
+
+                                    if (context.mounted) {
+                                      Navigator.of(context).pop(false);
+                                    }
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          "Input data is still invalid.",
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Update profile failed: $e",
+                                      ),
+                                    ),
                                   );
                                 }
-                                // profileProvider.resetForm();
-                                if (context.mounted) {
-                                  Navigator.of(context).pop(false);
-                                }
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      "Please fill all fields (and select a photo if required).",
+                              },
+                              child: profileProvider.isLoading
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Submit',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              }
-                            },
-                            child: profileProvider.isLoading
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Text('Submit'),
+                            ),
                           ),
                         ],
                       ),

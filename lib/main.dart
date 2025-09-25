@@ -1,6 +1,8 @@
 import 'package:community_report_app/provider/auth_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
+import 'package:community_report_app/routes.dart';
 import 'package:community_report_app/screens/auth/login_screen.dart';
+// import 'package:community_report_app/screens/auth/login_test.dart';
 import 'package:community_report_app/screens/auth/register_screen.dart';
 import 'package:community_report_app/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -8,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,6 +54,7 @@ class MainApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: MainScreen(),
+      onGenerateRoute: (settings) => AppRoutes.generateRoute(settings),
     );
   }
 }
@@ -85,6 +87,7 @@ class _MainScreenState extends State<MainScreen> {
     final List<Widget> _screens = [
       HomeScreen(),
       LoginScreen(),
+      // LoginTest(),
       RegisterScreen(),
     ];
     return Scaffold(

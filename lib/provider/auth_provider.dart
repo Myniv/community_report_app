@@ -1,3 +1,4 @@
+import 'package:community_report_app/models/profile.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/services/auth_services.dart';
 import 'package:flutter/foundation.dart';
@@ -14,7 +15,11 @@ class AuthProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get isLoading => _isLoading;
 
-  Future<bool> signInWithEmail(String email, String password, ProfileProvider profileProvider) async {
+  Future<bool> signInWithEmail(
+    String email,
+    String password,
+    ProfileProvider profileProvider,
+  ) async {
     _setLoading(true);
     try {
       _user = await _authService.signInWithEmail(email, password);
@@ -33,10 +38,15 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> registerWithEmail(String email, String password, ProfileProvider profileProvider) async {
+  Future<bool> registerWithEmail(
+    String email,
+    String password,
+    ProfileProvider profileProvider,
+    Profile registProfile,
+  ) async {
     _setLoading(true);
     try {
-      _user = await _authService.registerWithEmail(email, password);
+      _user = await _authService.registerWithEmail(email, password, registProfile);
       if (_user != null) {
         await profileProvider.loadProfile(_user!.uid);
       }

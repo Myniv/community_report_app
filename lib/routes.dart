@@ -1,4 +1,5 @@
 import 'package:community_report_app/screens/auth/login_screen.dart';
+import 'package:community_report_app/screens/profile/edit_profile_screen.dart';
 import 'package:community_report_app/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -24,7 +25,7 @@ class AppRoutes {
         );
       case editProfile:
         return MaterialPageRoute(
-          builder: (_) => ProfileScreen(),
+          builder: (_) => UpdateProfileScreen(),
           settings: settings,
         );
       default:
