@@ -51,6 +51,13 @@ class HomeScreen extends StatelessWidget {
               user?.email ?? '',
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
+            const SizedBox(height: 16),
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, AppRoutes.profile);
+              },
+              child: Text('Profile'),
+            ),
           ],
         ),
       ),
