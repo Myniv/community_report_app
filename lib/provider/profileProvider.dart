@@ -77,15 +77,15 @@ class ProfileProvider extends ChangeNotifier {
       }
 
       final updated = Profile(
-        uid: _otherUserProfile!.uid,
-        email: _otherUserProfile!.email,
-        username: _otherUserProfile!.username,
+        uid: _profile!.uid,
+        email: _profile!.email,
+        username: _profile!.username,
         front_name: frontNameController.text,
         last_name: lastNameController.text,
         phone: phoneController.text,
-        location: otherUserProfile!.location,
+        location: profile!.location,
         photo: pathPhoto,
-        role: _otherUserProfile!.role,
+        role: _profile!.role,
       );
 
       await _profileService.updateUserProfile(updated);
@@ -167,7 +167,6 @@ class ProfileProvider extends ChangeNotifier {
     final isValid = formKey.currentState?.validate() ?? false;
 
     notifyListeners();
-
     return isValid;
   }
 
