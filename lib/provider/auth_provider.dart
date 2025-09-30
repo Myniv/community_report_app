@@ -10,10 +10,25 @@ class AuthProvider extends ChangeNotifier {
   User? _user;
   String? _errorMessage;
   bool _isLoading = false;
+  bool _isInitialized = false;
 
   User? get user => _user;
   String? get errorMessage => _errorMessage;
   bool get isLoading => _isLoading;
+  bool get isInitialized => _isInitialized;
+
+  AuthProvider() {
+    _initializeAuthState();
+  }
+
+  void _initializeAuthState() {
+    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+      _user = user;
+      _isInitialized = true;
+
+      notifyListeners();
+    });
+  }
 
   Future<bool> signInWithEmail(
     String email,
@@ -46,7 +61,11 @@ class AuthProvider extends ChangeNotifier {
   ) async {
     _setLoading(true);
     try {
-      _user = await _authService.registerWithEmail(email, password, registProfile);
+      _user = await _authService.registerWithEmail(
+        email,
+        password,
+        registProfile,
+      );
       if (_user != null) {
         await profileProvider.loadProfile(_user!.uid);
       }

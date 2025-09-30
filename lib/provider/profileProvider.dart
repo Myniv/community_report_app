@@ -16,6 +16,9 @@ class ProfileProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
+
   // form key
   final formKey = GlobalKey<FormState>();
 
@@ -38,6 +41,9 @@ class ProfileProvider extends ChangeNotifier {
         locationController.text = _profile!.location ?? '';
       }
       notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
     } finally {
       _setLoading(false);
     }
@@ -55,6 +61,9 @@ class ProfileProvider extends ChangeNotifier {
         phoneController.text = _otherUserProfile!.phone ?? '';
         locationController.text = _otherUserProfile!.location ?? '';
       }
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
       notifyListeners();
     } finally {
       _setLoading(false);
@@ -93,6 +102,10 @@ class ProfileProvider extends ChangeNotifier {
       notifyListeners();
 
       return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return false;
     } finally {
       _setLoading(false);
     }
@@ -131,6 +144,9 @@ class ProfileProvider extends ChangeNotifier {
       await _profileService.updateUserProfile(updated);
       _otherUserProfile = updated;
       notifyListeners();
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
     } finally {
       _setLoading(false);
     }
@@ -148,6 +164,10 @@ class ProfileProvider extends ChangeNotifier {
 
       // kasih cacheBuster biar url fresh
       return "$url?v=${DateTime.now().millisecondsSinceEpoch}";
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return null;
     } finally {
       _isLoading = false;
       notifyListeners();

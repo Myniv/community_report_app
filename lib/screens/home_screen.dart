@@ -1,4 +1,5 @@
 import 'package:community_report_app/provider/auth_provider.dart';
+import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../routes.dart';
@@ -18,6 +19,11 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
+              final profileProvider = Provider.of<ProfileProvider>(
+                context,
+                listen: false,
+              );
+              profileProvider.clearProfile();
               await authProvider.signOut();
               if (context.mounted) {
                 Navigator.pushReplacementNamed(context, AppRoutes.login);
