@@ -5,6 +5,8 @@ import 'package:camera/camera.dart';
 import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/models/enum_list.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:community_report_app/main.dart';
@@ -452,6 +454,8 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
               context,
             ),
           ),
+          const SizedBox(height: 12),
+          _buildLocationMap(_latitude!, _longitude!),
         ],
       ),
     );
@@ -516,6 +520,47 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
     if (_cameraController != null && _cameraController!.value.isInitialized) {
       await _cameraController?.resumePreview();
     }
+  }
+
+  Widget _buildLocationMap(double latitude, double longitude) {
+    return Container(
+      height: 300,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: CustomTheme.whiteKindaGreen.withOpacity(0.3),
+        borderRadius: CustomTheme.borderRadius,
+        border: Border.all(color: CustomTheme.green.withOpacity(0.3), width: 1),
+      ),
+      child: ClipRRect(
+        borderRadius: CustomTheme.borderRadius,
+        child: FlutterMap(
+          options: MapOptions(
+            initialCenter: LatLng(latitude, longitude),
+            initialZoom: 16,
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+              userAgentPackageName: "com.example.community_report_app",
+            ),
+            MarkerLayer(
+              markers: [
+                Marker(
+                  point: LatLng(latitude, longitude),
+                  width: 80,
+                  height: 80,
+                  child: const Icon(
+                    Icons.location_pin,
+                    color: Colors.red,
+                    size: 40,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
