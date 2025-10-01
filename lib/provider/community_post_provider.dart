@@ -233,6 +233,13 @@ class CommunityPostProvider with ChangeNotifier {
       throw Exception("Post not initialized");
     }
 
+    // Validate image is provided
+    if (imageFile == null) {
+      _errorMessage = "Photo is required";
+      notifyListeners();
+      throw Exception("Photo is required");
+    }
+
     // Get current values
     final title = titleController.text.trim();
     final description = descriptionController.text.trim();
@@ -291,29 +298,28 @@ class CommunityPostProvider with ChangeNotifier {
         description: description,
       );
 
-      print("Post to be saved: ${_currentPost!.toMap()}");
-
       if (_postIndex == null) {
-        // Creating new post
-        print("Creating new post...");
-        final newPost = await _communityPostServices.createPost(_currentPost!);
-        print("New post created with ID: ${newPost.id}");
-        print("Returned post: ${newPost.toMap()}");
+        // Creating new post - upload photo FIRST, then create post
+        print("Step 1: Creating temporary post to get ID...");
+        final tempPost = await _communityPostServices.createPost(_currentPost!);
+        print("Temporary post created with ID: ${tempPost.id}");
 
-        _currentPost = newPost;
+        // Step 2: Upload photo using the post ID
+        print("Step 2: Uploading photo for post ${tempPost.id}...");
+        final photoUrl = await _communityPostServices.uploadProfilePhoto(
+          tempPost.id!,
+          imageFile,
+          '',
+        );
+        print("Photo uploaded successfully: $photoUrl");
 
-        // Upload photo after post is created
-        if (imageFile != null && newPost.id != null) {
-          print("Uploading photo for post ${newPost.id}...");
-          final photoUrl = await uploadPhoto(imageFile);
+        // Step 3: Update the post with photo URL
+        print("Step 3: Updating post with photo URL...");
+        _currentPost = tempPost.copyWith(photo: photoUrl);
+        await _communityPostServices.updatePost(_currentPost!);
+        print("Post updated with photo URL");
 
-          if (photoUrl != null) {
-            _currentPost = _currentPost!.copyWith(photo: photoUrl);
-            await _communityPostServices.updatePost(_currentPost!);
-            print("Photo uploaded and post updated with photo URL");
-          }
-        }
-
+        print("Final post data: ${_currentPost!.toMap()}");
         _postsList.add(_currentPost!);
       } else {
         // Updating existing post
@@ -321,14 +327,15 @@ class CommunityPostProvider with ChangeNotifier {
         _currentPost = _currentPost!.copyWith(id: _postIndex);
 
         // Upload new photo if provided
-        if (imageFile != null) {
-          print("Uploading new photo...");
-          final photoUrl = await uploadPhoto(imageFile);
-          if (photoUrl != null) {
-            _currentPost = _currentPost!.copyWith(photo: photoUrl);
-          }
-        }
+        print("Uploading new photo...");
+        final photoUrl = await _communityPostServices.uploadProfilePhoto(
+          _currentPost!.id!,
+          imageFile,
+          _currentPost!.photo ?? '',
+        );
+        print("New photo uploaded: $photoUrl");
 
+        _currentPost = _currentPost!.copyWith(photo: photoUrl);
         await _communityPostServices.updatePost(_currentPost!);
         print("Post updated successfully");
 

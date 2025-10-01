@@ -74,7 +74,7 @@ class CommunityPost {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'user_id': user_id,
+      'userId': user_id,
       'title': title,
       'description': description,
       'photo': photo,
@@ -83,36 +83,42 @@ class CommunityPost {
       'location': location,
       'status': status,
       'category': category,
-      'is_report': is_report,
+      'isReport': is_report,
       'urgency': urgency,
-      'created_at': created_at != null ? Timestamp.fromDate(created_at!) : null,
-      'updated_at': updated_at != null ? Timestamp.fromDate(updated_at!) : null,
-      'deleted_at': deleted_at != null ? Timestamp.fromDate(deleted_at!) : null,
+      // 'createdAt': created_at != null ? Timestamp.fromDate(created_at!) : null,
+      // 'updatedAt': updated_at != null ? Timestamp.fromDate(updated_at!) : null,
+      // 'deletedAt': deleted_at != null ? Timestamp.fromDate(deleted_at!) : null,
     };
   }
 
   factory CommunityPost.fromMap(Map<String, dynamic> map) {
     return CommunityPost(
       id: map['id'],
-      user_id: map['user_id'],
+      user_id: map['userId'] ?? map['user_id'],
       title: map['title'],
       description: map['description'],
       photo: map['photo'],
-      longitude: map['longitude'],
-      latitude: map['latitude'],
+      longitude: map['longitude']?.toDouble(),
+      latitude: map['latitude']?.toDouble(),
       location: map['location'],
       status: map['status'],
       category: map['category'],
-      is_report: map['is_report'],
+      is_report: map['isReport'] ?? map['is_report'],
       urgency: map['urgency'],
-      created_at: map['created_at'] != null
-          ? (map['created_at'] as Timestamp).toDate()
+      created_at: map['createdAt'] != null || map['created_at'] != null
+          ? (map['createdAt'] ?? map['created_at'] is Timestamp
+                ? (map['createdAt'] ?? map['created_at'] as Timestamp).toDate()
+                : DateTime.parse(map['createdAt'] ?? map['created_at']))
           : null,
-      updated_at: map['updated_at'] != null
-          ? (map['updated_at'] as Timestamp).toDate()
+      updated_at: map['updatedAt'] != null || map['updated_at'] != null
+          ? (map['updatedAt'] ?? map['updated_at'] is Timestamp
+                ? (map['updatedAt'] ?? map['updated_at'] as Timestamp).toDate()
+                : DateTime.parse(map['updatedAt'] ?? map['updated_at']))
           : null,
-      deleted_at: map['deleted_at'] != null
-          ? (map['deleted_at'] as Timestamp).toDate()
+      deleted_at: map['deletedAt'] != null || map['deleted_at'] != null
+          ? (map['deletedAt'] ?? map['deleted_at'] is Timestamp
+                ? (map['deletedAt'] ?? map['deleted_at'] as Timestamp).toDate()
+                : DateTime.parse(map['deletedAt'] ?? map['deleted_at']))
           : null,
     );
   }
