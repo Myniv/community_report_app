@@ -6,8 +6,8 @@ class CommunityPost {
   String? title;
   String? description;
   String? photo;
-  String? longitude;
-  String? latitude;
+  double? longitude;
+  double? latitude;
   String? location;
   String? status;
   String? category;
@@ -41,8 +41,8 @@ class CommunityPost {
     String? title,
     String? description,
     String? photo,
-    String? longitude,
-    String? latitude,
+    double? longitude,
+    double? latitude,
     String? location,
     String? status,
     String? category,
