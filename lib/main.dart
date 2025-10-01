@@ -1,10 +1,13 @@
+import 'package:camera/camera.dart';
 import 'package:community_report_app/provider/auth_provider.dart';
+import 'package:community_report_app/provider/community_post_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/routes.dart';
 import 'package:community_report_app/screens/auth/auth_wrapper.dart';
 import 'package:community_report_app/screens/auth/login_screen.dart';
 // import 'package:community_report_app/screens/auth/login_test.dart';
 import 'package:community_report_app/screens/auth/register_screen.dart';
+import 'package:community_report_app/screens/community_post/create_community_post_screen.dart';
 import 'package:community_report_app/screens/home_screen.dart';
 import 'package:community_report_app/screens/profile/profile_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -13,8 +16,11 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+late List<CameraDescription> cameras;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  cameras = await availableCameras();
 
   await Firebase.initializeApp(
     options: FirebaseOptions(
@@ -39,6 +45,11 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProxyProvider<ProfileProvider, CommunityPostProvider>(
+          create: (_) => CommunityPostProvider(ProfileProvider()),
+          update: (_, profileProvider, __) =>
+              CommunityPostProvider(profileProvider),
+        ),
       ],
       child: MainApp(),
     ),
@@ -100,7 +111,7 @@ class _MainScreenState extends State<MainScreen> {
     final List<String> _titleScreenMember = ["Home", "Profile", "Regist"];
     final List<Widget> _screensMember = [
       HomeScreen(),
-      ProfileScreen(),
+      CreateCommunityPostScreen(),
       RegisterScreen(),
     ];
     final List<IconData> _iconScreenMember = [
