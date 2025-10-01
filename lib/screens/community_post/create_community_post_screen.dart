@@ -411,12 +411,9 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: CustomTheme.green.withOpacity(0.3),
+        color: Colors.white,
         borderRadius: CustomTheme.borderRadius,
-        border: Border.all(
-          color: CustomTheme.lightGreen.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: CustomTheme.green.withOpacity(0.3), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -427,7 +424,7 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
               const SizedBox(width: 8),
               Text(
                 "Current Location",
-                style: CustomTheme().mediumFont(
+                style: CustomTheme().smallFont(
                   CustomTheme.lightGreen,
                   FontWeight.w600,
                   context,
@@ -438,8 +435,8 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
           const SizedBox(height: 12),
           Text(
             _address,
-            style: CustomTheme().smallFont(
-              CustomTheme.whiteKindaGreen,
+            style: CustomTheme().superSmallFont(
+              Colors.black,
               FontWeight.w400,
               context,
             ),
@@ -449,8 +446,8 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
           const SizedBox(height: 8),
           Text(
             "Coordinates: $_location",
-            style: CustomTheme().superSmallFont(
-              CustomTheme.whiteKindaGreen.withOpacity(0.7),
+            style: CustomTheme().superSmallFont2(
+              Colors.black87.withOpacity(0.7),
               FontWeight.w400,
               context,
             ),
@@ -534,10 +531,6 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
     final allUrgency = UrgencyItem.values.map((e) => e.displayName).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isEdit ? 'Edit Post' : 'Create Post'),
-        backgroundColor: CustomTheme.lightGreen,
-      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Container(
@@ -591,162 +584,214 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Always show form fields
-                      _customTheme.customTextField(
-                        context: context,
-                        controller: postProvider.titleController,
-                        label: "Title",
-                        hint: "Enter title",
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return "Please enter a title";
-                          }
-                          if (value.trim().length < 3) {
-                            return "Title must be at least 3 characters";
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-
-                      _customTheme.customTextField(
-                        context: context,
-                        controller: postProvider.descriptionController,
-                        label: "Description",
-                        hint: "Enter description",
-                        maxLines: 5,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return "Please enter a description";
-                          }
-                          if (value.trim().length < 3) {
-                            return "Description must be at least 3 characters";
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-
-                      _customTheme.customDropdown<String>(
-                        context: context,
-                        value:
-                            postProvider.currentPost?.category?.isNotEmpty ==
-                                true
-                            ? postProvider.currentPost?.category
-                            : null,
-                        items: allCategory,
-                        label: "Category",
-                        hint: "Select category",
-                        onChanged: (value) {
-                          postProvider.setCategory(value);
-                        },
-                        validator: (value) {
-                          if (value == null) {
-                            return "Please select a category";
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-
-                      _customTheme.customDropdown<String>(
-                        context: context,
-                        value:
-                            postProvider.currentPost?.urgency?.isNotEmpty ==
-                                true
-                            ? postProvider.currentPost?.urgency
-                            : null,
-                        items: allUrgency,
-                        label: "Urgency",
-                        hint: "Select urgency",
-                        onChanged: (value) {
-                          postProvider.setUrgency(value);
-                        },
-                        validator: (value) {
-                          if (value == null) {
-                            return "Please select an urgency";
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-
-                      _customTheme.customDropdown<String>(
-                        context: context,
-                        value:
-                            postProvider.currentPost?.location?.isNotEmpty ==
-                                true
-                            ? postProvider.currentPost?.location
-                            : null,
-                        items: allLocation,
-                        label: "Location",
-                        hint: "Select location",
-                        onChanged: (value) {
-                          postProvider.setLocation(value);
-                        },
-                        validator: (value) {
-                          if (value == null) {
-                            return "Please select a location";
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Camera section
-                      Text(
-                        "Photo",
-                        style: CustomTheme().mediumFont(
-                          CustomTheme.lightGreen,
-                          FontWeight.w600,
-                          context,
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [CustomTheme.green, CustomTheme.lightGreen],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: CustomTheme.borderRadius,
+                          border: Border.all(
+                            color: CustomTheme.lightGreen,
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.post_add,
+                              color: CustomTheme.whiteKindaGreen,
+                              size: 48,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              isEdit ? "Edit Post" : "Create Post",
+                              style: CustomTheme().largeFont(
+                                CustomTheme.whiteKindaGreen,
+                                FontWeight.w700,
+                                context,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 12),
-
-                      if (_capturedImage != null)
-                        _buildCameraTaken()
-                      else
-                        _buildCameraPreview(),
-
                       const SizedBox(height: 20),
 
-                      // Location info
-                      if (_isLocationLoading)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    CustomTheme.lightGreen,
+                      if (_capturedImage != null) ...[
+                        _customTheme.customTextField(
+                          context: context,
+                          controller: postProvider.titleController,
+                          label: "Title",
+                          hint: "Enter title",
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return "Please enter a title";
+                            }
+                            if (value.trim().length < 3) {
+                              return "Title must be at least 3 characters";
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 20),
+
+                        _customTheme.customTextField(
+                          context: context,
+                          controller: postProvider.descriptionController,
+                          label: "Description",
+                          hint: "Enter description",
+                          maxLines: 5,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return "Please enter a description";
+                            }
+                            if (value.trim().length < 3) {
+                              return "Description must be at least 3 characters";
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 20),
+
+                        _customTheme.customDropdown<String>(
+                          context: context,
+                          value:
+                              postProvider.currentPost?.category?.isNotEmpty ==
+                                  true
+                              ? postProvider.currentPost?.category
+                              : null,
+                          items: allCategory,
+                          label: "Category",
+                          hint: "Select category",
+                          onChanged: (value) {
+                            postProvider.setCategory(value);
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              return "Please select a category";
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 20),
+
+                        _customTheme.customDropdown<String>(
+                          context: context,
+                          value:
+                              postProvider.currentPost?.urgency?.isNotEmpty ==
+                                  true
+                              ? postProvider.currentPost?.urgency
+                              : null,
+                          items: allUrgency,
+                          label: "Urgency",
+                          hint: "Select urgency",
+                          onChanged: (value) {
+                            postProvider.setUrgency(value);
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              return "Please select an urgency";
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 20),
+
+                        _customTheme.customDropdown<String>(
+                          context: context,
+                          value:
+                              postProvider.currentPost?.location?.isNotEmpty ==
+                                  true
+                              ? postProvider.currentPost?.location
+                              : null,
+                          items: allLocation,
+                          label: "Location",
+                          hint: "Select location",
+                          onChanged: (value) {
+                            postProvider.setLocation(value);
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              return "Please select a location";
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 12),
+
+                        if (_isLocationLoading)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      CustomTheme.lightGreen,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                "Getting location...",
-                                style: CustomTheme().smallFont(
-                                  CustomTheme.lightGreen,
-                                  FontWeight.w400,
-                                  context,
+                                const SizedBox(width: 12),
+                                Text(
+                                  "Getting location...",
+                                  style: CustomTheme().superSmallFont(
+                                    CustomTheme.lightGreen,
+                                    FontWeight.w400,
+                                    context,
+                                  ),
                                 ),
+                              ],
+                            ),
+                          )
+                        else
+                          _buildLocationInfo(),
+
+                        SizedBox(height: 12),
+                        Container(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: CustomTheme.borderRadius,
+                            border: Border.all(
+                              color: CustomTheme.green.withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.photo,
+                                    color: CustomTheme.lightGreen,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    "Photo",
+                                    style: CustomTheme().smallFont(
+                                      CustomTheme.lightGreen,
+                                      FontWeight.w600,
+                                      context,
+                                    ),
+                                  ),
+                                ],
                               ),
+                              const SizedBox(height: 12),
+                              _buildCameraTaken(),
                             ],
                           ),
-                        )
-                      else
-                        _buildLocationInfo(),
-
-                      const SizedBox(height: 20),
-
-                      // Action buttons
-                      if (_capturedImage != null)
+                        ),
+                        const SizedBox(height: 12),
                         Row(
                           children: [
                             Expanded(
@@ -773,8 +818,11 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                               ),
                             ),
                           ],
-                        )
-                      else
+                        ),
+                        const SizedBox(height: 20),
+                      ] else ...[
+                        _buildCameraPreview(),
+                        const SizedBox(height: 20),
                         Row(
                           children: [
                             Expanded(
@@ -800,6 +848,7 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                             ),
                           ],
                         ),
+                      ],
                     ],
                   ),
                 ),
