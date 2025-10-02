@@ -222,16 +222,23 @@ Widget buildPostSection(Profile? profile, BuildContext context) {
         ),
       ),
       Padding(
-        padding: EdgeInsetsGeometry.only(top: 7, left: 75, right: 25),
+        padding: EdgeInsets.fromLTRB(
+          horizontalPadding + 50,
+          0,
+          horizontalPadding,
+          0,
+        ),
         child: Column(
           children: [
             SizedBox(
-              width: 328,
+              width: double.infinity,
               child: Text(
                 'The pedestrian signal at the main intersection near Mexico Square is not functioning. Cars don’t stop, and people are forced to cross dangerously. This puts children and elderly at high risk. Please fix urgently.',
+                overflow: TextOverflow.ellipsis,
+                maxLines: 6,
                 style: TextStyle(
                   color: Colors.black /* Black */,
-                  fontSize: 13,
+                  fontSize: MediaQuery.of(context).size.width > 600 ? 16 : 13,
                   fontFamily: 'Roboto',
                   fontWeight: FontWeight.w400,
                   height: 1.92,
@@ -240,8 +247,13 @@ Widget buildPostSection(Profile? profile, BuildContext context) {
             ),
             const SizedBox(height: 7),
             Container(
-              width: double.infinity,
-              height: 145,
+              width:
+                  MediaQuery.of(context).size.width -
+                  (horizontalPadding + 50 + horizontalPadding),
+              height:
+                  (MediaQuery.of(context).size.width -
+                      (horizontalPadding + 50 + horizontalPadding)) *
+                  0.6,
               decoration: ShapeDecoration(
                 image: DecorationImage(
                   image: NetworkImage(

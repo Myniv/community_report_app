@@ -1,4 +1,5 @@
 import 'package:community_report_app/screens/auth/login_screen.dart';
+import 'package:community_report_app/screens/auth/register_screen.dart';
 import 'package:community_report_app/screens/profile/edit_profile_screen.dart';
 import 'package:community_report_app/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,11 @@ class AppRoutes {
       case home:
         return MaterialPageRoute(
           builder: (_) => LoginScreen(),
+          settings: settings,
+        );
+      case register:
+        return MaterialPageRoute(
+          builder: (_) => RegisterScreen(),
           settings: settings,
         );
       case profile:
