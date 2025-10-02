@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'package:community_report_app/provider/community_post_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
+import 'package:community_report_app/widgets/no_item.dart';
+import 'package:community_report_app/widgets/post_section.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -61,6 +64,11 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     final profile = context.read<ProfileProvider>().profile;
     selectedValue = profile?.location;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      context.read<CommunityPostProvider>().fetchPostsList(
+        location: selectedValue,
+      );
+    });
 
     if (selectedValue != null) {
       Future.microtask(() async {
@@ -71,6 +79,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final communityPostProvider = context.watch<CommunityPostProvider>();
+    final communityPost = communityPostProvider.postListProfile;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -88,6 +99,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     await _getLatLonFromAddress(value);
                     _mapController.move(_currentPosition!, 16.0);
                   }
+
+                  context.read<CommunityPostProvider>().fetchPostsList(
+                    location: value,
+                  );
 
                   print(selectedValue);
                 },
@@ -199,146 +214,40 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.only(bottom: 16),
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return buildPostSection(context);
-              },
-            ),
+            communityPostProvider.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : communityPost.isEmpty
+                ? const NoItem(
+                    title: "No Post",
+                    subTitle: "You have no post yet",
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.only(bottom: 16),
+                    itemCount: communityPost.length,
+                    itemBuilder: (context, index) {
+                      final post = communityPost[index];
+                      return PostSection(
+                        profilePhoto: post.user_photo,
+                        username: post.username ?? "",
+                        title: post.title ?? "",
+                        description: post.description ?? "",
+                        category: post.category ?? "",
+                        urgency: post.urgency ?? "",
+                        status: post.status ?? "",
+                        location: post.location ?? "",
+                        latitude: post.latitude ?? 0.0,
+                        longitude: post.longitude ?? 0.0,
+                        createdAt: post.created_at ?? DateTime.now(),
+                        settingPostScreen: false,
+                        postImage: post.photo,
+                      );
+                    },
+                  ),
           ],
         ),
       ),
     );
   }
-}
-
-Widget buildPostSection(BuildContext context) {
-  // todo: fetch posts from backend
-  final screenWidth = MediaQuery.of(context).size.width;
-  final horizontalPadding = screenWidth * 0.07;
-
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Padding(
-        padding: EdgeInsets.fromLTRB(
-          horizontalPadding,
-          30,
-          horizontalPadding,
-          0,
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 20,
-              // backgroundImage:
-              //     (profile?.photo != null && profile!.photo!.isNotEmpty)
-              //     ? NetworkImage(profile.photo!)
-              //     : null,
-              child: const Icon(Icons.person, size: 20),
-              // child: (profile?.photo == null || profile!.photo!.isEmpty)
-              //     ? const Icon(Icons.person, size: 20)
-              //     : null,
-            ),
-            const SizedBox(width: 10),
-
-            Text(
-              'John Doe',
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(width: 10),
-
-            Text(
-              '22 hours ago',
-              style: const TextStyle(
-                color: Color(0xFF249A00),
-                fontSize: 13,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-
-            const Spacer(),
-
-            Container(
-              width: 57,
-              height: 25,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE0FFDE),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              alignment: Alignment.center,
-              child: const Text(
-                'Safety',
-                style: TextStyle(
-                  color: Color(0xFF249A00),
-                  fontSize: 13,
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.normal,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      Padding(
-        padding: EdgeInsets.fromLTRB(
-          horizontalPadding + 50,
-          0,
-          horizontalPadding,
-          0,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: double.infinity,
-              child: Text(
-                'The pedestrian signal at the main intersection near Mexico Square is not functioning. Cars don’t stop, and people are forced to cross dangerously. This puts children and elderly at high risk. Please fix urgently.',
-                overflow: TextOverflow.ellipsis,
-                maxLines: 6,
-                style: TextStyle(
-                  color: Colors.black /* Black */,
-                  fontSize: MediaQuery.of(context).size.width > 600 ? 16 : 13,
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.w400,
-                  height: 1.92,
-                ),
-              ),
-            ),
-            const SizedBox(height: 7),
-            Container(
-              width:
-                  MediaQuery.of(context).size.width -
-                  (horizontalPadding + 50 + horizontalPadding),
-              height:
-                  (MediaQuery.of(context).size.width -
-                      (horizontalPadding + 50 + horizontalPadding)) *
-                  0.6,
-              decoration: ShapeDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(
-                    "https://dishub.banjarmasinkota.go.id/wp-content/uploads/2024/11/lampu-lalu-lintas-punya-3-warna_169.jpg",
-                  ),
-                  fit: BoxFit.cover,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
 }
