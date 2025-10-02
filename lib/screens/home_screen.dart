@@ -22,12 +22,13 @@ class _HomescreenState extends State<Homescreen> {
     "Karawaci",
     "Kemanggisan Baru",
   ];
-
+  String? selectedValue;
   final TextEditingController searchController = TextEditingController();
-  LatLng _currentPosition = LatLng(
-    -6.200000,
-    106.816666,
-  ); // Jakarta coordinates
+  LatLng? _currentPosition;
+  // LatLng? _currentPosition = LatLng(
+  //   -6.200000,
+  //   106.816666,
+  // ); // Jakarta coordinates
   final MapController _mapController = MapController();
   Future<void> _getLatLonFromAddress(String query) async {
     final url = Uri.parse(
@@ -56,9 +57,21 @@ class _HomescreenState extends State<Homescreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    final profile = context.read<ProfileProvider>().profile;
+    selectedValue = profile?.location;
+
+    if (selectedValue != null) {
+      Future.microtask(() async {
+        await _getLatLonFromAddress(selectedValue!);
+        _mapController.move(_currentPosition!, 16.0);
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final profile = context.watch<ProfileProvider>().profile;
-    String? selectedValue = profile?.location;
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -68,15 +81,19 @@ class _HomescreenState extends State<Homescreen> {
               padding: const EdgeInsets.all(16.0),
               child: DropdownSearch<String>(
                 onChanged: (value) async {
-                  selectedValue = value;
+                  setState(() {
+                    selectedValue = value;
+                  });
+                  // selectedValue = value;
                   if (value != null) {
                     await _getLatLonFromAddress(value);
-                    _mapController.move(_currentPosition, 16.0);
+                    _mapController.move(_currentPosition!, 16.0);
                   }
 
                   print(selectedValue);
                 },
                 items: (f, cs) => locationItem,
+                selectedItem: selectedValue,
                 decoratorProps: DropDownDecoratorProps(
                   decoration: InputDecoration(
                     // icon: Icon(Icons.location_on, color: Color(0xFF249A00)),
@@ -120,61 +137,64 @@ class _HomescreenState extends State<Homescreen> {
                 ),
               ),
             ),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: SizedBox(
-                height: 300,
-                child: FlutterMap(
-                  mapController: _mapController,
-                  options: MapOptions(
-                    initialCenter: _currentPosition,
-                    initialZoom: 16,
+            _currentPosition == null
+                ? const Center(child: CircularProgressIndicator())
+                : ClipRRect(
+                    // borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      height: 300,
+                      child: FlutterMap(
+                        mapController: _mapController,
+                        options: MapOptions(
+                          initialCenter: _currentPosition!,
+                          initialZoom: 16,
+                        ),
+                        children: [
+                          TileLayer(
+                            urlTemplate:
+                                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                            userAgentPackageName:
+                                "com.example.community_report_app",
+                          ),
+                          MarkerLayer(
+                            markers: [
+                              Marker(
+                                point: _currentPosition!,
+                                width: 60,
+                                height: 60,
+                                child: const Icon(
+                                  Icons.location_pin,
+                                  color: Colors.red,
+                                  size: 40,
+                                ),
+                              ),
+                              // todo: fetch real markers location from backend
+                              Marker(
+                                point: LatLng(-6.25722, 106.84639),
+                                width: 20,
+                                height: 20,
+                                child: const Icon(
+                                  Icons.circle,
+                                  color: Colors.red,
+                                  size: 20,
+                                ),
+                              ),
+                              Marker(
+                                point: LatLng(-6.255446, 106.843134),
+                                width: 20,
+                                height: 20,
+                                child: const Icon(
+                                  Icons.circle,
+                                  color: Colors.red,
+                                  size: 20,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  children: [
-                    TileLayer(
-                      urlTemplate:
-                          "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                      userAgentPackageName: "com.example.community_report_app",
-                    ),
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: _currentPosition,
-                          width: 60,
-                          height: 60,
-                          child: const Icon(
-                            Icons.location_pin,
-                            color: Colors.red,
-                            size: 40,
-                          ),
-                        ),
-                        // todo: fetch real markers location from backend
-                        Marker(
-                          point: LatLng(-6.25722, 106.84639),
-                          width: 20,
-                          height: 20,
-                          child: const Icon(
-                            Icons.circle,
-                            color: Colors.red,
-                            size: 20,
-                          ),
-                        ),
-                        Marker(
-                          point: LatLng(-6.255446, 106.843134),
-                          width: 20,
-                          height: 20,
-                          child: const Icon(
-                            Icons.circle,
-                            color: Colors.red,
-                            size: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
