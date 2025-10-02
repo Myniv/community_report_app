@@ -249,9 +249,9 @@ class PostSection extends StatelessWidget {
                     0.6,
                 decoration: ShapeDecoration(
                   image: DecorationImage(
-                    image: postImage != null
-                        ? NetworkImage(postImage!)
-                        : const AssetImage('assets/images/no_image.png'),
+                    image: (postImage != null && postImage!.isNotEmpty)
+                        ? NetworkImage(postImage!) as ImageProvider
+                        : AssetImage('assets/images/no_image.png'),
                     fit: BoxFit.cover,
                   ),
                   shape: RoundedRectangleBorder(

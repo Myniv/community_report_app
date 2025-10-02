@@ -125,7 +125,7 @@ class CommunityPost {
       user_id: map['userId'] ?? map['user_id'],
       title: map['title'],
       description: map['description'],
-      photo: map['photo'],
+      photo: map['photo'] == null || map['photo'] == '' ? null : map['photo'],
       longitude: map['longitude']?.toDouble(),
       latitude: map['latitude']?.toDouble(),
       location: map['location'],
@@ -140,8 +140,6 @@ class CommunityPost {
       deleted_at: _parseDateTime(map['deletedAt'] ?? map['deleted_at']),
     );
   }
-
-
 
   static bool? _parseBool(dynamic value) {
     if (value == null) return null;

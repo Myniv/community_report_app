@@ -21,8 +21,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final profileProvider = context.read<ProfileProvider>();
-      // context.read<CommunityPostProvider>().fetchPostsList(userId: profileProvider.profile?.uid);
-      context.read<CommunityPostProvider>().fetchPostsList();
+      context.read<CommunityPostProvider>().fetchPostsList(userId: profileProvider.profile?.uid);
+      // context.read<CommunityPostProvider>().fetchPostsList();
     });
   }
 
@@ -67,7 +67,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             final post = communityPost[index];
                             return PostSection(
                               profilePhoto: post.user_photo,
-                              username: profile?.username ?? "",
+                              username: post.username ?? "",
                               role: profile?.role ?? "",
                               title: post.title ?? "",
                               description: post.description ?? "",
@@ -79,6 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               longitude: post.longitude ?? 0.0,
                               createdAt: post.created_at ?? DateTime.now(),
                               settingPostScreen: false,
+                              postImage: post.photo,
                             );
                           },
                         ),
