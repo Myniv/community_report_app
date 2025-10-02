@@ -49,7 +49,8 @@ class AuthWrapper extends StatelessWidget {
 
           if (profileProvider.profile != null) {
             // Navigator.pushReplacementNamed(context, AppRoutes.mainScreen);
-            return const MainScreenLoggedIn();
+            // return const MainScreenLoggedIn();
+            return const MainScreen();
           }
 
           if (profileProvider.errorMessage != null) {

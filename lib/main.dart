@@ -1,3 +1,4 @@
+
 import 'package:camera/camera.dart';
 import 'package:community_report_app/provider/auth_provider.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
@@ -15,6 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+late List<CameraDescription> cameras;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,46 +67,8 @@ class MainApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: MainScreen(),
-      onGenerateRoute: (settings) => AppRoutes.generateRoute(settings),
-    );
-  }
-}
-
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<fb.User?>(
-      stream: fb.FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        final profileProvider = Provider.of<ProfileProvider>(
-          context,
-          listen: false,
-        );
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasData) {
-          // semisal nutup aplikasi tanpa log out
-          if (profileProvider.profile == null) {
-            return const LoginScreen();
-          }
-
-          return const MainScreenLoggedIn();
-
-          // if (profileProvider.profile!.role == "admin") {
-          //   return const AdminMainScreen();
-          // } else {
-          //   return const MainScreen();
-          // }
-        }
-
-        return const LoginScreen();
-      },
+      home: AuthWrapper(),
+      onGenerateRoute: AppRoutes.generateRoute,
     );
   }
 }
@@ -141,15 +106,17 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _screens = [
+    final profileProvider = Provider.of<ProfileProvider>(context);
+    //TODO CHAGNE THE SCREENS BASED ON THE CORRESPONDED
+    final List<String> _titleScreenMember = ["Home", "Post", "Profile"];
+    final List<Widget> _screensMember = [
       HomeScreen(),
-      LoginScreen(),
-      // LoginTest(),
-      RegisterScreen(),
+      CreateCommunityPostScreen(onTabSelected: _changeTab),
+      ProfileScreen(),
     ];
     final List<IconData> _iconScreenMember = [
       Icons.home,
-      Icons.login,
+      Icons.add_box_outlined,
       Icons.person,
     ];
 

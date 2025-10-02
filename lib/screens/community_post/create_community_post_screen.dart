@@ -16,7 +16,9 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 class CreateCommunityPostScreen extends StatefulWidget {
-  const CreateCommunityPostScreen({super.key});
+  final void Function(int) onTabSelected;
+
+  const CreateCommunityPostScreen({super.key, required this.onTabSelected});
 
   @override
   State<CreateCommunityPostScreen> createState() =>
@@ -495,7 +497,7 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
         backgroundColor: Colors.green,
       );
 
-      Navigator.pop(context, true);
+      widget.onTabSelected(2);
     } catch (e) {
       print("Error submitting post: $e");
       CustomTheme().customScaffoldMessage(

@@ -296,6 +296,7 @@ class CommunityPostProvider with ChangeNotifier {
       _currentPost = _currentPost!.copyWith(
         title: title,
         description: description,
+        is_report: true,
       );
 
       if (_postIndex == null) {

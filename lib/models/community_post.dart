@@ -83,7 +83,7 @@ class CommunityPost {
       'location': location,
       'status': status,
       'category': category,
-      'isReport': is_report,
+      'isReport': is_report ?? true,
       'urgency': urgency,
       // 'createdAt': created_at != null ? Timestamp.fromDate(created_at!) : null,
       // 'updatedAt': updated_at != null ? Timestamp.fromDate(updated_at!) : null,
@@ -103,23 +103,28 @@ class CommunityPost {
       location: map['location'],
       status: map['status'],
       category: map['category'],
-      is_report: map['isReport'] ?? map['is_report'],
+      is_report: _parseBool(map['isReport']),
       urgency: map['urgency'],
-      created_at: map['createdAt'] != null || map['created_at'] != null
-          ? (map['createdAt'] ?? map['created_at'] is Timestamp
-                ? (map['createdAt'] ?? map['created_at'] as Timestamp).toDate()
-                : DateTime.parse(map['createdAt'] ?? map['created_at']))
-          : null,
-      updated_at: map['updatedAt'] != null || map['updated_at'] != null
-          ? (map['updatedAt'] ?? map['updated_at'] is Timestamp
-                ? (map['updatedAt'] ?? map['updated_at'] as Timestamp).toDate()
-                : DateTime.parse(map['updatedAt'] ?? map['updated_at']))
-          : null,
-      deleted_at: map['deletedAt'] != null || map['deleted_at'] != null
-          ? (map['deletedAt'] ?? map['deleted_at'] is Timestamp
-                ? (map['deletedAt'] ?? map['deleted_at'] as Timestamp).toDate()
-                : DateTime.parse(map['deletedAt'] ?? map['deleted_at']))
-          : null,
+      created_at: _parseDateTime(map['createdAt'] ?? map['created_at']),
+      updated_at: _parseDateTime(map['updatedAt'] ?? map['updated_at']),
+      deleted_at: _parseDateTime(map['deletedAt'] ?? map['deleted_at']),
     );
+  }
+
+  static bool? _parseBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is String) {
+      return value.toLowerCase() == 'true' || value == '1';
+    }
+    if (value is int) return value == 1;
+    return null;
+  }
+
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value == null) return null;
+    if (value is Timestamp) return value.toDate();
+    if (value is String) return DateTime.parse(value);
+    return null;
   }
 }

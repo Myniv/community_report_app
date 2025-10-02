@@ -19,7 +19,7 @@ class _MainScreenState extends State<MainScreenLoggedIn> {
   final PageController _pageController = PageController();
 
   final List<Widget> _screens = [
-    Homescreen(),
+    HomeScreen(),
     ProfileScreen(),
     // AttendanceHistoryScreen(),
   ];
