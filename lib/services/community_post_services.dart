@@ -34,7 +34,7 @@ class CommunityPostServices {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
-        return data.map((e) => CommunityPost.fromMap(e)).toList();
+        return data.map((e) => CommunityPost.fromAPIWithUsernamePhoto(e)).toList();
       } else {
         throw Exception("Failed to load posts");
       }

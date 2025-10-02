@@ -16,6 +16,8 @@ class CommunityPost {
   DateTime? created_at;
   DateTime? updated_at;
   DateTime? deleted_at;
+  String? username;
+  String? user_photo;
 
   CommunityPost({
     this.id,
@@ -33,6 +35,8 @@ class CommunityPost {
     this.created_at,
     this.updated_at,
     this.deleted_at,
+    this.username,
+    this.user_photo,
   });
 
   CommunityPost copyWith({
@@ -51,6 +55,8 @@ class CommunityPost {
     DateTime? created_at,
     DateTime? updated_at,
     DateTime? deleted_at,
+    String? username,
+    String? user_photo,
   }) {
     return CommunityPost(
       id: id ?? this.id,
@@ -68,6 +74,8 @@ class CommunityPost {
       created_at: created_at ?? this.created_at,
       updated_at: updated_at ?? this.updated_at,
       deleted_at: deleted_at ?? this.deleted_at,
+      username: username ?? this.username,
+      user_photo: user_photo ?? this.user_photo,
     );
   }
 
@@ -110,6 +118,30 @@ class CommunityPost {
       deleted_at: _parseDateTime(map['deletedAt'] ?? map['deleted_at']),
     );
   }
+
+  factory CommunityPost.fromAPIWithUsernamePhoto(Map<String, dynamic> map) {
+    return CommunityPost(
+      id: map['id'],
+      user_id: map['userId'] ?? map['user_id'],
+      title: map['title'],
+      description: map['description'],
+      photo: map['photo'],
+      longitude: map['longitude']?.toDouble(),
+      latitude: map['latitude']?.toDouble(),
+      location: map['location'],
+      status: map['status'],
+      category: map['category'],
+      is_report: _parseBool(map['isReport']),
+      urgency: map['urgency'],
+      username: map['username'],
+      user_photo: map['userPhoto'],
+      created_at: _parseDateTime(map['createdAt'] ?? map['created_at']),
+      updated_at: _parseDateTime(map['updatedAt'] ?? map['updated_at']),
+      deleted_at: _parseDateTime(map['deletedAt'] ?? map['deleted_at']),
+    );
+  }
+
+
 
   static bool? _parseBool(dynamic value) {
     if (value == null) return null;

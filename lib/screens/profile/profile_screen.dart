@@ -1,15 +1,36 @@
+import 'package:community_report_app/models/community_post.dart';
 import 'package:community_report_app/models/profile.dart';
+import 'package:community_report_app/provider/community_post_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/routes.dart';
+import 'package:community_report_app/widgets/no_item.dart';
+import 'package:community_report_app/widgets/post_section.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final profileProvider = context.read<ProfileProvider>();
+      // context.read<CommunityPostProvider>().fetchPostsList(userId: profileProvider.profile?.uid);
+      context.read<CommunityPostProvider>().fetchPostsList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final profile = context.watch<ProfileProvider>().profile;
+    final communityPostProvider = context.watch<CommunityPostProvider>();
+    final communityPost = communityPostProvider.postListProfile;
 
     return DefaultTabController(
       length: 2,
@@ -32,13 +53,35 @@ class ProfileScreen extends StatelessWidget {
             Expanded(
               child: TabBarView(
                 children: [
-                  ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    itemCount: 10,
-                    itemBuilder: (context, index) {
-                      return buildPostSection(profile, context);
-                    },
-                  ),
+                  communityPostProvider.isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : communityPost.isEmpty
+                      ? const NoItem(
+                          title: "No Post",
+                          subTitle: "You have no post yet",
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          itemCount: communityPost.length,
+                          itemBuilder: (context, index) {
+                            final post = communityPost[index];
+                            return PostSection(
+                              profilePhoto: post.user_photo,
+                              username: profile?.username ?? "",
+                              role: profile?.role ?? "",
+                              title: post.title ?? "",
+                              description: post.description ?? "",
+                              category: post.category ?? "",
+                              urgency: post.urgency ?? "",
+                              status: post.status ?? "",
+                              location: post.location ?? "",
+                              latitude: post.latitude ?? 0.0,
+                              longitude: post.longitude ?? 0.0,
+                              createdAt: post.created_at ?? DateTime.now(),
+                              settingPostScreen: false,
+                            );
+                          },
+                        ),
                   ListView.builder(
                     itemCount: 5,
                     itemBuilder: (context, index) {

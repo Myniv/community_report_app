@@ -1,7 +1,104 @@
+import 'package:community_report_app/custom_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PostSection extends StatelessWidget {
-  const PostSection({Key? key}) : super(key: key);
+  String? profilePhoto;
+  String username;
+  String title;
+  String description;
+  String category;
+  String urgency;
+  String status;
+  String location;
+  double latitude;
+  double longitude;
+  String? postImage;
+  DateTime createdAt;
+  String? role;
+  bool? settingPostScreen = false;
+
+  PostSection({
+    Key? key,
+    this.profilePhoto,
+    required this.username,
+    required this.title,
+    required this.description,
+    required this.category,
+    required this.urgency,
+    required this.status,
+    required this.location,
+    required this.latitude,
+    required this.longitude,
+    this.postImage,
+    required this.createdAt,
+    this.role,
+    this.settingPostScreen,
+  }) : super(key: key);
+
+  void _showOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.star_border),
+              title: const Text('Interested'),
+              onTap: () {
+                Navigator.pop(context);
+                // handle interested action
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.star),
+              title: const Text('Not interested'),
+              onTap: () {
+                Navigator.pop(context);
+                // handle not interested action
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.bookmark_border),
+              title: const Text('Save post'),
+              onTap: () {
+                Navigator.pop(context);
+                // handle save action
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.visibility_off),
+              title: const Text('Hide post'),
+              onTap: () {
+                Navigator.pop(context);
+                // handle hide action
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.report),
+              title: const Text('Report post'),
+              onTap: () {
+                Navigator.pop(context);
+                // handle report action
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _openMap(double lat, double lng) async {
+    final Uri url = Uri.parse("https://www.google.com/maps?q=$lat,$lng");
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Could not open the map.';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,19 +119,19 @@ class PostSection extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 20,
-                // backgroundImage:
-                //     (profile?.photo != null && profile!.photo!.isNotEmpty)
-                //     ? NetworkImage(profile.photo!)
-                //     : null,
-                child: const Icon(Icons.person, size: 20),
-                // child: (profile?.photo == null || profile!.photo!.isEmpty)
-                //     ? const Icon(Icons.person, size: 20)
-                //     : null,
+                backgroundImage:
+                    (profilePhoto != null && profilePhoto!.isNotEmpty)
+                    ? NetworkImage(profilePhoto!)
+                    : null,
+                // child: const Icon(Icons.person, size: 20),
+                child: (profilePhoto == null || profilePhoto!.isEmpty)
+                    ? const Icon(Icons.person, size: 20)
+                    : null,
               ),
               const SizedBox(width: 10),
 
               Text(
-                'John Doe',
+                username,
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 16,
@@ -46,7 +143,7 @@ class PostSection extends StatelessWidget {
               const SizedBox(width: 10),
 
               Text(
-                '22 hours ago',
+                CustomTheme().timeAgo(createdAt),
                 style: const TextStyle(
                   color: Color(0xFF249A00),
                   fontSize: 13,
@@ -65,8 +162,8 @@ class PostSection extends StatelessWidget {
                   borderRadius: BorderRadius.circular(5),
                 ),
                 alignment: Alignment.center,
-                child: const Text(
-                  'Safety',
+                child: Text(
+                  category,
                   style: TextStyle(
                     color: Color(0xFF249A00),
                     fontSize: 13,
@@ -75,6 +172,35 @@ class PostSection extends StatelessWidget {
                   ),
                 ),
               ),
+              SizedBox(width: 10),
+              Container(
+                width: 57,
+                height: 25,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE0FFDE),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    color: Color(0xFF249A00),
+                    fontSize: 13,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ),
+
+              if (settingPostScreen == true &&
+                  (role == 'admin' || role == 'leader')) ...[
+                IconButton(
+                  icon: const Icon(Icons.more_vert),
+                  onPressed: () {
+                    _showOptions(context);
+                  },
+                ),
+              ],
             ],
           ),
         ),
@@ -88,10 +214,19 @@ class PostSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontFamily: 'Roboto',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               SizedBox(
                 width: double.infinity,
                 child: Text(
-                  'The pedestrian signal at the main intersection near Mexico Square is not functioning. Cars don’t stop, and people are forced to cross dangerously. This puts children and elderly at high risk. Please fix urgently.',
+                  description,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 6,
                   style: TextStyle(
@@ -114,14 +249,51 @@ class PostSection extends StatelessWidget {
                     0.6,
                 decoration: ShapeDecoration(
                   image: DecorationImage(
-                    image: NetworkImage(
-                      "https://dishub.banjarmasinkota.go.id/wp-content/uploads/2024/11/lampu-lalu-lintas-punya-3-warna_169.jpg",
-                    ),
+                    image: postImage != null
+                        ? NetworkImage(postImage!)
+                        : const AssetImage('assets/images/no_image.png'),
                     fit: BoxFit.cover,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5),
                   ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 10),
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            horizontalPadding + 50,
+            0,
+            horizontalPadding,
+            0,
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.comment, size: 20),
+              ),
+              SizedBox(width: 10),
+              InkWell(
+                onTap: () {
+                  _openMap(latitude, longitude);
+                },
+                child: Row(
+                  children: [
+                    Icon(Icons.location_on, size: 20, color: Color(0xFF249A00)),
+                    Text(
+                      location,
+                      style: TextStyle(
+                        color: Color(0xFF249A00),
+                        fontSize: 13,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

@@ -12,8 +12,8 @@ class CommunityPostProvider with ChangeNotifier {
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
 
-  List<CommunityPost> _postsList = [];
-  List<CommunityPost> get postList => _postsList;
+  List<CommunityPost> _postsListProfile = [];
+  List<CommunityPost> get postListProfile => _postsListProfile;
 
   CommunityPost? _currentPost;
   CommunityPost? get currentPost => _currentPost;
@@ -40,7 +40,7 @@ class CommunityPostProvider with ChangeNotifier {
   final ProfileProvider profileProvider;
   CommunityPostProvider(this.profileProvider);
 
-  Future<void> fetchPosts({
+  Future<void> fetchPostsList({
     String? userId,
     String? status,
     String? category,
@@ -52,10 +52,7 @@ class CommunityPostProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final role = profileProvider.profile!.role;
-      final uid = profileProvider.profile!.uid;
-
-      _postsList = await _communityPostServices.getPosts(
+      _postsListProfile = await _communityPostServices.getPosts(
         userId: userId,
         status: status,
         category: category,
@@ -65,7 +62,7 @@ class CommunityPostProvider with ChangeNotifier {
       );
     } catch (e) {
       print("Error in provider: $e");
-      _postsList = [];
+      _postsListProfile = [];
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -88,11 +85,11 @@ class CommunityPostProvider with ChangeNotifier {
   }
 
   Future<void> getEditPost(int postId) async {
-    final index = _postsList.indexWhere((post) => post.id == postId);
+    final index = _postsListProfile.indexWhere((post) => post.id == postId);
 
     if (index != -1) {
       _postIndex = postId;
-      final post = _postsList[index];
+      final post = _postsListProfile[index];
 
       titleController.text = post.title ?? '';
       descriptionController.text = post.description ?? '';
@@ -321,7 +318,7 @@ class CommunityPostProvider with ChangeNotifier {
         print("Post updated with photo URL");
 
         print("Final post data: ${_currentPost!.toMap()}");
-        _postsList.add(_currentPost!);
+        _postsListProfile.add(_currentPost!);
       } else {
         // Updating existing post
         print("Updating post: ${_currentPost!.id}");
@@ -340,9 +337,9 @@ class CommunityPostProvider with ChangeNotifier {
         await _communityPostServices.updatePost(_currentPost!);
         print("Post updated successfully");
 
-        final index = _postsList.indexWhere((post) => post.id == _postIndex);
+        final index = _postsListProfile.indexWhere((post) => post.id == _postIndex);
         if (index != -1) {
-          _postsList[index] = _currentPost!;
+          _postsListProfile[index] = _currentPost!;
         }
       }
 
