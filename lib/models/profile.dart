@@ -46,7 +46,31 @@ class Profile {
     };
   }
 
+  Map<String, dynamic> toApi() {
+    return {
+      'uid': uid,
+      'email': email,
+      'username': username,
+      'front_name': front_name,
+      'last_name': last_name,
+      'role': role,
+      'photo': photo,
+      'phone': phone,
+      'address': location,
+      'created_at': created_at?.toIso8601String(),
+      'updated_at': updated_at?.toIso8601String(),
+      'deleted_at': deleted_at?.toIso8601String(),
+    };
+  }
+
   factory Profile.fromMap(Map<String, dynamic> map) {
+    DateTime? parseDate(dynamic value) {
+      if (value == null) return null;
+      if (value is Timestamp) return value.toDate(); // Firestore
+      if (value is String) return DateTime.tryParse(value); // API
+      return null;
+    }
+
     return Profile(
       uid: map['uid'] ?? '',
       email: map['email'] ?? '',
@@ -57,9 +81,9 @@ class Profile {
       photo: map['photo'],
       phone: map['phone'],
       location: map['address'],
-      created_at: map['created_at'] != null ? map['created_at'].toDate() : null,
-      updated_at: map['updated_at'] != null ? map['updated_at'].toDate() : null,
-      deleted_at: map['deleted_at'] != null ? map['deleted_at'].toDate() : null,
+      created_at: parseDate(map['created_at']),
+      updated_at: parseDate(map['updated_at']),
+      deleted_at: parseDate(map['deleted_at']),
     );
   }
 }
