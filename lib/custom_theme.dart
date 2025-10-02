@@ -392,4 +392,23 @@ class CustomTheme {
       ),
     );
   }
+
+  void customScaffoldMessage({
+    required BuildContext context,
+    required String message,
+    Color? backgroundColor,
+  }) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: smallFont(Colors.black, FontWeight.w600, context),
+        ),
+        backgroundColor: backgroundColor ?? CustomTheme.whiteKindaGreen,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
 }

@@ -65,7 +65,6 @@ class _HomescreenState extends State<Homescreen> {
     if (selectedValue != null) {
       Future.microtask(() async {
         await _getLatLonFromAddress(selectedValue!);
-        _mapController.move(_currentPosition!, 16.0);
       });
     }
   }
@@ -148,6 +147,11 @@ class _HomescreenState extends State<Homescreen> {
                         options: MapOptions(
                           initialCenter: _currentPosition!,
                           initialZoom: 16,
+                          onMapReady: () {
+                            if (_currentPosition != null) {
+                              _mapController.move(_currentPosition!, 16.0);
+                            }
+                          },
                         ),
                         children: [
                           TileLayer(

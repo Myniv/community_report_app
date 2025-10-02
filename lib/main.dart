@@ -1,20 +1,24 @@
-import 'package:community_report_app/logged_in_screen_state.dart';
+import 'package:camera/camera.dart';
 import 'package:community_report_app/provider/auth_provider.dart';
+import 'package:community_report_app/provider/community_post_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/routes.dart';
+import 'package:community_report_app/screens/auth/auth_wrapper.dart';
 import 'package:community_report_app/screens/auth/login_screen.dart';
 // import 'package:community_report_app/screens/auth/login_test.dart';
 import 'package:community_report_app/screens/auth/register_screen.dart';
+import 'package:community_report_app/screens/community_post/create_community_post_screen.dart';
 import 'package:community_report_app/screens/home_screen.dart';
+import 'package:community_report_app/screens/profile/profile_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fb;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  cameras = await availableCameras();
 
   await Firebase.initializeApp(
     options: FirebaseOptions(
@@ -39,6 +43,11 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProxyProvider<ProfileProvider, CommunityPostProvider>(
+          create: (_) => CommunityPostProvider(ProfileProvider()),
+          update: (_, profileProvider, __) =>
+              CommunityPostProvider(profileProvider),
+        ),
       ],
       child: MainApp(),
     ),
@@ -55,8 +64,7 @@ class MainApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      // home: MainScreen(),
-      home: AuthWrapper(),
+      home: MainScreen(),
       onGenerateRoute: (settings) => AppRoutes.generateRoute(settings),
     );
   }
@@ -109,6 +117,9 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+  List<Widget> _screens = [];
+  List<String> _titleScreen = [];
+  List<IconData> _iconScreen = [];
 
   void _changeTab(int index) {
     setState(() {
@@ -116,21 +127,64 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  final List<String> _titleScreen = ["Home", "Login", "Regist"];
-  final List<IconData> _iconScreen = [
-    Icons.home,
-    Icons.access_time,
-    Icons.person,
-  ];
+  void _changeScreen(
+    List<Widget> screen,
+    List<IconData> icon,
+    List<String> title,
+  ) {
+    setState(() {
+      _screens = screen;
+      _iconScreen = icon;
+      _titleScreen = title;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> _screens = [
-      Homescreen(),
+      HomeScreen(),
       LoginScreen(),
       // LoginTest(),
       RegisterScreen(),
     ];
+    final List<IconData> _iconScreenMember = [
+      Icons.home,
+      Icons.login,
+      Icons.person,
+    ];
+
+    final List<String> _titleScreenLeader = ["Home", "Regist", "Profile"];
+    final List<Widget> _screensLeader = [
+      HomeScreen(),
+      RegisterScreen(),
+      ProfileScreen(),
+    ];
+    final List<IconData> _iconScreenLeader = [
+      Icons.home,
+      Icons.app_registration,
+      Icons.person,
+    ];
+
+    final List<String> _titleScreenAdmin = ["Home", "Regist", "Profile"];
+    final List<Widget> _screensAdmin = [
+      HomeScreen(),
+      RegisterScreen(),
+      ProfileScreen(),
+    ];
+    final List<IconData> _iconScreenAdmin = [
+      Icons.home,
+      Icons.app_registration,
+      Icons.person,
+    ];
+
+    if (profileProvider.profile!.role == 'member') {
+      _changeScreen(_screensMember, _iconScreenMember, _titleScreenMember);
+    } else if (profileProvider.profile!.role == 'leader') {
+      _changeScreen(_screensLeader, _iconScreenLeader, _titleScreenLeader);
+    } else if (profileProvider.profile!.role == 'admin') {
+      _changeScreen(_screensAdmin, _iconScreenAdmin, _titleScreenAdmin);
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
