@@ -1,5 +1,5 @@
-
 import 'package:camera/camera.dart';
+import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/provider/auth_provider.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
@@ -11,6 +11,7 @@ import 'package:community_report_app/screens/auth/register_screen.dart';
 import 'package:community_report_app/screens/community_post/create_community_post_screen.dart';
 import 'package:community_report_app/screens/home_screen.dart';
 import 'package:community_report_app/screens/profile/profile_screen.dart';
+import 'package:community_report_app/widgets/custom_drawer.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -154,21 +155,46 @@ class _MainScreenState extends State<MainScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(_titleScreen[_currentIndex]),
-      ),
-      body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        items: List.generate(
-          _iconScreen.length,
-          (index) => BottomNavigationBarItem(
-            icon: Icon(_iconScreen[index]),
-            label: _titleScreen[index],
+        backgroundColor: Colors.white,
+        iconTheme: IconThemeData(
+          color: CustomTheme.green, 
+        ),
+        title: Text(
+          _titleScreen[_currentIndex],
+          style: CustomTheme().smallFont(
+            CustomTheme.green,
+            FontWeight.bold,
+            context,
           ),
         ),
-        onTap: _changeTab,
       ),
+      body: _screens[_currentIndex],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            top: BorderSide(color: Colors.grey.shade300, width: 1.0),
+          ),
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: _currentIndex,
+          backgroundColor: Colors.white,
+          selectedItemColor: CustomTheme.green,
+          unselectedItemColor: Colors.grey,
+          selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
+          unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal),
+          items: List.generate(
+            _iconScreen.length,
+            (index) => BottomNavigationBarItem(
+              icon: Icon(_iconScreen[index]),
+              label: _titleScreen[index],
+            ),
+          ),
+          onTap: _changeTab,
+        ),
+      ),
+      drawer: CustomDrawer(),
     );
   }
 }
