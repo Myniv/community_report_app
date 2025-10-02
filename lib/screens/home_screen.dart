@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class Homescreen extends StatefulWidget {
   const Homescreen({super.key});
@@ -20,7 +22,6 @@ class _HomescreenState extends State<Homescreen> {
     "Karawaci",
     "Kemanggisan Baru",
   ];
-  String? selectedValue;
 
   final TextEditingController searchController = TextEditingController();
   LatLng _currentPosition = LatLng(
@@ -56,6 +57,8 @@ class _HomescreenState extends State<Homescreen> {
 
   @override
   Widget build(BuildContext context) {
+    final profile = context.watch<ProfileProvider>().profile;
+    String? selectedValue = profile?.location;
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
