@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:community_report_app/models/discussion.dart';
 
 class CommunityPost {
   int? id;
@@ -18,6 +19,7 @@ class CommunityPost {
   DateTime? deleted_at;
   String? username;
   String? user_photo;
+  List<Discussion> discussions;
 
   CommunityPost({
     this.id,
@@ -37,6 +39,7 @@ class CommunityPost {
     this.deleted_at,
     this.username,
     this.user_photo,
+    this.discussions = const [],
   });
 
   CommunityPost copyWith({
@@ -113,6 +116,7 @@ class CommunityPost {
       category: map['category'],
       is_report: _parseBool(map['isReport']),
       urgency: map['urgency'],
+      username: map['username'],
       created_at: _parseDateTime(map['createdAt'] ?? map['created_at']),
       updated_at: _parseDateTime(map['updatedAt'] ?? map['updated_at']),
       deleted_at: _parseDateTime(map['deletedAt'] ?? map['deleted_at']),
@@ -135,6 +139,35 @@ class CommunityPost {
       urgency: map['urgency'],
       username: map['username'],
       user_photo: map['userPhoto'],
+      created_at: _parseDateTime(map['createdAt'] ?? map['created_at']),
+      updated_at: _parseDateTime(map['updatedAt'] ?? map['updated_at']),
+      deleted_at: _parseDateTime(map['deletedAt'] ?? map['deleted_at']),
+    );
+  }
+
+  factory CommunityPost.fromAPIWithDiscussions(Map<String, dynamic> map) {
+    return CommunityPost(
+      id: map['id'],
+      user_id: map['userId'] ?? map['user_id'],
+      title: map['title'],
+      description: map['description'],
+      photo: map['photo'] == null || map['photo'] == '' ? null : map['photo'],
+      longitude: map['longitude']?.toDouble(),
+      latitude: map['latitude']?.toDouble(),
+      location: map['location'],
+      status: map['status'],
+      category: map['category'],
+      is_report: _parseBool(map['isReport']),
+      urgency: map['urgency'],
+      username: map['username'],
+      user_photo: map['userPhoto'],
+      discussions: map['discussions'] != null
+          ? List<Discussion>.from(
+              (map['discussions'] as List).map(
+                (x) => Discussion.fromMap(x as Map<String, dynamic>),
+              ),
+            )
+          : [],
       created_at: _parseDateTime(map['createdAt'] ?? map['created_at']),
       updated_at: _parseDateTime(map['updatedAt'] ?? map['updated_at']),
       deleted_at: _parseDateTime(map['deletedAt'] ?? map['deleted_at']),

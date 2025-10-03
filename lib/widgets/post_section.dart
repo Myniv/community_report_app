@@ -1,8 +1,10 @@
 import 'package:community_report_app/custom_theme.dart';
+import 'package:community_report_app/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PostSection extends StatelessWidget {
+  int? postId;
   String? profilePhoto;
   String username;
   String title;
@@ -17,9 +19,11 @@ class PostSection extends StatelessWidget {
   DateTime createdAt;
   String? role;
   bool? settingPostScreen = false;
+  int? discussionCount;
 
   PostSection({
     Key? key,
+    this.postId,
     this.profilePhoto,
     required this.username,
     required this.title,
@@ -34,6 +38,7 @@ class PostSection extends StatelessWidget {
     required this.createdAt,
     this.role,
     this.settingPostScreen,
+    this.discussionCount,
   }) : super(key: key);
 
   void _showOptions(BuildContext context) {
@@ -272,10 +277,37 @@ class PostSection extends StatelessWidget {
           ),
           child: Row(
             children: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.comment, size: 20),
+              InkWell(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.discussionDetail,
+                    arguments: postId,
+                  );
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.comment, size: 20),
+                    const SizedBox(width: 4),
+                    Text(
+                      "${discussionCount ?? ''}",
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ],
+                ),
               ),
+
+              // IconButton(
+              //   onPressed: () {
+              //     Navigator.pushNamed(
+              //       context,
+              //       AppRoutes.discussionDetail,
+              //       arguments: postId,
+              //     );
+              //   },
+              //   icon: const Icon(Icons.comment, size: 20),
+              // ),
               SizedBox(width: 10),
               InkWell(
                 onTap: () {

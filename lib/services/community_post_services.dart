@@ -34,7 +34,9 @@ class CommunityPostServices {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
-        return data.map((e) => CommunityPost.fromAPIWithUsernamePhoto(e)).toList();
+        return data
+            .map((e) => CommunityPost.fromAPIWithUsernamePhoto(e))
+            .toList();
       } else {
         throw Exception("Failed to load posts");
       }
@@ -46,10 +48,10 @@ class CommunityPostServices {
 
   Future<CommunityPost> getPostById(int id) async {
     try {
-      final response = await http.get(Uri.parse("$baseUrl/$id"));
+      final response = await http.get(Uri.parse("$baseUrl/post/$id"));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return CommunityPost.fromMap(data);
+        return CommunityPost.fromAPIWithDiscussions(data);
       } else {
         throw Exception("Failed to load post");
       }

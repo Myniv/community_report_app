@@ -69,6 +69,22 @@ class CommunityPostProvider with ChangeNotifier {
     }
   }
 
+  Future<void> fetchPost(int? postId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      _currentPost = await _communityPostServices.getPostById(postId!);
+      print("Fetched post: $_currentPost");
+    } catch (e) {
+      print("Error in provider: $e");
+      // _postsListProfile = [];
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void initializeNewPost() {
     _currentPost = CommunityPost(
       user_id: profileProvider.profile?.uid,
@@ -337,7 +353,9 @@ class CommunityPostProvider with ChangeNotifier {
         await _communityPostServices.updatePost(_currentPost!);
         print("Post updated successfully");
 
-        final index = _postsListProfile.indexWhere((post) => post.id == _postIndex);
+        final index = _postsListProfile.indexWhere(
+          (post) => post.id == _postIndex,
+        );
         if (index != -1) {
           _postsListProfile[index] = _currentPost!;
         }
