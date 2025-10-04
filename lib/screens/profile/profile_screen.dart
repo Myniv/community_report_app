@@ -1,4 +1,6 @@
+import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/models/community_post.dart';
+import 'package:community_report_app/models/enum_list.dart';
 import 'package:community_report_app/models/profile.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
@@ -16,12 +18,23 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  String? selectStatus;
+  String? selectCategory;
+  String? selectDate;
+  String? selectUrgency;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final profileProvider = context.read<ProfileProvider>();
-      context.read<CommunityPostProvider>().fetchPostsList(userId: profileProvider.profile?.uid);
+      context.read<CommunityPostProvider>().fetchPostsList(
+        userId: profileProvider.profile?.uid,
+        status: selectStatus,
+        category: selectCategory,
+        location: selectDate,
+        urgency: selectUrgency,
+      );
       // context.read<CommunityPostProvider>().fetchPostsList();
     });
   }
@@ -31,6 +44,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final profile = context.watch<ProfileProvider>().profile;
     final communityPostProvider = context.watch<CommunityPostProvider>();
     final communityPost = communityPostProvider.postListProfile;
+
+    final allCategory = [
+      'All',
+      ...CategoryItem.values.map((e) => e.displayName).toList(),
+    ];
+    final allStatus = [
+      'All',
+      ...StatusItem.values.map((e) => e.displayName).toList(),
+    ];
+    final allUrgency = [
+      'All',
+      ...UrgencyItem.values.map((e) => e.displayName).toList(),
+    ];
 
     return DefaultTabController(
       length: 2,
@@ -49,40 +75,154 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
 
-            // ✅ Konten tab
             Expanded(
               child: TabBarView(
                 children: [
-                  communityPostProvider.isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : communityPost.isEmpty
-                      ? const NoItem(
-                          title: "No Post",
-                          subTitle: "You have no post yet",
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          itemCount: communityPost.length,
-                          itemBuilder: (context, index) {
-                            final post = communityPost[index];
-                            return PostSection(
-                              profilePhoto: post.user_photo,
-                              username: post.username ?? "",
-                              role: profile?.role ?? "",
-                              title: post.title ?? "",
-                              description: post.description ?? "",
-                              category: post.category ?? "",
-                              urgency: post.urgency ?? "",
-                              status: post.status ?? "",
-                              location: post.location ?? "",
-                              latitude: post.latitude ?? 0.0,
-                              longitude: post.longitude ?? 0.0,
-                              createdAt: post.created_at ?? DateTime.now(),
-                              settingPostScreen: false,
-                              postImage: post.photo,
-                            );
-                          },
+                  Column(
+                    children: [
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 8.0,
                         ),
+                        child: Row(
+                          children: [
+                            CustomTheme().customDropdown2(
+                              hint: "Category",
+                              value: selectCategory,
+                              items: allCategory,
+                              onChanged: (value) {
+                                setState(
+                                  () => selectCategory = value == 'All'
+                                      ? null
+                                      : value!,
+                                );
+                                final profileProvider = context
+                                    .read<ProfileProvider>();
+                                context
+                                    .read<CommunityPostProvider>()
+                                    .fetchPostsList(
+                                      userId: profileProvider.profile?.uid,
+                                      status: selectStatus,
+                                      category: selectCategory,
+                                      location: selectDate,
+                                      urgency: selectUrgency,
+                                    );
+                              },
+                            ),
+                            const SizedBox(width: 12),
+                            CustomTheme().customDropdown2(
+                              hint: "Urgency",
+                              value: selectUrgency,
+                              items: allUrgency,
+                              onChanged: (value) {
+                                setState(
+                                  () => selectUrgency = value == 'All'
+                                      ? null
+                                      : value!,
+                                );
+                                final profileProvider = context
+                                    .read<ProfileProvider>();
+                                context
+                                    .read<CommunityPostProvider>()
+                                    .fetchPostsList(
+                                      userId: profileProvider.profile?.uid,
+                                      status: selectStatus,
+                                      category: selectCategory,
+                                      location: selectDate,
+                                      urgency: selectUrgency,
+                                    );
+                              },
+                            ),
+                            const SizedBox(width: 12),
+                            CustomTheme().customDropdown2(
+                              hint: "Status",
+                              value: selectStatus,
+                              items: allStatus,
+                              onChanged: (value) {
+                                setState(
+                                  () => selectStatus = value == 'All'
+                                      ? null
+                                      : value!,
+                                );
+                                final profileProvider = context
+                                    .read<ProfileProvider>();
+                                context
+                                    .read<CommunityPostProvider>()
+                                    .fetchPostsList(
+                                      userId: profileProvider.profile?.uid,
+                                      status: selectStatus,
+                                      category: selectCategory,
+                                      location: selectDate,
+                                      urgency: selectUrgency,
+                                    );
+                              },
+                            ),
+                            const SizedBox(width: 12),
+                            CustomTheme().customDropdown2(
+                              hint: "Date",
+                              value: selectDate,
+                              items: ['All', 'Newest', 'Oldest'],
+                              onChanged: (value) {
+                                setState(
+                                  () => selectDate = value == 'All'
+                                      ? null
+                                      : value!,
+                                );
+                                final profileProvider = context
+                                    .read<ProfileProvider>();
+                                context
+                                    .read<CommunityPostProvider>()
+                                    .fetchPostsList(
+                                      userId: profileProvider.profile?.uid,
+                                      status: selectStatus,
+                                      category: selectCategory,
+                                      location: selectDate,
+                                      urgency: selectUrgency,
+                                    );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      Expanded(
+                        child: communityPostProvider.isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : communityPost.isEmpty
+                            ? const NoItem(
+                                title: "No Post",
+                                subTitle: "You have no post yet",
+                              )
+                            : ListView.builder(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                itemCount: communityPost.length,
+                                itemBuilder: (context, index) {
+                                  final post = communityPost[index];
+                                  return PostSection(
+                                    profilePhoto: post.user_photo,
+                                    username: post.username ?? "",
+                                    role: profile?.role ?? "",
+                                    title: post.title ?? "",
+                                    description: post.description ?? "",
+                                    category: post.category ?? "",
+                                    urgency: post.urgency ?? "",
+                                    status: post.status ?? "",
+                                    location: post.location ?? "",
+                                    latitude: post.latitude ?? 0.0,
+                                    longitude: post.longitude ?? 0.0,
+                                    createdAt:
+                                        post.created_at ?? DateTime.now(),
+                                    settingPostScreen: false,
+                                    postImage: post.photo,
+                                  );
+                                },
+                              ),
+                      ),
+                    ],
+                  ),
+
                   ListView.builder(
                     itemCount: 5,
                     itemBuilder: (context, index) {
