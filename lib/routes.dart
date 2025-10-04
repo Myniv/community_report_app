@@ -1,6 +1,7 @@
 import 'package:community_report_app/main.dart';
 import 'package:community_report_app/screens/auth/login_screen.dart';
 import 'package:community_report_app/screens/auth/register_screen.dart';
+import 'package:community_report_app/screens/community_post/create_community_post_screen.dart';
 import 'package:community_report_app/screens/community_post/detail_community_post_screen.dart';
 import 'package:community_report_app/screens/profile/edit_profile_screen.dart';
 import 'package:community_report_app/screens/profile/profile_screen.dart';
@@ -14,6 +15,7 @@ class AppRoutes {
   static const String editProfile = '/edit_profile';
   static const String mainScreen = '/main';
   static const String discussionDetail = '/discussion_detail';
+  static const String editPost = '/edit_post';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     // final args = settings.arguments;
@@ -41,6 +43,11 @@ class AppRoutes {
       case mainScreen:
         return MaterialPageRoute(
           builder: (_) => MainScreen(),
+          settings: settings,
+        );
+      case editPost:
+        return MaterialPageRoute(
+          builder: (_) => CreateCommunityPostScreen(onTabSelected: null),
           settings: settings,
         );
       case discussionDetail:

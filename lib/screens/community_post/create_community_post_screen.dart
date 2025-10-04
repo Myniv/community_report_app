@@ -6,6 +6,7 @@ import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/models/enum_list.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
@@ -16,9 +17,9 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 class CreateCommunityPostScreen extends StatefulWidget {
-  final void Function(int) onTabSelected;
+  final void Function(int)? onTabSelected;
 
-  const CreateCommunityPostScreen({super.key, required this.onTabSelected});
+  const CreateCommunityPostScreen({super.key, this.onTabSelected});
 
   @override
   State<CreateCommunityPostScreen> createState() =>
@@ -337,6 +338,13 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
     await _getLocation();
   }
 
+  bool get _hasImage {
+    final postProvider = context.read<CommunityPostProvider>();
+    return _capturedImage != null ||
+        (postProvider.currentPost?.photo != null &&
+            postProvider.currentPost!.photo!.isNotEmpty);
+  }
+
   Widget _buildCameraPreview() {
     if (_cameraController == null || _initializeControllerFuture == null) {
       return Container(
@@ -412,6 +420,32 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
   }
 
   Widget _buildCameraTaken() {
+    final postProvider = context.read<CommunityPostProvider>();
+
+    bool hasLocalImage = _capturedImage != null;
+
+    bool hasNetworkImage =
+        !hasLocalImage &&
+        postProvider.currentPost?.photo != null &&
+        postProvider.currentPost!.photo!.isNotEmpty;
+
+    if (!hasLocalImage && !hasNetworkImage) {
+      return Container(
+        height: 300,
+        color: CustomTheme.green.withOpacity(0.3),
+        child: Center(
+          child: Text(
+            "No image available",
+            style: CustomTheme().mediumFont(
+              CustomTheme.whiteKindaGreen,
+              FontWeight.w400,
+              context,
+            ),
+          ),
+        ),
+      );
+    }
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: CustomTheme.borderRadius,
@@ -426,12 +460,64 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
       ),
       child: ClipRRect(
         borderRadius: CustomTheme.borderRadius,
-        child: Image.file(
-          File(_capturedImage!.path),
-          height: 300,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        ),
+        child: hasLocalImage
+            ? Image.file(
+                File(_capturedImage!.path),
+                height: 300,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              )
+            : Image.network(
+                postProvider.currentPost!.photo!,
+                height: 300,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    height: 300,
+                    color: CustomTheme.green.withOpacity(0.3),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                            : null,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          CustomTheme.lightGreen,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    height: 300,
+                    color: CustomTheme.green.withOpacity(0.3),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: Colors.red,
+                            size: 48,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Failed to load image",
+                            style: CustomTheme().smallFont(
+                              Colors.red,
+                              FontWeight.w400,
+                              context,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
       ),
     );
   }
@@ -453,10 +539,16 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.location_on, color: CustomTheme.lightGreen, size: 20),
+                  Icon(
+                    Icons.location_on,
+                    color: CustomTheme.lightGreen,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Text(
-                    _isManualLocationSelection ? "Selected Location" : "Current Location",
+                    _isManualLocationSelection
+                        ? "Selected Location"
+                        : "Current Location",
                     style: CustomTheme().smallFont(
                       CustomTheme.lightGreen,
                       FontWeight.w600,
@@ -468,7 +560,11 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
               if (_isManualLocationSelection)
                 TextButton.icon(
                   onPressed: _resetToCurrentLocation,
-                  icon: Icon(Icons.my_location, size: 16, color: CustomTheme.lightGreen),
+                  icon: Icon(
+                    Icons.my_location,
+                    size: 16,
+                    color: CustomTheme.lightGreen,
+                  ),
                   label: Text(
                     "Reset",
                     style: CustomTheme().superSmallFont(
@@ -520,11 +616,7 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.touch_app,
-                  size: 16,
-                  color: CustomTheme.lightGreen,
-                ),
+                Icon(Icons.touch_app, size: 16, color: CustomTheme.lightGreen),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -544,7 +636,10 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
     );
   }
 
-  Future<void> _submitPost(CommunityPostProvider postProvider) async {
+  Future<void> _submitPost(
+    CommunityPostProvider postProvider,
+    int? postIndex,
+  ) async {
     if (!postProvider.postKey.currentState!.validate()) {
       CustomTheme().customScaffoldMessage(
         context: context,
@@ -554,7 +649,12 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
       return;
     }
 
-    if (_capturedImage == null) {
+    bool hasLocalImage = _capturedImage != null;
+    bool hasNetworkImage =
+        postProvider.currentPost?.photo != null &&
+        postProvider.currentPost!.photo!.isNotEmpty;
+
+    if (!hasLocalImage && !hasNetworkImage) {
       CustomTheme().customScaffoldMessage(
         context: context,
         message: "Please capture or select an image",
@@ -568,7 +668,9 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
     });
 
     try {
-      await postProvider.savePost(imageFile: File(_capturedImage!.path));
+      await postProvider.savePost(
+        imageFile: hasLocalImage ? File(_capturedImage!.path) : null,
+      );
 
       CustomTheme().customScaffoldMessage(
         context: context,
@@ -576,7 +678,11 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
         backgroundColor: Colors.green,
       );
 
-      widget.onTabSelected(2);
+      if (widget.onTabSelected != null && postIndex == null) {
+        widget.onTabSelected!(2);
+      } else {
+        Navigator.pop(context);
+      }
     } catch (e) {
       print("Error submitting post: $e");
       CustomTheme().customScaffoldMessage(
@@ -634,7 +740,9 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                   height: 80,
                   child: Icon(
                     Icons.location_pin,
-                    color: _isManualLocationSelection ? Colors.blue : Colors.red,
+                    color: _isManualLocationSelection
+                        ? Colors.blue
+                        : Colors.red,
                     size: 40,
                   ),
                 ),
@@ -659,6 +767,33 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
     final allUrgency = UrgencyItem.values.map((e) => e.displayName).toList();
 
     return Scaffold(
+      appBar: isEdit
+          ? AppBar(
+              backgroundColor: Colors.white,
+              iconTheme: IconThemeData(color: CustomTheme.green),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Edit Report",
+                    style: CustomTheme().smallFont(
+                      CustomTheme.green,
+                      FontWeight.bold,
+                      context,
+                    ),
+                  ),
+                  Text(
+                    DateFormat('MMMM dd, yyyy').format(DateTime.now()),
+                    style: CustomTheme().superSmallFont(
+                      CustomTheme.green,
+                      FontWeight.bold,
+                      context,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : null,
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Container(
@@ -737,7 +872,7 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      if (_capturedImage != null) ...[
+                      if (_hasImage) ...[
                         _customTheme.customTextField(
                           context: context,
                           controller: postProvider.titleController,
@@ -935,7 +1070,8 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                                 icon: Icons.check_circle_outline,
                                 onPressed: _isSubmitting
                                     ? null
-                                    : () => _submitPost(postProvider),
+                                    : () =>
+                                          _submitPost(postProvider, postIndex),
                                 isLoading: _isSubmitting,
                                 context: context,
                               ),

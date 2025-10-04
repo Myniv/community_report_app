@@ -246,13 +246,6 @@ class CommunityPostProvider with ChangeNotifier {
       throw Exception("Post not initialized");
     }
 
-    // Validate image is provided
-    if (imageFile == null) {
-      _errorMessage = "Photo is required";
-      notifyListeners();
-      throw Exception("Photo is required");
-    }
-
     // Get current values
     final title = titleController.text.trim();
     final description = descriptionController.text.trim();
@@ -268,6 +261,17 @@ class CommunityPostProvider with ChangeNotifier {
     print("User ID: ${_currentPost!.user_id}");
     print("Status: ${_currentPost!.status}");
     print("Is Report: ${_currentPost!.is_report}");
+    print("Existing Photo: ${_currentPost!.photo}");
+    print("New Image File: ${imageFile?.path}");
+
+    // Validate image is provided for NEW posts only
+    // For editing, allow keeping existing photo
+    if (imageFile == null &&
+        (_currentPost!.photo == null || _currentPost!.photo!.isEmpty)) {
+      _errorMessage = "Photo is required";
+      notifyListeners();
+      throw Exception("Photo is required");
+    }
 
     // Validate required fields
     if (title.isEmpty) {
@@ -313,7 +317,11 @@ class CommunityPostProvider with ChangeNotifier {
       );
 
       if (_postIndex == null) {
-        // Creating new post - upload photo FIRST, then create post
+        // Creating new post - photo is required
+        if (imageFile == null) {
+          throw Exception("Photo is required for new posts");
+        }
+
         print("Step 1: Creating temporary post to get ID...");
         final tempPost = await _communityPostServices.createPost(_currentPost!);
         print("Temporary post created with ID: ${tempPost.id}");
@@ -340,16 +348,20 @@ class CommunityPostProvider with ChangeNotifier {
         print("Updating post: ${_currentPost!.id}");
         _currentPost = _currentPost!.copyWith(id: _postIndex);
 
-        // Upload new photo if provided
-        print("Uploading new photo...");
-        final photoUrl = await _communityPostServices.uploadProfilePhoto(
-          _currentPost!.id!,
-          imageFile,
-          _currentPost!.photo ?? '',
-        );
-        print("New photo uploaded: $photoUrl");
+        // Only upload new photo if one was provided
+        if (imageFile != null) {
+          print("Uploading new photo...");
+          final photoUrl = await _communityPostServices.uploadProfilePhoto(
+            _currentPost!.id!,
+            imageFile,
+            _currentPost!.photo ?? '',
+          );
+          print("New photo uploaded: $photoUrl");
+          _currentPost = _currentPost!.copyWith(photo: photoUrl);
+        } else {
+          print("Keeping existing photo: ${_currentPost!.photo}");
+        }
 
-        _currentPost = _currentPost!.copyWith(photo: photoUrl);
         await _communityPostServices.updatePost(_currentPost!);
         print("Post updated successfully");
 

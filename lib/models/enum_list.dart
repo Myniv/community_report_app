@@ -30,16 +30,16 @@ extension UrgencyExtension on UrgencyItem {
   }
 }
 
-enum StatusItem { pending, approved, rejected }
+enum StatusItem { pending, onProgress, resolved }
 extension StatusExtension on StatusItem {
   String get displayName {
     switch (this) {
       case StatusItem.pending:
         return "Pending";
-      case StatusItem.approved:
-        return "Approved";
-      case StatusItem.rejected:
-        return "Rejected";
+      case StatusItem.onProgress:
+        return "On Progress";
+      case StatusItem.resolved:
+        return "Resolved";
     }
   }
 }

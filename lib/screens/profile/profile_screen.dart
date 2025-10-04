@@ -22,21 +22,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? selectCategory;
   String? selectDate;
   String? selectUrgency;
+  bool isInitialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final profileProvider = context.read<ProfileProvider>();
-      context.read<CommunityPostProvider>().fetchPostsList(
-        userId: profileProvider.profile?.uid,
-        status: selectStatus,
-        category: selectCategory,
-        location: selectDate,
-        urgency: selectUrgency,
-      );
-      // context.read<CommunityPostProvider>().fetchPostsList();
-    });
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!isInitialized) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final profileProvider = context.read<ProfileProvider>();
+        context.read<CommunityPostProvider>().fetchPostsList(
+          userId: profileProvider.profile?.uid,
+          status: selectStatus,
+          category: selectCategory,
+          location: selectDate,
+          urgency: selectUrgency,
+        );
+      });
+      isInitialized = true;
+    }
   }
 
   @override
@@ -201,6 +204,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 itemBuilder: (context, index) {
                                   final post = communityPost[index];
                                   return PostSection(
+                                    postId: post.id,
                                     profilePhoto: post.user_photo,
                                     username: post.username ?? "",
                                     role: profile?.role ?? "",
@@ -216,6 +220,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         post.created_at ?? DateTime.now(),
                                     settingPostScreen: false,
                                     postImage: post.photo,
+                                    editPost: true,
                                   );
                                 },
                               ),
