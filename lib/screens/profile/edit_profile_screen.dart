@@ -54,25 +54,28 @@ class FormScreenState extends State<UpdateProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        backgroundColor: Colors.amber.shade900,
-        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: CustomTheme.green),
+          onPressed: () => Navigator.pop(context),
+          color: CustomTheme.green,
+        ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               'Edit Profile',
-              style: GoogleFonts.pacifico(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: CustomTheme.green,
                 fontSize: 20,
               ),
             ),
             Text(
               DateFormat('MMMM dd, yyyy').format(DateTime.now()),
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+              style: CustomTheme().superSmallFont(
+                CustomTheme.green,
+                FontWeight.bold,
+                context,
               ),
             ),
           ],

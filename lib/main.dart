@@ -14,6 +14,7 @@ import 'package:community_report_app/screens/profile/profile_screen.dart';
 import 'package:community_report_app/widgets/custom_drawer.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -156,16 +157,27 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        iconTheme: IconThemeData(
-          color: CustomTheme.green, 
-        ),
-        title: Text(
-          _titleScreen[_currentIndex],
-          style: CustomTheme().smallFont(
-            CustomTheme.green,
-            FontWeight.bold,
-            context,
-          ),
+        iconTheme: IconThemeData(color: CustomTheme.green),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              _titleScreen[_currentIndex],
+              style: CustomTheme().smallFont(
+                CustomTheme.green,
+                FontWeight.bold,
+                context,
+              ),
+            ),
+            Text(
+              DateFormat('MMMM dd, yyyy').format(DateTime.now()),
+              style: CustomTheme().superSmallFont(
+                CustomTheme.green,
+                FontWeight.bold,
+                context,
+              ),
+            ),
+          ],
         ),
       ),
       body: _screens[_currentIndex],
