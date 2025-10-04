@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/provider/auth_provider.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
+import 'package:community_report_app/provider/discussion_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/routes.dart';
 import 'package:community_report_app/screens/auth/auth_wrapper.dart';
@@ -52,6 +53,7 @@ void main() async {
           update: (_, profileProvider, __) =>
               CommunityPostProvider(profileProvider),
         ),
+        ChangeNotifierProvider(create: (_) => DiscussionProvider()),
       ],
       child: MainApp(),
     ),
@@ -156,9 +158,7 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        iconTheme: IconThemeData(
-          color: CustomTheme.green, 
-        ),
+        iconTheme: IconThemeData(color: CustomTheme.green),
         title: Text(
           _titleScreen[_currentIndex],
           style: CustomTheme().smallFont(

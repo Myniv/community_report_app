@@ -36,4 +36,36 @@ class Discussion {
       message: map['message'] ?? '',
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'userId': userId,
+      'communityPostId': communityPostId,
+      'message': message,
+    };
+  }
+
+  Discussion copyWith({
+    int? discussionId,
+    String? userId,
+    int? communityPostId,
+    String? message,
+    String? userPhoto,
+    String? username,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? deletedAt,
+  }) {
+    return Discussion(
+      discussionId: discussionId ?? this.discussionId,
+      userId: userId ?? this.userId,
+      communityPostId: communityPostId ?? this.communityPostId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      username: username ?? this.username,
+      userPhoto: userPhoto ?? this.userPhoto,
+      message: message ?? this.message,
+    );
+  }
 }

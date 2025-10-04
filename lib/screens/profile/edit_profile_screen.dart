@@ -54,31 +54,16 @@ class FormScreenState extends State<UpdateProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        backgroundColor: Colors.amber.shade900,
-        automaticallyImplyLeading: false,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Edit Profile',
-              style: GoogleFonts.pacifico(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: 20,
-              ),
-            ),
-            Text(
-              DateFormat('MMMM dd, yyyy').format(DateTime.now()),
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
+        backgroundColor: Colors.white,
+        iconTheme: IconThemeData(color: CustomTheme.green),
+        title: Text(
+          "Edit Profile",
+          style: CustomTheme().smallFont(
+            CustomTheme.green,
+            FontWeight.bold,
+            context,
+          ),
         ),
-        centerTitle: false,
-        elevation: 0,
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -264,7 +249,7 @@ class FormScreenState extends State<UpdateProfileScreen> {
 
                                 if (!context.mounted) return;
                                 if (shouldUpdate == true) {
-                                  Navigator.pop(context);
+                                  Navigator.pop(context, true);
                                 }
                               },
                               child: const Text('Cancel'),
@@ -301,7 +286,7 @@ class FormScreenState extends State<UpdateProfileScreen> {
                                     );
 
                                     if (context.mounted) {
-                                      Navigator.of(context).pop(false);
+                                      Navigator.of(context).pop(true);
                                     }
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(

@@ -1,4 +1,3 @@
-import 'package:community_report_app/models/community_post.dart';
 import 'package:community_report_app/models/profile.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
@@ -21,7 +20,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final profileProvider = context.read<ProfileProvider>();
-      context.read<CommunityPostProvider>().fetchPostsList(userId: profileProvider.profile?.uid);
+      context.read<CommunityPostProvider>().fetchPostsList(
+        userId: profileProvider.profile?.uid,
+      );
       // context.read<CommunityPostProvider>().fetchPostsList();
     });
   }
@@ -171,9 +172,17 @@ Widget buildProfileHeader(Profile? profile, BuildContext context) {
 
 Widget buildEditProfileButton(BuildContext context) {
   return GestureDetector(
-    onTap: () {
-      Navigator.pushNamed(context, AppRoutes.editProfile);
+    onTap: () async {
+      final result = await Navigator.pushNamed(context, AppRoutes.editProfile);
+
+      if (result == true) {
+        // Refresh data setelah balik dari edit
+        context.read<CommunityPostProvider>().fetchPostsList(
+          userId: context.read<ProfileProvider>().profile?.uid,
+        );
+      }
     },
+
     child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: ShapeDecoration(

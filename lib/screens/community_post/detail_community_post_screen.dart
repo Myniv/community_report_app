@@ -1,5 +1,7 @@
 import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
+import 'package:community_report_app/provider/discussion_provider.dart';
+import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/widgets/post_section.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +31,8 @@ class _DetailCommunityPostScreenState extends State<DetailCommunityPostScreen> {
   @override
   Widget build(BuildContext context) {
     final communityPost = context.watch<CommunityPostProvider>().currentPost;
-    final TextEditingController commentController = TextEditingController();
+    final discussionProvider = Provider.of<DiscussionProvider>(context);
+    final profile = context.watch<ProfileProvider>().profile;
 
     return Scaffold(
       appBar: AppBar(
@@ -104,6 +107,108 @@ class _DetailCommunityPostScreenState extends State<DetailCommunityPostScreen> {
                         ),
                         title: Text(comment.username ?? 'Unknown'),
                         subtitle: Text(comment.message ?? ''),
+                        trailing: (profile?.uid == comment.userId)
+                            ? PopupMenuButton<String>(
+                                onSelected: (value) {
+                                  if (value == 'edit') {
+                                    discussionProvider
+                                            .editMessageController
+                                            .text =
+                                        comment.message ?? '';
+
+                                    showDialog(
+                                      context: context,
+                                      builder: (ctx) {
+                                        return AlertDialog(
+                                          title: const Text("Edit Comment"),
+                                          content: TextField(
+                                            controller: discussionProvider
+                                                .editMessageController,
+                                            decoration: const InputDecoration(
+                                              hintText:
+                                                  "Update your comment...",
+                                            ),
+                                            maxLines: null,
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.of(ctx).pop(),
+                                              child: const Text("Cancel"),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                final newMessage =
+                                                    discussionProvider
+                                                        .editMessageController
+                                                        .text
+                                                        .trim();
+                                                if (newMessage.isNotEmpty) {
+                                                  discussionProvider
+                                                      .updateDiscussion(
+                                                        discussionId: comment
+                                                            .discussionId,
+                                                        userId: comment.userId,
+                                                        communityPostId: comment
+                                                            .communityPostId,
+                                                        message: newMessage,
+                                                      )
+                                                      .then((_) {
+                                                        Provider.of<
+                                                              CommunityPostProvider
+                                                            >(
+                                                              context,
+                                                              listen: false,
+                                                            )
+                                                            .fetchPost(
+                                                              widget.postId,
+                                                            );
+                                                      });
+
+                                                  if (context.mounted) {
+                                                    Navigator.of(ctx).pop();
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text(
+                                                          "Comment updated!",
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }
+                                                }
+                                              },
+                                              child: const Text("Save"),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  } else if (value == 'delete') {
+                                    discussionProvider
+                                        .deleteDiscussion(comment.discussionId!)
+                                        .then((_) {
+                                          // Refresh the post to reflect deletion
+                                          Provider.of<CommunityPostProvider>(
+                                            context,
+                                            listen: false,
+                                          ).fetchPost(widget.postId);
+                                        });
+                                  }
+                                },
+                                itemBuilder: (context) => [
+                                  const PopupMenuItem(
+                                    value: 'edit',
+                                    child: Text("Edit"),
+                                  ),
+                                  const PopupMenuItem(
+                                    value: 'delete',
+                                    child: Text("Delete"),
+                                  ),
+                                ],
+                              )
+                            : null,
                       );
                     },
                     separatorBuilder: (context, index) => const Divider(
@@ -127,7 +232,7 @@ class _DetailCommunityPostScreenState extends State<DetailCommunityPostScreen> {
             children: [
               Expanded(
                 child: TextField(
-                  controller: commentController,
+                  controller: discussionProvider.messageController,
                   decoration: InputDecoration(
                     hintText: "Write a comment...",
                     border: OutlineInputBorder(
@@ -147,10 +252,21 @@ class _DetailCommunityPostScreenState extends State<DetailCommunityPostScreen> {
               IconButton(
                 icon: const Icon(Icons.send, color: CustomTheme.green),
                 onPressed: () {
-                  final text = commentController.text.trim();
+                  final text = discussionProvider.messageController.text.trim();
                   if (text.isNotEmpty) {
-                    print("Send comment: $text");
-                    commentController.clear();
+                    discussionProvider
+                        .createDiscussion(
+                          message: text,
+                          communityPostId: communityPost?.id,
+                          userId: profile?.uid,
+                        )
+                        .then((_) {
+                          // Refresh the post to show the new comment
+                          Provider.of<CommunityPostProvider>(
+                            context,
+                            listen: false,
+                          ).fetchPost(widget.postId);
+                        });
                   }
                 },
               ),
