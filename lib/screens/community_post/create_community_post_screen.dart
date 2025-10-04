@@ -522,7 +522,7 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
     );
   }
 
-  Widget _buildLocationInfo() {
+  Widget _buildLocationInfo(bool isReadOnly) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       padding: const EdgeInsets.all(16),
@@ -557,7 +557,7 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                   ),
                 ],
               ),
-              if (_isManualLocationSelection)
+              if (_isManualLocationSelection && !isReadOnly)
                 TextButton.icon(
                   onPressed: _resetToCurrentLocation,
                   icon: Icon(
@@ -602,35 +602,40 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          _buildLocationMap(_latitude!, _longitude!),
+          _buildLocationMap(_latitude!, _longitude!, isReadOnly),
           const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: CustomTheme.lightGreen.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: CustomTheme.lightGreen.withOpacity(0.3),
-                width: 1,
+          if (!isReadOnly)
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: CustomTheme.lightGreen.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: CustomTheme.lightGreen.withOpacity(0.3),
+                  width: 1,
+                ),
               ),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.touch_app, size: 16, color: CustomTheme.lightGreen),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    "Tap on the map to select a different location",
-                    style: CustomTheme().superSmallFont2(
-                      CustomTheme.lightGreen,
-                      FontWeight.w500,
-                      context,
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.touch_app,
+                    size: 16,
+                    color: CustomTheme.lightGreen,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "Tap on the map to select a different location",
+                      style: CustomTheme().superSmallFont2(
+                        CustomTheme.lightGreen,
+                        FontWeight.w500,
+                        context,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -709,7 +714,7 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
     }
   }
 
-  Widget _buildLocationMap(double latitude, double longitude) {
+  Widget _buildLocationMap(double latitude, double longitude, bool isReadOnly) {
     return Container(
       height: 300,
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -725,7 +730,13 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
           options: MapOptions(
             initialCenter: LatLng(latitude, longitude),
             initialZoom: 16,
-            onTap: _onMapTap,
+            onTap: isReadOnly ? null : _onMapTap, // Disable tap when read-only
+            interactionOptions: InteractionOptions(
+              flags: isReadOnly
+                  ? InteractiveFlag
+                        .none // Disable all interactions when editing
+                  : InteractiveFlag.all,
+            ),
           ),
           children: [
             TileLayer(
@@ -860,7 +871,7 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                         child: Column(
                           children: [
                             Text(
-                              isEdit ? "Edit Post" : "Create Report",
+                              isEdit ? "Edit Report" : "Create Report",
                               style: CustomTheme().mediumFont(
                                 CustomTheme.green,
                                 FontWeight.w700,
@@ -878,6 +889,8 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                           controller: postProvider.titleController,
                           label: "Title",
                           hint: "Enter title",
+                          readOnly: isEdit, 
+                          enabled: !isEdit, 
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
                               return "Please enter a title";
@@ -886,7 +899,7 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                               return "Title must be at least 3 characters";
                             }
                             if (value.trim().length > 100) {
-                              return "Description must be at least 3 characters";
+                              return "Title must not exceed 100 characters";
                             }
                             return null;
                           },
@@ -907,7 +920,7 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                               return "Description must be at least 3 characters";
                             }
                             if (value.trim().length > 500) {
-                              return "Description must be at least 3 characters";
+                              return "Description must not exceed 500 characters";
                             }
                             return null;
                           },
@@ -924,9 +937,12 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                           items: allCategory,
                           label: "Category",
                           hint: "Select category",
-                          onChanged: (value) {
-                            postProvider.setCategory(value);
-                          },
+                          enabled: !isEdit, 
+                          onChanged: isEdit
+                              ? null
+                              : (value) {
+                                  postProvider.setCategory(value);
+                                },
                           validator: (value) {
                             if (value == null) {
                               return "Please select a category";
@@ -946,9 +962,12 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                           items: allUrgency,
                           label: "Urgency",
                           hint: "Select urgency",
-                          onChanged: (value) {
-                            postProvider.setUrgency(value);
-                          },
+                          enabled: !isEdit, 
+                          onChanged: isEdit
+                              ? null
+                              : (value) {
+                                  postProvider.setUrgency(value);
+                                },
                           validator: (value) {
                             if (value == null) {
                               return "Please select an urgency";
@@ -968,9 +987,12 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                           items: allLocation,
                           label: "Location",
                           hint: "Select location",
-                          onChanged: (value) {
-                            postProvider.setLocation(value);
-                          },
+                          enabled: !isEdit, 
+                          onChanged: isEdit
+                              ? null
+                              : (value) {
+                                  postProvider.setLocation(value);
+                                },
                           validator: (value) {
                             if (value == null) {
                               return "Please select a location";
@@ -1009,9 +1031,10 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                             ),
                           )
                         else
-                          _buildLocationInfo(),
+                          _buildLocationInfo(isEdit), 
 
                         SizedBox(height: 12),
+
                         Container(
                           margin: const EdgeInsets.symmetric(vertical: 8),
                           padding: const EdgeInsets.all(16),
@@ -1050,24 +1073,31 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
+
                         Row(
                           children: [
-                            Expanded(
-                              child: CustomTheme().customActionButton(
-                                text: "Retake",
-                                icon: Icons.camera_alt_outlined,
-                                onPressed: _retakePhoto,
-                                backgroundColor: CustomTheme.lightGreen,
-                                foregroundColor: CustomTheme.whiteKindaGreen,
-                                context: context,
+                            if (!isEdit) ...[
+                              Expanded(
+                                child: CustomTheme().customActionButton(
+                                  text: "Retake",
+                                  icon: Icons.camera_alt_outlined,
+                                  onPressed: _retakePhoto,
+                                  backgroundColor: CustomTheme.lightGreen,
+                                  foregroundColor: CustomTheme.whiteKindaGreen,
+                                  context: context,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 16),
+                              const SizedBox(width: 16),
+                            ],
                             Expanded(
-                              flex: 2,
+                              flex: isEdit ? 1 : 2,
                               child: CustomTheme().customActionButton(
-                                text: "Submit Post",
-                                icon: Icons.check_circle_outline,
+                                text: isEdit
+                                    ? "Update Description"
+                                    : "Submit Post",
+                                icon: isEdit
+                                    ? Icons.edit
+                                    : Icons.check_circle_outline,
                                 onPressed: _isSubmitting
                                     ? null
                                     : () =>
