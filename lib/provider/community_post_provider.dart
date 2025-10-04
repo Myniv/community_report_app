@@ -387,6 +387,25 @@ class CommunityPostProvider with ChangeNotifier {
     }
   }
 
+  Future<void> deletePost(int? postId) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _communityPostServices.deletePost(postId!);
+      _errorMessage = null;
+      notifyListeners();
+      print("Post deleted successfully");
+    } catch (e) {
+      _errorMessage = "Failed to delete post: $e";
+      print("Error deleting post: $e");
+      notifyListeners();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void resetPost() {
     titleController.clear();
     descriptionController.clear();
