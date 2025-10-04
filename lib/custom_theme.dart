@@ -268,6 +268,63 @@ class CustomTheme {
     );
   }
 
+  Widget customDropdown2({
+    required String hint,
+    required String? value,
+    required List<String> items,
+    required Function(String?) onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF249A00), width: 1.5),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          isDense: true,
+          hint: Text(
+            hint,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF249A00),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          value: value,
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: Color(0xFF249A00),
+            size: 20,
+          ),
+          items: items
+              .map(
+                (e) => DropdownMenuItem(
+                  value: e,
+                  child: Text(
+                    e,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF249A00),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
+          onChanged: onChanged,
+          dropdownColor: Colors.white,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Color(0xFF249A00),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget customSelectDate({
     required BuildContext context,
     required String label,

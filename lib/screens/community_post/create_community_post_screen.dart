@@ -635,29 +635,18 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [CustomTheme.green, CustomTheme.lightGreen],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
                           borderRadius: CustomTheme.borderRadius,
                           border: Border.all(
                             color: CustomTheme.lightGreen,
-                            width: 1,
+                            width: 2,
                           ),
                         ),
                         child: Column(
                           children: [
-                            Icon(
-                              Icons.post_add,
-                              color: CustomTheme.whiteKindaGreen,
-                              size: 48,
-                            ),
-                            const SizedBox(height: 12),
                             Text(
-                              isEdit ? "Edit Post" : "Create Post",
-                              style: CustomTheme().largeFont(
-                                CustomTheme.whiteKindaGreen,
+                              isEdit ? "Edit Post" : "Create Report",
+                              style: CustomTheme().mediumFont(
+                                CustomTheme.green,
                                 FontWeight.w700,
                                 context,
                               ),

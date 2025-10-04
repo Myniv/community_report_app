@@ -109,7 +109,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final profileProvider = Provider.of<ProfileProvider>(context);
     //TODO CHAGNE THE SCREENS BASED ON THE CORRESPONDED
-    final List<String> _titleScreenMember = ["Home", "Post", "Profile"];
+    final List<String> _titleScreenMember = ["Home", "Report", "Profile"];
     final List<Widget> _screensMember = [
       HomeScreen(),
       CreateCommunityPostScreen(onTabSelected: _changeTab),
