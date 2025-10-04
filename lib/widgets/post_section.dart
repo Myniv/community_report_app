@@ -1,5 +1,6 @@
 import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/routes.dart';
+import 'package:community_report_app/widgets/text_container.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -20,6 +21,7 @@ class PostSection extends StatelessWidget {
   String? role;
   bool? settingPostScreen = false;
   int? discussionCount;
+  bool? editPost = false;
 
   PostSection({
     Key? key,
@@ -39,6 +41,7 @@ class PostSection extends StatelessWidget {
     this.role,
     this.settingPostScreen,
     this.discussionCount,
+    this.editPost,
   }) : super(key: key);
 
   void _showOptions(BuildContext context) {
@@ -159,44 +162,11 @@ class PostSection extends StatelessWidget {
 
               const Spacer(),
 
-              Container(
-                width: 57,
-                height: 25,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE0FFDE),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  category,
-                  style: TextStyle(
-                    color: Color(0xFF249A00),
-                    fontSize: 13,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-              ),
+              TextContainer(text: category, category: true),
               SizedBox(width: 10),
-              Container(
-                width: 57,
-                height: 25,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE0FFDE),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  status,
-                  style: TextStyle(
-                    color: Color(0xFF249A00),
-                    fontSize: 13,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-              ),
-
+              TextContainer(text: urgency),
+              SizedBox(width: 10),
+              TextContainer(text: status),
               if (settingPostScreen == true &&
                   (role == 'admin' || role == 'leader')) ...[
                 IconButton(
@@ -205,6 +175,11 @@ class PostSection extends StatelessWidget {
                     _showOptions(context);
                   },
                 ),
+              ],
+              if (editPost == true) ...[
+                IconButton(onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.editPost, arguments: {'postIndex': postId});
+                }, icon: const Icon(Icons.edit)),
               ],
             ],
           ),
