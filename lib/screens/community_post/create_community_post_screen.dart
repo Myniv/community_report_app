@@ -30,6 +30,7 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
   Future<void>? _initializeControllerFuture;
   final CustomTheme _customTheme = CustomTheme();
   final ImagePicker _imagePicker = ImagePicker();
+  final MapController _mapController = MapController();
 
   XFile? _capturedImage;
   String _location = "Getting location...";
@@ -43,6 +44,7 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
   double? _latitude;
   double? _longitude;
   bool _isInitialized = false;
+  bool _isManualLocationSelection = false;
 
   @override
   void initState() {
@@ -311,6 +313,30 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
     }
   }
 
+  void _onMapTap(TapPosition tapPosition, LatLng point) {
+    setState(() {
+      _latitude = point.latitude;
+      _longitude = point.longitude;
+      _location =
+          "${point.latitude.toStringAsFixed(6)}, ${point.longitude.toStringAsFixed(6)}";
+      _isLocationLoading = true;
+      _isManualLocationSelection = true;
+    });
+
+    final postProvider = context.read<CommunityPostProvider>();
+    postProvider.setCoordinates(point.latitude, point.longitude);
+
+    _getAddressFromLatLng(point.latitude, point.longitude);
+  }
+
+  void _resetToCurrentLocation() async {
+    setState(() {
+      _isLocationLoading = true;
+      _isManualLocationSelection = false;
+    });
+    await _getLocation();
+  }
+
   Widget _buildCameraPreview() {
     if (_cameraController == null || _initializeControllerFuture == null) {
       return Container(
@@ -423,17 +449,40 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(Icons.location_on, color: CustomTheme.lightGreen, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                "Current Location",
-                style: CustomTheme().smallFont(
-                  CustomTheme.lightGreen,
-                  FontWeight.w600,
-                  context,
-                ),
+              Row(
+                children: [
+                  Icon(Icons.location_on, color: CustomTheme.lightGreen, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    _isManualLocationSelection ? "Selected Location" : "Current Location",
+                    style: CustomTheme().smallFont(
+                      CustomTheme.lightGreen,
+                      FontWeight.w600,
+                      context,
+                    ),
+                  ),
+                ],
               ),
+              if (_isManualLocationSelection)
+                TextButton.icon(
+                  onPressed: _resetToCurrentLocation,
+                  icon: Icon(Icons.my_location, size: 16, color: CustomTheme.lightGreen),
+                  label: Text(
+                    "Reset",
+                    style: CustomTheme().superSmallFont(
+                      CustomTheme.lightGreen,
+                      FontWeight.w600,
+                      context,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    minimumSize: Size(0, 0),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 12),
@@ -458,13 +507,44 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
           ),
           const SizedBox(height: 12),
           _buildLocationMap(_latitude!, _longitude!),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: CustomTheme.lightGreen.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: CustomTheme.lightGreen.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.touch_app,
+                  size: 16,
+                  color: CustomTheme.lightGreen,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "Tap on the map to select a different location",
+                    style: CustomTheme().superSmallFont2(
+                      CustomTheme.lightGreen,
+                      FontWeight.w500,
+                      context,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
   Future<void> _submitPost(CommunityPostProvider postProvider) async {
-    // Validate form
     if (!postProvider.postKey.currentState!.validate()) {
       CustomTheme().customScaffoldMessage(
         context: context,
@@ -474,7 +554,6 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
       return;
     }
 
-    // Check if image is captured
     if (_capturedImage == null) {
       CustomTheme().customScaffoldMessage(
         context: context,
@@ -536,9 +615,11 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
       child: ClipRRect(
         borderRadius: CustomTheme.borderRadius,
         child: FlutterMap(
+          mapController: _mapController,
           options: MapOptions(
             initialCenter: LatLng(latitude, longitude),
             initialZoom: 16,
+            onTap: _onMapTap,
           ),
           children: [
             TileLayer(
@@ -551,9 +632,9 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                   point: LatLng(latitude, longitude),
                   width: 80,
                   height: 80,
-                  child: const Icon(
+                  child: Icon(
                     Icons.location_pin,
-                    color: Colors.red,
+                    color: _isManualLocationSelection ? Colors.blue : Colors.red,
                     size: 40,
                   ),
                 ),
@@ -669,6 +750,9 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                             if (value.trim().length < 3) {
                               return "Title must be at least 3 characters";
                             }
+                            if (value.trim().length > 100) {
+                              return "Description must be at least 3 characters";
+                            }
                             return null;
                           },
                         ),
@@ -685,6 +769,9 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                               return "Please enter a description";
                             }
                             if (value.trim().length < 3) {
+                              return "Description must be at least 3 characters";
+                            }
+                            if (value.trim().length > 500) {
                               return "Description must be at least 3 characters";
                             }
                             return null;
