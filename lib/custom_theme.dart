@@ -69,7 +69,7 @@ class CustomTheme {
     FontWeight? fontWeight,
     BuildContext? context,
   ]) {
-    double fontSize = 14; 
+    double fontSize = 14;
     if (context != null) {
       fontSize = _getResponsiveFontSize(context, 14);
     }
@@ -86,7 +86,7 @@ class CustomTheme {
     FontWeight? fontWeight,
     BuildContext? context,
   ]) {
-    double fontSize = 16; 
+    double fontSize = 16;
     if (context != null) {
       fontSize = _getResponsiveFontSize(context, 16);
     }
@@ -103,7 +103,7 @@ class CustomTheme {
     FontWeight? fontWeight,
     BuildContext? context,
   ]) {
-    double fontSize = 20; 
+    double fontSize = 20;
     if (context != null) {
       fontSize = _getResponsiveFontSize(context, 20);
     }
@@ -178,7 +178,7 @@ class CustomTheme {
     bool isPassword = false,
     VoidCallback? onToggleObscure,
     bool readOnly = false,
-    bool enabled = true, 
+    bool enabled = true,
   }) {
     return Container(
       decoration: BoxDecoration(borderRadius: CustomTheme.borderRadius),
@@ -188,10 +188,10 @@ class CustomTheme {
         inputFormatters: inputFormatters,
         maxLines: maxLines,
         obscureText: obscureText,
-        readOnly: readOnly, 
-        enabled: enabled, 
+        readOnly: readOnly,
+        enabled: enabled,
         style: superSmallFont(
-          enabled ? Colors.black87 : Colors.black45, 
+          enabled ? Colors.black87 : Colors.black45,
           FontWeight.w400,
           context,
         ),
@@ -201,7 +201,7 @@ class CustomTheme {
                   icon,
                   color: enabled
                       ? (iconColor ?? CustomTheme.green)
-                      : Colors.grey, 
+                      : Colors.grey,
                 )
               : null,
           labelText: label,
@@ -222,7 +222,7 @@ class CustomTheme {
             borderRadius: CustomTheme.borderRadius,
           ),
           filled: !enabled,
-          fillColor: Colors.grey.shade100, 
+          fillColor: Colors.grey.shade100,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 10,
             vertical: 15,
@@ -235,9 +235,7 @@ class CustomTheme {
                         ? (iconColor ?? CustomTheme.green)
                         : Colors.grey,
                   ),
-                  onPressed: enabled
-                      ? onToggleObscure
-                      : null, 
+                  onPressed: enabled ? onToggleObscure : null,
                 )
               : null,
         ),
@@ -252,7 +250,7 @@ class CustomTheme {
     required List<T> items,
     required String label,
     required String hint,
-    required void Function(T?)? onChanged, 
+    required void Function(T?)? onChanged,
     String? Function(T?)? validator,
     IconData? icon,
     Color? iconColor,
@@ -269,9 +267,7 @@ class CustomTheme {
                 child: Text(
                   item.toString(),
                   style: superSmallFont(
-                    enabled
-                        ? Colors.black87
-                        : Colors.black45, 
+                    enabled ? Colors.black87 : Colors.black45,
                     FontWeight.w400,
                     context,
                   ),
@@ -285,13 +281,13 @@ class CustomTheme {
                   icon,
                   color: enabled
                       ? (iconColor ?? CustomTheme.green)
-                      : Colors.grey, 
+                      : Colors.grey,
                 )
               : null,
           labelText: label,
           hintText: hint,
           labelStyle: superSmallFont(
-            enabled ? Colors.black87 : Colors.black45, 
+            enabled ? Colors.black87 : Colors.black45,
             FontWeight.w400,
             context,
           ),
@@ -305,23 +301,19 @@ class CustomTheme {
             borderSide: BorderSide(color: Colors.grey.shade300),
             borderRadius: CustomTheme.borderRadius,
           ),
-          filled: !enabled, 
-          fillColor: Colors.grey.shade100, 
+          filled: !enabled,
+          fillColor: Colors.grey.shade100,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 10,
             vertical: 15,
           ),
         ),
         dropdownColor: Colors.white,
-        onChanged: enabled
-            ? onChanged
-            : null, 
+        onChanged: enabled ? onChanged : null,
         validator: validator,
         icon: Icon(
           Icons.keyboard_arrow_down_rounded,
-          color: enabled
-              ? (iconColor ?? CustomTheme.green)
-              : Colors.grey, 
+          color: enabled ? (iconColor ?? CustomTheme.green) : Colors.grey,
           size: 24,
         ),
       ),
@@ -329,59 +321,101 @@ class CustomTheme {
   }
 
   Widget customDropdown2({
+    required BuildContext context,
     required String hint,
     required String? value,
     required List<String> items,
     required Function(String?) onChanged,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF249A00), width: 1.5),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          isDense: true,
-          hint: Text(
-            hint,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF249A00),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+    return GestureDetector(
+      onTap: () {
+        _showDropdownBottomSheet(
+          context: context,
+          hint: hint,
           value: value,
-          icon: const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: Color(0xFF249A00),
-            size: 20,
-          ),
-          items: items
-              .map(
-                (e) => DropdownMenuItem(
-                  value: e,
-                  child: Text(
-                    e,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF249A00),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              )
-              .toList(),
+          items: items,
           onChanged: onChanged,
-          dropdownColor: Colors.white,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF249A00),
-            fontWeight: FontWeight.w500,
-          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFF249A00), width: 1.5),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              value ?? hint,
+              style: TextStyle(
+                fontSize: 14,
+                color: const Color(0xFF249A00),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: Color(0xFF249A00),
+              size: 20,
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  void _showDropdownBottomSheet({
+    required BuildContext context,
+    required String hint,
+    required String? value,
+    required List<String> items,
+    required Function(String?) onChanged,
+  }) {
+    showModalBottomSheet(
+      context: context, 
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                hint,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF249A00),
+                ),
+              ),
+            ),
+            const Divider(height: 1),
+            ...items.map(
+              (item) => ListTile(
+                title: Text(
+                  item,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF249A00),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                trailing: value == item
+                    ? const Icon(Icons.check, color: Color(0xFF249A00))
+                    : null,
+                onTap: () {
+                  Navigator.pop(context);
+                  onChanged(item);
+                },
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

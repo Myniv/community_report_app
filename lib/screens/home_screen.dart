@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:community_report_app/custom_theme.dart';
+import 'package:community_report_app/models/enum_list.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/widgets/no_item.dart';
@@ -18,14 +20,17 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final locationItem = const [
+  final allLocation = const [
     "Binong Permai",
     "Bintaro",
     "Kalibata",
     "Karawaci",
     "Kemanggisan Baru",
   ];
-  String? selectedValue;
+  String? selectLocation;
+  String? selectCategory;
+  String? selectUrgency;
+  String? selectStatus;
   final TextEditingController searchController = TextEditingController();
   LatLng? _currentPosition;
   // LatLng? _currentPosition = LatLng(
@@ -63,16 +68,19 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     final profile = context.read<ProfileProvider>().profile;
-    selectedValue = profile?.location;
+    selectLocation = profile?.location;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<CommunityPostProvider>().fetchPostsList(
-        location: selectedValue,
+        location: selectLocation,
+        category: selectCategory,
+        status: selectStatus,
+        urgency: selectUrgency,
       );
     });
 
-    if (selectedValue != null) {
+    if (selectLocation != null) {
       Future.microtask(() async {
-        await _getLatLonFromAddress(selectedValue!);
+        await _getLatLonFromAddress(selectLocation!);
       });
     }
   }
@@ -82,6 +90,22 @@ class _HomeScreenState extends State<HomeScreen> {
     final communityPostProvider = context.watch<CommunityPostProvider>();
     final communityPost = communityPostProvider.postListProfile;
 
+    final allCategory = [
+      'All',
+      ...CategoryItem.values.map((e) => e.displayName).toList(),
+    ];
+    final allStatus = [
+      'All',
+      ...StatusItem.values.map((e) => e.displayName).toList(),
+    ];
+    final allUrgency = [
+      'All',
+      ...UrgencyItem.values.map((e) => e.displayName).toList(),
+    ];
+    final allLocation = [
+      'All',
+      ...LocationItem.values.map((e) => e.displayName).toList(),
+    ];
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -89,68 +113,163 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: DropdownSearch<String>(
-                onChanged: (value) async {
-                  setState(() {
-                    selectedValue = value;
-                  });
-                  // selectedValue = value;
-                  if (value != null) {
-                    await _getLatLonFromAddress(value);
-                    _mapController.move(_currentPosition!, 16.0);
-                  }
-
-                  context.read<CommunityPostProvider>().fetchPostsList(
-                    location: value,
-                  );
-
-                  print(selectedValue);
-                },
-                items: (f, cs) => locationItem,
-                selectedItem: selectedValue,
-                decoratorProps: DropDownDecoratorProps(
-                  decoration: InputDecoration(
-                    // icon: Icon(Icons.location_on, color: Color(0xFF249A00)),
-                    prefixIcon: const Icon(Icons.place, color: Colors.green),
-                    labelText: "Select Location",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CustomTheme().customDropdown2(
+                    context: context,
+                    hint: "Category",
+                    value: selectCategory,
+                    items: allCategory,
+                    onChanged: (value) async {
+                      setState(
+                        () => selectCategory = value == 'All' ? null : value!,
+                      );
+                      if (value != null) {
+                        await _getLatLonFromAddress(value);
+                        _mapController.move(_currentPosition!, 16.0);
+                      }
+                      context.read<CommunityPostProvider>().fetchPostsList(
+                        status: selectStatus,
+                        category: selectCategory,
+                        location: selectLocation,
+                        urgency: selectUrgency,
+                      );
+                    },
                   ),
-                ),
-                popupProps: PopupProps.bottomSheet(
-                  showSearchBox: true,
-                  searchFieldProps: TextFieldProps(
-                    controller: searchController,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.clear, color: Colors.red),
-                        onPressed: () {
-                          setState(() {
-                            searchController.clear();
-                          });
-                          // trigger rebuild pakai setState / state management
-                        },
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      hintText: 'Search location',
-                    ),
+                  SizedBox(width: 10),
+                  CustomTheme().customDropdown2(
+                    context: context,
+                    hint: "Status",
+                    value: selectStatus,
+                    items: allStatus,
+                    onChanged: (value) async {
+                      setState(
+                        () => selectStatus = value == 'All' ? null : value!,
+                      );
+                      if (value != null) {
+                        await _getLatLonFromAddress(value);
+                        _mapController.move(_currentPosition!, 16.0);
+                      }
+                      context.read<CommunityPostProvider>().fetchPostsList(
+                        status: selectStatus,
+                        category: selectCategory,
+                        location: selectLocation,
+                        urgency: selectUrgency,
+                      );
+                    },
                   ),
-                  fit: FlexFit.loose,
-                ),
+                  SizedBox(width: 10),
+                  CustomTheme().customDropdown2(
+                    context: context,
+                    hint: "Urgency",
+                    value: selectUrgency,
+                    items: allUrgency,
+                    onChanged: (value) async {
+                      setState(
+                        () => selectUrgency = value == 'All' ? null : value!,
+                      );
+                      if (value != null) {
+                        await _getLatLonFromAddress(value);
+                        _mapController.move(_currentPosition!, 16.0);
+                      }
+                      context.read<CommunityPostProvider>().fetchPostsList(
+                        status: selectStatus,
+                        category: selectCategory,
+                        location: selectLocation,
+                        urgency: selectUrgency,
+                      );
+                    },
+                  ),
+                  SizedBox(width: 10),
+                  CustomTheme().customDropdown2(
+                    context: context,
+                    hint: "Location",
+                    value: selectLocation,
+                    items: allLocation,
+                    onChanged: (value) async {
+                      setState(
+                        () => selectLocation = value == 'All' ? null : value!,
+                      );
+                      if (value != null) {
+                        await _getLatLonFromAddress(value);
+                        _mapController.move(_currentPosition!, 16.0);
+                      }
+                      context.read<CommunityPostProvider>().fetchPostsList(
+                        status: selectStatus,
+                        category: selectCategory,
+                        location: selectLocation,
+                        urgency: selectUrgency,
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
+            // Padding(
+            //   padding: const EdgeInsets.all(16.0),
+            //   child: DropdownSearch<String>(
+            //     onChanged: (value) async {
+            //       setState(() {
+            //         selectLocation = value;
+            //       });
+            //       // selectedValue = value;
+            //       if (value != null) {
+            //         await _getLatLonFromAddress(value);
+            //         _mapController.move(_currentPosition!, 16.0);
+            //       }
+
+            //       context.read<CommunityPostProvider>().fetchPostsList(
+            //         location: value,
+            //       );
+
+            //       print(selectLocation);
+            //     },
+            //     items: (f, cs) => allLocation,
+            //     selectedItem: selectLocation,
+            //     decoratorProps: DropDownDecoratorProps(
+            //       decoration: InputDecoration(
+            //         // icon: Icon(Icons.location_on, color: Color(0xFF249A00)),
+            //         prefixIcon: const Icon(Icons.place, color: Colors.green),
+            //         labelText: "Select Location",
+            //         border: OutlineInputBorder(
+            //           borderRadius: BorderRadius.circular(8),
+            //         ),
+            //         contentPadding: const EdgeInsets.symmetric(
+            //           horizontal: 12,
+            //           vertical: 8,
+            //         ),
+            //       ),
+            //     ),
+            //     popupProps: PopupProps.bottomSheet(
+            //       showSearchBox: true,
+            //       searchFieldProps: TextFieldProps(
+            //         controller: searchController,
+            //         decoration: InputDecoration(
+            //           prefixIcon: const Icon(Icons.search),
+            //           suffixIcon: IconButton(
+            //             icon: const Icon(Icons.clear, color: Colors.red),
+            //             onPressed: () {
+            //               setState(() {
+            //                 searchController.clear();
+            //               });
+            //               // trigger rebuild pakai setState / state management
+            //             },
+            //           ),
+            //           border: OutlineInputBorder(
+            //             borderRadius: BorderRadius.circular(8),
+            //           ),
+            //           contentPadding: const EdgeInsets.symmetric(
+            //             horizontal: 12,
+            //             vertical: 8,
+            //           ),
+            //           hintText: 'Search location',
+            //         ),
+            //       ),
+            //       fit: FlexFit.loose,
+            //     ),
+            //   ),
+            // ),
             _currentPosition == null
                 ? const Center(child: CircularProgressIndicator())
                 : ClipRRect(

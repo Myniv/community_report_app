@@ -20,7 +20,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String? selectStatus;
   String? selectCategory;
-  String? selectDate;
+  String? selectLocation;
   String? selectUrgency;
   bool isInitialized = false;
 
@@ -34,7 +34,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           userId: profileProvider.profile?.uid,
           status: selectStatus,
           category: selectCategory,
-          location: selectDate,
+          location: selectLocation,
           urgency: selectUrgency,
         );
       });
@@ -59,6 +59,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final allUrgency = [
       'All',
       ...UrgencyItem.values.map((e) => e.displayName).toList(),
+    ];
+    final allLocation = [
+      'All',
+      ...LocationItem.values.map((e) => e.displayName).toList(),
     ];
 
     return DefaultTabController(
@@ -92,6 +96,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Row(
                           children: [
                             CustomTheme().customDropdown2(
+                              context: context,
                               hint: "Category",
                               value: selectCategory,
                               items: allCategory,
@@ -109,37 +114,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       userId: profileProvider.profile?.uid,
                                       status: selectStatus,
                                       category: selectCategory,
-                                      location: selectDate,
+                                      location: selectLocation,
                                       urgency: selectUrgency,
                                     );
                               },
                             ),
                             const SizedBox(width: 12),
                             CustomTheme().customDropdown2(
-                              hint: "Urgency",
-                              value: selectUrgency,
-                              items: allUrgency,
-                              onChanged: (value) {
-                                setState(
-                                  () => selectUrgency = value == 'All'
-                                      ? null
-                                      : value!,
-                                );
-                                final profileProvider = context
-                                    .read<ProfileProvider>();
-                                context
-                                    .read<CommunityPostProvider>()
-                                    .fetchPostsList(
-                                      userId: profileProvider.profile?.uid,
-                                      status: selectStatus,
-                                      category: selectCategory,
-                                      location: selectDate,
-                                      urgency: selectUrgency,
-                                    );
-                              },
-                            ),
-                            const SizedBox(width: 12),
-                            CustomTheme().customDropdown2(
+                              context: context,
                               hint: "Status",
                               value: selectStatus,
                               items: allStatus,
@@ -157,19 +139,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       userId: profileProvider.profile?.uid,
                                       status: selectStatus,
                                       category: selectCategory,
-                                      location: selectDate,
+                                      location: selectLocation,
                                       urgency: selectUrgency,
                                     );
                               },
                             ),
+
                             const SizedBox(width: 12),
                             CustomTheme().customDropdown2(
-                              hint: "Date",
-                              value: selectDate,
-                              items: ['All', 'Newest', 'Oldest'],
+                              context: context,
+                              hint: "Urgency",
+                              value: selectUrgency,
+                              items: allUrgency,
                               onChanged: (value) {
                                 setState(
-                                  () => selectDate = value == 'All'
+                                  () => selectUrgency = value == 'All'
                                       ? null
                                       : value!,
                                 );
@@ -181,7 +165,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       userId: profileProvider.profile?.uid,
                                       status: selectStatus,
                                       category: selectCategory,
-                                      location: selectDate,
+                                      location: selectLocation,
+                                      urgency: selectUrgency,
+                                    );
+                              },
+                            ),
+                            const SizedBox(width: 12),
+                            CustomTheme().customDropdown2(
+                              context: context,
+                              hint: "Location",
+                              value: selectLocation,
+                              items: allLocation,
+                              onChanged: (value) {
+                                setState(
+                                  () => selectLocation = value == 'All'
+                                      ? null
+                                      : value!,
+                                );
+                                final profileProvider = context
+                                    .read<ProfileProvider>();
+                                context
+                                    .read<CommunityPostProvider>()
+                                    .fetchPostsList(
+                                      userId: profileProvider.profile?.uid,
+                                      status: selectStatus,
+                                      category: selectCategory,
+                                      location: selectLocation,
                                       urgency: selectUrgency,
                                     );
                               },
@@ -327,7 +336,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             userId: context.read<ProfileProvider>().profile?.uid,
             status: selectStatus,
             category: selectCategory,
-            location: selectDate,
+            location: selectLocation,
             urgency: selectUrgency,
           );
         }
