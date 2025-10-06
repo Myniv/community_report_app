@@ -88,7 +88,6 @@ class CommunityPostProvider with ChangeNotifier {
   void initializeNewPost() {
     _currentPost = CommunityPost(
       user_id: profileProvider.profile?.uid,
-      status: 'pending',
       is_report: true,
     );
     _postIndex = null;
@@ -321,6 +320,8 @@ class CommunityPostProvider with ChangeNotifier {
         if (imageFile == null) {
           throw Exception("Photo is required for new posts");
         }
+
+        _currentPost!.status = 'Pending';
 
         print("Step 1: Creating temporary post to get ID...");
         final tempPost = await _communityPostServices.createPost(_currentPost!);
