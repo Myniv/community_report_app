@@ -1,4 +1,5 @@
 import 'package:community_report_app/custom_theme.dart';
+import 'package:community_report_app/models/enum_list.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/widgets/image_picker_form.dart';
 import 'package:flutter/material.dart';
@@ -17,13 +18,6 @@ class UpdateProfileScreen extends StatefulWidget {
 
 class FormScreenState extends State<UpdateProfileScreen> {
   final CustomTheme _customTheme = CustomTheme();
-  final locationItem = const [
-    "Binong Permai",
-    "Bintaro",
-    "Kalibata",
-    "Karawaci",
-    "Kemanggisan Baru",
-  ];
 
   @override
   void initState() {
@@ -50,6 +44,8 @@ class FormScreenState extends State<UpdateProfileScreen> {
       mask: '+62 ###-####-####',
       filter: {"#": RegExp(r'[0-9]')},
     );
+
+    final locationItem = LocationItem.values.map((e) => e.displayName).toList();
 
     return Scaffold(
       backgroundColor: Colors.grey[200],

@@ -99,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     }
                   },
                   child: const Text(
-                    "Login dengan Email",
+                    "Sign In With Email",
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
@@ -149,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Belum punya akun? "),
+                  const Text("Don't have an account? "),
                   GestureDetector(
                     onTap: () {
                       Navigator.pushNamed(context, AppRoutes.register);
