@@ -69,7 +69,7 @@ class CustomTheme {
     FontWeight? fontWeight,
     BuildContext? context,
   ]) {
-    double fontSize = 14; // Body text
+    double fontSize = 14; 
     if (context != null) {
       fontSize = _getResponsiveFontSize(context, 14);
     }
@@ -86,7 +86,7 @@ class CustomTheme {
     FontWeight? fontWeight,
     BuildContext? context,
   ]) {
-    double fontSize = 16; // Subtitle/Large body text
+    double fontSize = 16; 
     if (context != null) {
       fontSize = _getResponsiveFontSize(context, 16);
     }
@@ -103,7 +103,7 @@ class CustomTheme {
     FontWeight? fontWeight,
     BuildContext? context,
   ]) {
-    double fontSize = 20; // Title/Heading
+    double fontSize = 20; 
     if (context != null) {
       fontSize = _getResponsiveFontSize(context, 20);
     }
@@ -121,7 +121,7 @@ class CustomTheme {
     FontWeight? fontWeight,
     BuildContext? context,
   ]) {
-    double fontSize = 26; // Title/Heading
+    double fontSize = 26;
     if (context != null) {
       fontSize = _getResponsiveFontSize(context, 26);
     }
@@ -152,6 +152,17 @@ class CustomTheme {
     }
   }
 
+  String capitalizeEachWord(String text) {
+    if (text.isEmpty) return text;
+    return text
+        .split(' ')
+        .map((word) {
+          if (word.isEmpty) return word;
+          return word[0].toUpperCase() + word.substring(1).toLowerCase();
+        })
+        .join(' ');
+  }
+
   Widget customTextField({
     required BuildContext context,
     required TextEditingController controller,
@@ -166,6 +177,8 @@ class CustomTheme {
     bool obscureText = false,
     bool isPassword = false,
     VoidCallback? onToggleObscure,
+    bool readOnly = false,
+    bool enabled = true, 
   }) {
     return Container(
       decoration: BoxDecoration(borderRadius: CustomTheme.borderRadius),
@@ -175,20 +188,41 @@ class CustomTheme {
         inputFormatters: inputFormatters,
         maxLines: maxLines,
         obscureText: obscureText,
-        style: superSmallFont(Colors.black87, FontWeight.w400, context),
+        readOnly: readOnly, 
+        enabled: enabled, 
+        style: superSmallFont(
+          enabled ? Colors.black87 : Colors.black45, 
+          FontWeight.w400,
+          context,
+        ),
         decoration: InputDecoration(
           prefixIcon: icon != null
-              ? Icon(icon, color: iconColor ?? CustomTheme.green)
+              ? Icon(
+                  icon,
+                  color: enabled
+                      ? (iconColor ?? CustomTheme.green)
+                      : Colors.grey, 
+                )
               : null,
           labelText: label,
           hintText: hint,
-          labelStyle: superSmallFont(Colors.black87, FontWeight.w400, context),
+          labelStyle: superSmallFont(
+            enabled ? Colors.black87 : Colors.black45,
+            FontWeight.w400,
+            context,
+          ),
           hintStyle: superSmallFont(Colors.black54, FontWeight.w400, context),
           border: OutlineInputBorder(borderRadius: CustomTheme.borderRadius),
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(color: CustomTheme.green),
             borderRadius: CustomTheme.borderRadius,
           ),
+          disabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderRadius: CustomTheme.borderRadius,
+          ),
+          filled: !enabled,
+          fillColor: Colors.grey.shade100, 
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 10,
             vertical: 15,
@@ -197,9 +231,13 @@ class CustomTheme {
               ? IconButton(
                   icon: Icon(
                     obscureText ? Icons.visibility_off : Icons.visibility,
-                    color: iconColor ?? CustomTheme.green,
+                    color: enabled
+                        ? (iconColor ?? CustomTheme.green)
+                        : Colors.grey,
                   ),
-                  onPressed: onToggleObscure,
+                  onPressed: enabled
+                      ? onToggleObscure
+                      : null, 
                 )
               : null,
         ),
@@ -214,10 +252,11 @@ class CustomTheme {
     required List<T> items,
     required String label,
     required String hint,
-    required void Function(T?) onChanged,
+    required void Function(T?)? onChanged, 
     String? Function(T?)? validator,
     IconData? icon,
     Color? iconColor,
+    bool enabled = true,
   }) {
     return Container(
       decoration: BoxDecoration(borderRadius: CustomTheme.borderRadius),
@@ -230,7 +269,9 @@ class CustomTheme {
                 child: Text(
                   item.toString(),
                   style: superSmallFont(
-                    Colors.black87,
+                    enabled
+                        ? Colors.black87
+                        : Colors.black45, 
                     FontWeight.w400,
                     context,
                   ),
@@ -240,29 +281,105 @@ class CustomTheme {
             .toList(),
         decoration: InputDecoration(
           prefixIcon: icon != null
-              ? Icon(icon, color: iconColor ?? CustomTheme.green)
+              ? Icon(
+                  icon,
+                  color: enabled
+                      ? (iconColor ?? CustomTheme.green)
+                      : Colors.grey, 
+                )
               : null,
           labelText: label,
           hintText: hint,
-          labelStyle: superSmallFont(Colors.black87, FontWeight.w400, context),
+          labelStyle: superSmallFont(
+            enabled ? Colors.black87 : Colors.black45, 
+            FontWeight.w400,
+            context,
+          ),
           hintStyle: superSmallFont(Colors.black54, FontWeight.w400, context),
           border: OutlineInputBorder(borderRadius: CustomTheme.borderRadius),
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(color: CustomTheme.green),
             borderRadius: CustomTheme.borderRadius,
           ),
+          disabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey.shade300),
+            borderRadius: CustomTheme.borderRadius,
+          ),
+          filled: !enabled, 
+          fillColor: Colors.grey.shade100, 
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 10,
             vertical: 15,
           ),
         ),
         dropdownColor: Colors.white,
-        onChanged: onChanged,
+        onChanged: enabled
+            ? onChanged
+            : null, 
         validator: validator,
         icon: Icon(
           Icons.keyboard_arrow_down_rounded,
-          color: iconColor ?? CustomTheme.green,
+          color: enabled
+              ? (iconColor ?? CustomTheme.green)
+              : Colors.grey, 
           size: 24,
+        ),
+      ),
+    );
+  }
+
+  Widget customDropdown2({
+    required String hint,
+    required String? value,
+    required List<String> items,
+    required Function(String?) onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF249A00), width: 1.5),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          isDense: true,
+          hint: Text(
+            hint,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF249A00),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          value: value,
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: Color(0xFF249A00),
+            size: 20,
+          ),
+          items: items
+              .map(
+                (e) => DropdownMenuItem(
+                  value: e,
+                  child: Text(
+                    e,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF249A00),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
+          onChanged: onChanged,
+          dropdownColor: Colors.white,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Color(0xFF249A00),
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );

@@ -1,6 +1,9 @@
 import 'package:community_report_app/custom_theme.dart';
+import 'package:community_report_app/provider/community_post_provider.dart';
 import 'package:community_report_app/routes.dart';
+import 'package:community_report_app/widgets/text_container.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PostSection extends StatelessWidget {
@@ -20,6 +23,9 @@ class PostSection extends StatelessWidget {
   String? role;
   bool? settingPostScreen = false;
   int? discussionCount;
+  bool? editPost = false;
+
+  final CustomTheme _theme = CustomTheme();
 
   PostSection({
     Key? key,
@@ -39,6 +45,7 @@ class PostSection extends StatelessWidget {
     this.role,
     this.settingPostScreen,
     this.discussionCount,
+    this.editPost,
   }) : super(key: key);
 
   void _showOptions(BuildContext context) {
@@ -51,45 +58,72 @@ class PostSection extends StatelessWidget {
         return Wrap(
           children: [
             ListTile(
-              leading: const Icon(Icons.star_border),
-              title: const Text('Interested'),
+              leading: Icon(Icons.edit),
+              title: const Text('Edit Report'),
               onTap: () {
                 Navigator.pop(context);
-                // handle interested action
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.editPost,
+                  arguments: {'postIndex': postId},
+                );
               },
             ),
             ListTile(
-              leading: const Icon(Icons.star),
-              title: const Text('Not interested'),
-              onTap: () {
+              leading: const Icon(Icons.delete, color: Colors.red),
+              title: const Text(
+                'Delete Report',
+                style: TextStyle(color: Colors.red),
+              ),
+              onTap: () async {
                 Navigator.pop(context);
-                // handle not interested action
+                final shouldDelete = await _deleteDialog(context);
+                if (shouldDelete == true) {
+                  final communityPostProvider =
+                      Provider.of<CommunityPostProvider>(
+                        context,
+                        listen: false,
+                      );
+                  await communityPostProvider.deletePost(postId);
+                  if (context.mounted) {
+                    communityPostProvider.fetchPostsList();
+                    CustomTheme().customScaffoldMessage(
+                      context: context,
+                      message: "Post deleted successfully",
+                      backgroundColor: Colors.green,
+                    );
+                  }
+                }
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.bookmark_border),
-              title: const Text('Save post'),
-              onTap: () {
-                Navigator.pop(context);
-                // handle save action
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.visibility_off),
-              title: const Text('Hide post'),
-              onTap: () {
-                Navigator.pop(context);
-                // handle hide action
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.report),
-              title: const Text('Report post'),
-              onTap: () {
-                Navigator.pop(context);
-                // handle report action
-              },
-            ),
+            if (settingPostScreen == true &&
+                (role == 'admin' || role == 'leader')) ...[
+              //TODO CHANGE THIS FOR ADMIN OR LEADER
+              ListTile(
+                leading: const Icon(Icons.bookmark_border),
+                title: const Text('Save post'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // handle save action
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.visibility_off),
+                title: const Text('Hide post'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // handle hide action
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.report),
+                title: const Text('Report post'),
+                onTap: () {
+                  Navigator.pop(context);
+                  // handle report action
+                },
+              ),
+            ],
           ],
         );
       },
@@ -103,6 +137,81 @@ class PostSection extends StatelessWidget {
     } else {
       throw 'Could not open the map.';
     }
+  }
+
+  Future<bool?> _deleteDialog(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.logout_rounded, color: Colors.red, size: 24),
+              ),
+              SizedBox(width: 12),
+              Text(
+                'Logout',
+                style: _theme
+                    .mediumFont(Colors.grey[800]!, FontWeight.bold, context)
+                    .copyWith(letterSpacing: 0),
+              ),
+            ],
+          ),
+          content: Text(
+            'Are you sure you want to logout from your account?',
+            style: _theme.smallFont(
+              Colors.grey[700]!,
+              FontWeight.w400,
+              context,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: Text(
+                'Cancel',
+                style: _theme.superSmallFont(
+                  Colors.grey[600]!,
+                  FontWeight.w600,
+                  context,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'Delete',
+                style: _theme.superSmallFont(
+                  Colors.white,
+                  FontWeight.w600,
+                  context,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -159,46 +268,12 @@ class PostSection extends StatelessWidget {
 
               const Spacer(),
 
-              Container(
-                width: 57,
-                height: 25,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE0FFDE),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  category,
-                  style: TextStyle(
-                    color: Color(0xFF249A00),
-                    fontSize: 13,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-              ),
+              TextContainer(text: category, category: true),
               SizedBox(width: 10),
-              Container(
-                width: 57,
-                height: 25,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE0FFDE),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  status,
-                  style: TextStyle(
-                    color: Color(0xFF249A00),
-                    fontSize: 13,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-              ),
-
-              if (settingPostScreen == true &&
-                  (role == 'admin' || role == 'leader')) ...[
+              TextContainer(text: urgency),
+              SizedBox(width: 10),
+              TextContainer(text: status),
+              if (editPost == true) ...[
                 IconButton(
                   icon: const Icon(Icons.more_vert),
                   onPressed: () {
