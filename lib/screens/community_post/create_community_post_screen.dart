@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/models/enum_list.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
+import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
@@ -777,6 +778,8 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
     final allCategory = CategoryItem.values.map((e) => e.displayName).toList();
     final allUrgency = UrgencyItem.values.map((e) => e.displayName).toList();
 
+    final profileProvider = context.read<ProfileProvider>();
+
     return Scaffold(
       appBar: isEdit
           ? AppBar(
@@ -889,8 +892,8 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                           controller: postProvider.titleController,
                           label: "Title",
                           hint: "Enter title",
-                          readOnly: isEdit, 
-                          enabled: !isEdit, 
+                          readOnly: isEdit,
+                          enabled: !isEdit,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
                               return "Please enter a title";
@@ -937,7 +940,7 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                           items: allCategory,
                           label: "Category",
                           hint: "Select category",
-                          enabled: !isEdit, 
+                          enabled: !isEdit,
                           onChanged: isEdit
                               ? null
                               : (value) {
@@ -962,7 +965,7 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                           items: allUrgency,
                           label: "Urgency",
                           hint: "Select urgency",
-                          enabled: !isEdit, 
+                          enabled: !isEdit,
                           onChanged: isEdit
                               ? null
                               : (value) {
@@ -983,11 +986,14 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                               postProvider.currentPost?.location?.isNotEmpty ==
                                   true
                               ? postProvider.currentPost?.location
+                              : profileProvider.profile?.location?.isNotEmpty ==
+                                    true
+                              ? profileProvider.profile?.location
                               : null,
                           items: allLocation,
                           label: "Location",
                           hint: "Select location",
-                          enabled: !isEdit, 
+                          enabled: !isEdit,
                           onChanged: isEdit
                               ? null
                               : (value) {
@@ -1031,7 +1037,7 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
                             ),
                           )
                         else
-                          _buildLocationInfo(isEdit), 
+                          _buildLocationInfo(isEdit),
 
                         SizedBox(height: 12),
 
