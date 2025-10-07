@@ -201,6 +201,15 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setRole(String? value, String? uid) {
+    if (uid != null) {
+      _otherUserProfile!.role = value!;
+    } else {
+      print("NOT ADMIN");
+    }
+    notifyListeners();
+  }
+
   bool validateForm(String? profileId) {
     final isValid = formKey.currentState?.validate() ?? false;
 
