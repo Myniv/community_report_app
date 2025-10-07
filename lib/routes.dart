@@ -39,10 +39,11 @@ class AppRoutes {
           builder: (_) => ProfileScreen(profileId: profileId),
           settings: settings,
         );
-
       case editProfile:
+        final args = settings.arguments as Map<String, dynamic>?;
+        final profileId = args?['uid'];
         return MaterialPageRoute(
-          builder: (_) => UpdateProfileScreen(),
+          builder: (_) => UpdateProfileScreen(profileId: profileId),
           settings: settings,
         );
       case mainScreen:

@@ -8,6 +8,7 @@ import 'package:community_report_app/routes.dart';
 import 'package:community_report_app/widgets/no_item.dart';
 import 'package:community_report_app/widgets/post_section.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -74,7 +75,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     print("isLoading: ${communityPostProvider.isLoading}");
     print("Community post length: ${communityPost.length}");
     print("Posts list reference: ${communityPost.hashCode}");
-    
+
     final allCategory = [
       'All',
       ...CategoryItem.values.map((e) => e.displayName).toList(),
@@ -95,6 +96,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+        appBar: widget.profileId != null
+            ? AppBar(
+                backgroundColor: Colors.white,
+                iconTheme: IconThemeData(color: CustomTheme.green),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Profile of ${profile?.username ?? ""}",
+                      style: CustomTheme().smallFont(
+                        CustomTheme.green,
+                        FontWeight.bold,
+                        context,
+                      ),
+                    ),
+                    Text(
+                      DateFormat('MMMM dd, yyyy').format(DateTime.now()),
+                      style: CustomTheme().superSmallFont(
+                        CustomTheme.green,
+                        FontWeight.bold,
+                        context,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : null,
         body: Column(
           children: [
             SizedBox(height: 260, child: buildProfileSection(profile, context)),
@@ -367,18 +395,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final result = await Navigator.pushNamed(
           context,
           AppRoutes.editProfile,
+          arguments: {'uid': widget.profileId ?? null},
         );
 
-        if (result == true) {
-          // Refresh data setelah balik dari edit
-          context.read<CommunityPostProvider>().fetchPostsList(
-            userId: context.read<ProfileProvider>().profile?.uid,
-            status: selectStatus,
-            category: selectCategory,
-            location: selectLocation,
-            urgency: selectUrgency,
-          );
-        }
+        // if (result == true) {
+        //   // Refresh data setelah balik dari edit
+        //   context.read<CommunityPostProvider>().fetchPostsList(
+        //     userId: context.read<ProfileProvider>().profile?.uid,
+        //     status: selectStatus,
+        //     category: selectCategory,
+        //     location: selectLocation,
+        //     urgency: selectUrgency,
+        //   );
+        // }
       },
 
       child: Container(

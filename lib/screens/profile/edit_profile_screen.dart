@@ -52,13 +52,26 @@ class FormScreenState extends State<UpdateProfileScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         iconTheme: IconThemeData(color: CustomTheme.green),
-        title: Text(
-          "Edit Profile",
-          style: CustomTheme().smallFont(
-            CustomTheme.green,
-            FontWeight.bold,
-            context,
-          ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Edit Profile",
+              style: CustomTheme().smallFont(
+                CustomTheme.green,
+                FontWeight.bold,
+                context,
+              ),
+            ),
+            Text(
+              DateFormat('MMMM dd, yyyy').format(DateTime.now()),
+              style: CustomTheme().superSmallFont(
+                CustomTheme.green,
+                FontWeight.bold,
+                context,
+              ),
+            ),
+          ],
         ),
       ),
       body: Center(
