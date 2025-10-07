@@ -11,6 +11,7 @@ import 'package:community_report_app/screens/auth/login_screen.dart';
 import 'package:community_report_app/screens/auth/register_screen.dart';
 import 'package:community_report_app/screens/community_post/create_community_post_screen.dart';
 import 'package:community_report_app/screens/home_screen.dart';
+import 'package:community_report_app/screens/profile/profile_list_screen.dart';
 import 'package:community_report_app/screens/profile/profile_screen.dart';
 import 'package:community_report_app/widgets/custom_drawer.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -50,10 +51,11 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProxyProvider<ProfileProvider, CommunityPostProvider>(
-          create: (_) => CommunityPostProvider(ProfileProvider()),
-          update: (_, profileProvider, __) =>
-              CommunityPostProvider(profileProvider),
-        ),
+          create: (context) =>
+              CommunityPostProvider(context.read<ProfileProvider>()),
+          update: (context, profileProvider, previous) =>
+              previous ?? CommunityPostProvider(profileProvider),
+        ),  
         ChangeNotifierProvider(create: (_) => DiscussionProvider()),
       ],
       child: MainApp(),
@@ -140,12 +142,12 @@ class _MainScreenState extends State<MainScreen> {
     final List<Widget> _screensAdmin = [
       HomeScreen(),
       RegisterScreen(),
-      ProfileScreen(),
+      ProfileListScreen(),
     ];
     final List<IconData> _iconScreenAdmin = [
       Icons.home,
       Icons.app_registration,
-      Icons.person,
+      Icons.person_search,
     ];
 
     if (profileProvider.profile!.role == 'member') {

@@ -11,7 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final String? profileId;
+  const ProfileScreen({super.key, this.profileId});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -30,13 +31,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!isInitialized) {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         final profileProvider = context.read<ProfileProvider>();
-        context.read<CommunityPostProvider>().fetchPostsList(
-          userId: profileProvider.profile?.uid,
-          status: selectStatus,
-          category: selectCategory,
-          location: selectLocation,
-          urgency: selectUrgency,
-        );
+
+        if (widget.profileId != null) {
+          print("Loading profile other user with id: ${widget.profileId}");
+          await profileProvider.loadProfileOtherUser(widget.profileId!);
+
+          await context.read<CommunityPostProvider>().fetchPostsList(
+            userId: widget.profileId,
+            status: selectStatus,
+            category: selectCategory,
+            location: selectLocation,
+            urgency: selectUrgency,
+          );
+        } else {
+          print("Loading own profile");
+
+          if (profileProvider.profile?.uid != null) {
+            await context.read<CommunityPostProvider>().fetchPostsList(
+              userId: profileProvider.profile!.uid,
+              status: selectStatus,
+              category: selectCategory,
+              location: selectLocation,
+              urgency: selectUrgency,
+            );
+          }
+        }
       });
       isInitialized = true;
     }
@@ -44,10 +63,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final profile = context.watch<ProfileProvider>().profile;
+    final profileProvider = context.watch<ProfileProvider>();
+    final profile = widget.profileId == null
+        ? profileProvider.profile
+        : profileProvider.otherUserProfile;
     final communityPostProvider = context.watch<CommunityPostProvider>();
     final communityPost = communityPostProvider.postListProfile;
 
+    print("=== BUILD METHOD ===");
+    print("isLoading: ${communityPostProvider.isLoading}");
+    print("Community post length: ${communityPost.length}");
+    print("Posts list reference: ${communityPost.hashCode}");
+    
     final allCategory = [
       'All',
       ...CategoryItem.values.map((e) => e.displayName).toList(),
@@ -106,12 +133,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ? null
                                       : value!,
                                 );
+                                print("filter category: $selectCategory");
+
                                 final profileProvider = context
                                     .read<ProfileProvider>();
                                 context
                                     .read<CommunityPostProvider>()
                                     .fetchPostsList(
-                                      userId: profileProvider.profile?.uid,
+                                      userId:
+                                          widget.profileId ??
+                                          profileProvider.profile?.uid,
                                       status: selectStatus,
                                       category: selectCategory,
                                       location: selectLocation,
@@ -131,12 +162,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ? null
                                       : value!,
                                 );
+
                                 final profileProvider = context
                                     .read<ProfileProvider>();
                                 context
                                     .read<CommunityPostProvider>()
                                     .fetchPostsList(
-                                      userId: profileProvider.profile?.uid,
+                                      userId:
+                                          widget.profileId ??
+                                          profileProvider.profile?.uid,
                                       status: selectStatus,
                                       category: selectCategory,
                                       location: selectLocation,
@@ -144,7 +178,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     );
                               },
                             ),
-
                             const SizedBox(width: 12),
                             CustomTheme().customDropdown2(
                               context: context,
@@ -157,12 +190,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ? null
                                       : value!,
                                 );
+
                                 final profileProvider = context
                                     .read<ProfileProvider>();
                                 context
                                     .read<CommunityPostProvider>()
                                     .fetchPostsList(
-                                      userId: profileProvider.profile?.uid,
+                                      userId:
+                                          widget.profileId ??
+                                          profileProvider.profile?.uid,
                                       status: selectStatus,
                                       category: selectCategory,
                                       location: selectLocation,
@@ -182,12 +218,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ? null
                                       : value!,
                                 );
+
                                 final profileProvider = context
                                     .read<ProfileProvider>();
                                 context
                                     .read<CommunityPostProvider>()
                                     .fetchPostsList(
-                                      userId: profileProvider.profile?.uid,
+                                      userId:
+                                          widget.profileId ??
+                                          profileProvider.profile?.uid,
                                       status: selectStatus,
                                       category: selectCategory,
                                       location: selectLocation,
