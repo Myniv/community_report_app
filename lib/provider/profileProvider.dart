@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 class ProfileProvider extends ChangeNotifier {
   final ProfileService _profileService = ProfileService();
 
+  List<Profile> _allProfiles = [];
+  List<Profile> get allProfiles => _allProfiles;
+
   Profile? _profile;
   Profile? get profile => _profile;
 
@@ -27,6 +30,21 @@ class ProfileProvider extends ChangeNotifier {
   final lastNameController = TextEditingController();
   final phoneController = TextEditingController();
   final locationController = TextEditingController();
+
+  Future<void> loadAllProfiles() async {
+    _setLoading(true);
+    try {
+      _allProfiles = await _profileService.getAllUserProfiles();
+      _errorMessage = null;
+      notifyListeners();
+    } catch (e) {
+      print("Error loading profiles: $e");
+      _errorMessage = "Failed to load profiles: $e";
+      notifyListeners();
+    } finally {
+      _setLoading(false);
+    }
+  }
 
   // load profile from Firestore
   Future<void> loadProfile(String uid) async {
