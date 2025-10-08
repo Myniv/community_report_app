@@ -7,6 +7,7 @@ import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/routes.dart';
 import 'package:community_report_app/widgets/no_item.dart';
 import 'package:community_report_app/widgets/post_section.dart';
+import 'package:community_report_app/widgets/tab_bar_delegate.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -48,209 +49,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final communityPostProvider = context.watch<CommunityPostProvider>();
     final communityPost = communityPostProvider.postListProfile;
 
-    final allCategory = [
-      'All',
-      ...CategoryItem.values.map((e) => e.displayName).toList(),
-    ];
-    final allStatus = [
-      'All',
-      ...StatusItem.values.map((e) => e.displayName).toList(),
-    ];
-    final allUrgency = [
-      'All',
-      ...UrgencyItem.values.map((e) => e.displayName).toList(),
-    ];
-    final allLocation = [
-      'All',
-      ...LocationItem.values.map((e) => e.displayName).toList(),
-    ];
-
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        body: Column(
-          children: [
-            SizedBox(height: 260, child: buildProfileSection(profile, context)),
-            const SizedBox(height: 60),
-            const TabBar(
-              labelColor: Colors.black,
-              unselectedLabelColor: Colors.grey,
-              indicatorColor: Colors.green,
-              tabs: [
-                Tab(text: "Posts"),
-                Tab(text: "Likes"),
-              ],
-            ),
-
-            Expanded(
-              child: TabBarView(
-                children: [
-                  Column(
-                    children: [
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0,
-                          vertical: 8.0,
-                        ),
-                        child: Row(
-                          children: [
-                            CustomTheme().customDropdown2(
-                              context: context,
-                              hint: "Category",
-                              value: selectCategory,
-                              items: allCategory,
-                              onChanged: (value) {
-                                setState(
-                                  () => selectCategory = value == 'All'
-                                      ? null
-                                      : value!,
-                                );
-                                final profileProvider = context
-                                    .read<ProfileProvider>();
-                                context
-                                    .read<CommunityPostProvider>()
-                                    .fetchPostsList(
-                                      userId: profileProvider.profile?.uid,
-                                      status: selectStatus,
-                                      category: selectCategory,
-                                      location: selectLocation,
-                                      urgency: selectUrgency,
-                                    );
-                              },
-                            ),
-                            const SizedBox(width: 12),
-                            CustomTheme().customDropdown2(
-                              context: context,
-                              hint: "Status",
-                              value: selectStatus,
-                              items: allStatus,
-                              onChanged: (value) {
-                                setState(
-                                  () => selectStatus = value == 'All'
-                                      ? null
-                                      : value!,
-                                );
-                                final profileProvider = context
-                                    .read<ProfileProvider>();
-                                context
-                                    .read<CommunityPostProvider>()
-                                    .fetchPostsList(
-                                      userId: profileProvider.profile?.uid,
-                                      status: selectStatus,
-                                      category: selectCategory,
-                                      location: selectLocation,
-                                      urgency: selectUrgency,
-                                    );
-                              },
-                            ),
-
-                            const SizedBox(width: 12),
-                            CustomTheme().customDropdown2(
-                              context: context,
-                              hint: "Urgency",
-                              value: selectUrgency,
-                              items: allUrgency,
-                              onChanged: (value) {
-                                setState(
-                                  () => selectUrgency = value == 'All'
-                                      ? null
-                                      : value!,
-                                );
-                                final profileProvider = context
-                                    .read<ProfileProvider>();
-                                context
-                                    .read<CommunityPostProvider>()
-                                    .fetchPostsList(
-                                      userId: profileProvider.profile?.uid,
-                                      status: selectStatus,
-                                      category: selectCategory,
-                                      location: selectLocation,
-                                      urgency: selectUrgency,
-                                    );
-                              },
-                            ),
-                            const SizedBox(width: 12),
-                            CustomTheme().customDropdown2(
-                              context: context,
-                              hint: "Location",
-                              value: selectLocation,
-                              items: allLocation,
-                              onChanged: (value) {
-                                setState(
-                                  () => selectLocation = value == 'All'
-                                      ? null
-                                      : value!,
-                                );
-                                final profileProvider = context
-                                    .read<ProfileProvider>();
-                                context
-                                    .read<CommunityPostProvider>()
-                                    .fetchPostsList(
-                                      userId: profileProvider.profile?.uid,
-                                      status: selectStatus,
-                                      category: selectCategory,
-                                      location: selectLocation,
-                                      urgency: selectUrgency,
-                                    );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      Expanded(
-                        child: communityPostProvider.isLoading
-                            ? const Center(child: CircularProgressIndicator())
-                            : communityPost.isEmpty
-                            ? const NoItem(
-                                title: "No Post",
-                                subTitle: "You have no post yet",
-                              )
-                            : ListView.builder(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                itemCount: communityPost.length,
-                                itemBuilder: (context, index) {
-                                  final post = communityPost[index];
-                                  return PostSection(
-                                    postId: post.id,
-                                    profilePhoto: post.user_photo,
-                                    username: post.username ?? "",
-                                    role: profile?.role ?? "",
-                                    title: post.title ?? "",
-                                    description: post.description ?? "",
-                                    category: post.category ?? "",
-                                    urgency: post.urgency ?? "",
-                                    status: post.status ?? "",
-                                    location: post.location ?? "",
-                                    latitude: post.latitude ?? 0.0,
-                                    longitude: post.longitude ?? 0.0,
-                                    createdAt:
-                                        post.created_at ?? DateTime.now(),
-                                    settingPostScreen: false,
-                                    postImage: post.photo,
-                                    editPost: true,
-                                  );
-                                },
-                              ),
-                      ),
+        body: SafeArea(
+          child: NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) => [
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 260,
+                      child: buildProfileSection(profile, context),
+                    ),
+                    const SizedBox(height: 60),
+                  ],
+                ),
+              ),
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: TabBarDelegate(
+                  const TabBar(
+                    labelColor: Colors.black,
+                    unselectedLabelColor: Colors.grey,
+                    indicatorColor: Colors.green,
+                    tabs: [
+                      Tab(text: "Posts"),
+                      Tab(text: "Likes"),
                     ],
                   ),
-
-                  ListView.builder(
-                    itemCount: 5,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        leading: const Icon(Icons.favorite, color: Colors.red),
-                        title: Text("Liked Post #$index"),
-                        subtitle: const Text("This is a liked post"),
-                      );
-                    },
-                  ),
-                ],
+                ),
               ),
+            ],
+            body: TabBarView(
+              children: [
+                _buildPostTab(
+                  context,
+                  communityPost,
+                  communityPostProvider,
+                  profile,
+                ),
+                ListView.builder(
+                  itemCount: 5,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      leading: const Icon(Icons.favorite, color: Colors.red),
+                      title: Text("Liked Post #$index"),
+                      subtitle: const Text("This is a liked post"),
+                    );
+                  },
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -332,13 +183,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         if (result == true) {
           // Refresh data setelah balik dari edit
-          context.read<CommunityPostProvider>().fetchPostsList(
-            userId: context.read<ProfileProvider>().profile?.uid,
-            status: selectStatus,
-            category: selectCategory,
-            location: selectLocation,
-            urgency: selectUrgency,
-          );
+          setState(() {
+            isInitialized = false;
+          });
         }
       },
 
@@ -361,127 +208,166 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget buildPostSection(Profile? profile, BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final horizontalPadding = screenWidth * 0.07;
-
+  Widget _buildPostTab(
+    BuildContext context,
+    List<CommunityPost> communityPost,
+    CommunityPostProvider provider,
+    Profile? profile,
+  ) {
+    final allCategory = [
+      'All',
+      ...CategoryItem.values.map((e) => e.displayName).toList(),
+    ];
+    final allStatus = [
+      'All',
+      ...StatusItem.values.map((e) => e.displayName).toList(),
+    ];
+    final allUrgency = [
+      'All',
+      ...UrgencyItem.values.map((e) => e.displayName).toList(),
+    ];
+    final allLocation = [
+      'All',
+      ...LocationItem.values.map((e) => e.displayName).toList(),
+    ];
     return Column(
       children: [
-        Padding(
-          padding: EdgeInsets.fromLTRB(
-            horizontalPadding,
-            30,
-            horizontalPadding,
-            0,
-          ),
+        // filter bar horizontal
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundImage:
-                    (profile?.photo != null && profile!.photo!.isNotEmpty)
-                    ? NetworkImage(profile.photo!)
-                    : null,
-                child: (profile?.photo == null || profile!.photo!.isEmpty)
-                    ? const Icon(Icons.person, size: 20)
-                    : null,
+              CustomTheme().customDropdown2(
+                context: context,
+                hint: "Category",
+                value: selectCategory,
+                items: allCategory,
+                onChanged: (value) async {
+                  setState(
+                    () => selectCategory = value == 'All' ? null : value!,
+                  );
+                  context.read<CommunityPostProvider>().fetchPostsList(
+                    status: selectStatus,
+                    category: selectCategory,
+                    location: selectLocation,
+                    urgency: selectUrgency,
+                  );
+                },
               ),
-              const SizedBox(width: 10),
-
-              Text(
-                '${profile?.front_name ?? "-"} ${profile?.last_name ?? "-"}',
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.bold,
-                ),
+              SizedBox(width: 10),
+              CustomTheme().customDropdown2(
+                context: context,
+                hint: "Status",
+                value: selectStatus,
+                items: allStatus,
+                onChanged: (value) async {
+                  setState(() => selectStatus = value == 'All' ? null : value!);
+                  context.read<CommunityPostProvider>().fetchPostsList(
+                    status: selectStatus,
+                    category: selectCategory,
+                    location: selectLocation,
+                    urgency: selectUrgency,
+                  );
+                },
               ),
-
-              const SizedBox(width: 10),
-
-              Text(
-                '22 hours ago',
-                style: const TextStyle(
-                  color: Color(0xFF249A00),
-                  fontSize: 13,
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.w500,
-                ),
+              SizedBox(width: 10),
+              CustomTheme().customDropdown2(
+                context: context,
+                hint: "Urgency",
+                value: selectUrgency,
+                items: allUrgency,
+                onChanged: (value) async {
+                  setState(
+                    () => selectUrgency = value == 'All' ? null : value!,
+                  );
+                  context.read<CommunityPostProvider>().fetchPostsList(
+                    status: selectStatus,
+                    category: selectCategory,
+                    location: selectLocation,
+                    urgency: selectUrgency,
+                  );
+                },
               ),
-
-              const Spacer(),
-
-              Container(
-                width: 57,
-                height: 25,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE0FFDE),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                alignment: Alignment.center,
-                child: const Text(
-                  'Safety',
-                  style: TextStyle(
-                    color: Color(0xFF249A00),
-                    fontSize: 13,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
+              SizedBox(width: 10),
+              CustomTheme().customDropdown2(
+                context: context,
+                hint: "Location",
+                value: selectLocation,
+                items: allLocation,
+                onChanged: (value) async {
+                  setState(
+                    () => selectLocation = value == 'All' ? null : value!,
+                  );
+                  context.read<CommunityPostProvider>().fetchPostsList(
+                    status: selectStatus,
+                    category: selectCategory,
+                    location: selectLocation,
+                    urgency: selectUrgency,
+                  );
+                },
               ),
             ],
           ),
         ),
-        Padding(
-          padding: EdgeInsets.fromLTRB(
-            horizontalPadding + 50,
-            0,
-            horizontalPadding,
-            0,
-          ),
-          child: Column(
-            children: [
-              SizedBox(
-                width: double.infinity,
-                child: Text(
-                  'The pedestrian signal at the main intersection near Mexico Square is not functioning. Cars don’t stop, and people are forced to cross dangerously. This puts children and elderly at high risk. Please fix urgently.',
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 6,
-                  style: TextStyle(
-                    color: Colors.black /* Black */,
-                    fontSize: MediaQuery.of(context).size.width > 600 ? 16 : 13,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.w400,
-                    height: 1.92,
-                  ),
+        Expanded(
+          child: provider.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : communityPost.isEmpty
+              ? const NoItem(title: "No Post", subTitle: "You have no post yet")
+              : ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  itemCount: communityPost.length,
+                  itemBuilder: (context, index) {
+                    final post = communityPost[index];
+                    return PostSection(
+                      postId: post.id,
+                      profilePhoto: post.user_photo,
+                      username: post.username ?? "",
+                      role: profile?.role ?? "",
+                      title: post.title ?? "",
+                      description: post.description ?? "",
+                      category: post.category ?? "",
+                      urgency: post.urgency ?? "",
+                      status: post.status ?? "",
+                      location: post.location ?? "",
+                      latitude: post.latitude ?? 0.0,
+                      longitude: post.longitude ?? 0.0,
+                      createdAt: post.created_at ?? DateTime.now(),
+                      settingPostScreen: false,
+                      postImage: post.photo,
+                      editPost: true,
+                    );
+                  },
                 ),
-              ),
-              const SizedBox(height: 7),
-              Container(
-                width:
-                    MediaQuery.of(context).size.width -
-                    (horizontalPadding + 50 + horizontalPadding),
-                height:
-                    (MediaQuery.of(context).size.width -
-                        (horizontalPadding + 50 + horizontalPadding)) *
-                    0.6,
-                decoration: ShapeDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(
-                      "https://dishub.banjarmasinkota.go.id/wp-content/uploads/2024/11/lampu-lalu-lintas-punya-3-warna_169.jpg",
-                    ),
-                    fit: BoxFit.cover,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-              ),
-            ],
-          ),
         ),
       ],
     );
   }
 }
+
+// class _TabBarDelegate extends SliverPersistentHeaderDelegate {
+//   final TabBar tabBar;
+//   _TabBarDelegate(this.tabBar);
+
+//   @override
+//   double get minExtent => tabBar.preferredSize.height;
+//   @override
+//   double get maxExtent => tabBar.preferredSize.height;
+
+//   @override
+//   Widget build(
+//     BuildContext context,
+//     double shrinkOffset,
+//     bool overlapsContent,
+//   ) {
+//     return Container(
+//       color: ColorScheme.fromSeed(seedColor: Colors.deepPurple).surface,
+//       child: tabBar,
+//     );
+//   }
+
+//   @override
+//   bool shouldRebuild(_TabBarDelegate oldDelegate) => false;
+// }

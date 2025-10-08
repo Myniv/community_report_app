@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:community_report_app/models/community_post_update.dart';
 import 'package:community_report_app/models/discussion.dart';
 
 class CommunityPost {
@@ -20,6 +21,7 @@ class CommunityPost {
   String? username;
   String? user_photo;
   List<Discussion> discussions;
+  List<CommunityPostUpdate> communityPostUpdates;
 
   CommunityPost({
     this.id,
@@ -40,6 +42,7 @@ class CommunityPost {
     this.username,
     this.user_photo,
     this.discussions = const [],
+    this.communityPostUpdates = const [],
   });
 
   CommunityPost copyWith({
@@ -165,6 +168,13 @@ class CommunityPost {
           ? List<Discussion>.from(
               (map['discussions'] as List).map(
                 (x) => Discussion.fromMap(x as Map<String, dynamic>),
+              ),
+            )
+          : [],
+      communityPostUpdates: map['communityPostUpdates'] != null
+          ? List<CommunityPostUpdate>.from(
+              (map['communityPostUpdates'] as List).map(
+                (x) => CommunityPostUpdate.fromMap(x as Map<String, dynamic>),
               ),
             )
           : [],

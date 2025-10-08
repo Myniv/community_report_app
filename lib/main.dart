@@ -10,6 +10,7 @@ import 'package:community_report_app/screens/auth/login_screen.dart';
 // import 'package:community_report_app/screens/auth/login_test.dart';
 import 'package:community_report_app/screens/auth/register_screen.dart';
 import 'package:community_report_app/screens/community_post/create_community_post_screen.dart';
+import 'package:community_report_app/screens/community_post/list_community_post_screen.dart';
 import 'package:community_report_app/screens/home_screen.dart';
 import 'package:community_report_app/screens/profile/profile_screen.dart';
 import 'package:community_report_app/widgets/custom_drawer.dart';
@@ -112,15 +113,22 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     final profileProvider = Provider.of<ProfileProvider>(context);
     //TODO CHAGNE THE SCREENS BASED ON THE CORRESPONDED
-    final List<String> _titleScreenMember = ["Home", "Report", "Profile"];
+    final List<String> _titleScreenMember = [
+      "Home",
+      "Report",
+      "List Reports",
+      "Profile",
+    ];
     final List<Widget> _screensMember = [
       HomeScreen(),
       CreateCommunityPostScreen(onTabSelected: _changeTab),
+      ListCommunityPostScreen(),
       ProfileScreen(),
     ];
     final List<IconData> _iconScreenMember = [
       Icons.home,
       Icons.add_box_outlined,
+      Icons.assignment,
       Icons.person,
     ];
 
