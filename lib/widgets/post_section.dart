@@ -1,5 +1,6 @@
 import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
+import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/routes.dart';
 import 'package:community_report_app/widgets/text_container.dart';
 import 'package:flutter/material.dart';
@@ -219,6 +220,8 @@ class PostSection extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final horizontalPadding = screenWidth * 0.07;
 
+    final profileProvider = Provider.of<ProfileProvider>(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -273,7 +276,7 @@ class PostSection extends StatelessWidget {
               TextContainer(text: urgency),
               SizedBox(width: 10),
               TextContainer(text: status),
-              if (editPost == true) ...[
+              if (editPost == true || profileProvider.profile?.role == 'admin') ...[
                 IconButton(
                   icon: const Icon(Icons.more_vert),
                   onPressed: () {
