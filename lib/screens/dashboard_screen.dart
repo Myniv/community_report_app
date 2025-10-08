@@ -1,5 +1,8 @@
-// screens/dashboard_screen.dart
 import 'package:community_report_app/provider/dashboard_provider.dart';
+import 'package:community_report_app/widgets/chart_bar_horizontal.dart';
+import 'package:community_report_app/widgets/chart_bar_vertical.dart';
+import 'package:community_report_app/widgets/chart_pie.dart';
+import 'package:community_report_app/widgets/summary_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -12,7 +15,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch data when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<DashboardProvider>().fetchDashboardData();
     });
@@ -21,11 +23,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Dashboard')),
       body: Consumer<DashboardProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
-            return Center(child: CircularProgressIndicator());
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Loading dashboard data...'),
+                ],
+              ),
+            );
           }
 
           if (provider.error != null) {
@@ -33,12 +43,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Error: ${provider.error}'),
-                  ElevatedButton(
+                  Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  SizedBox(height: 16),
+                  Text(
+                    'Error: ${provider.error}',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton.icon(
                     onPressed: () {
                       provider.fetchDashboardData();
                     },
-                    child: Text('Retry'),
+                    icon: Icon(Icons.refresh),
+                    label: Text('Retry'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.indigo,
+                    ),
                   ),
                 ],
               ),
@@ -50,124 +71,96 @@ class _DashboardScreenState extends State<DashboardScreen> {
             return Center(child: Text('No data available'));
           }
 
-          return SingleChildScrollView(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Summary Cards
-                Row(
-                  children: [
-                    Expanded(
-                      child: Card(
-                        child: Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              Text(
-                                'Total Profiles',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                '${data.totalProfile}',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
+          return RefreshIndicator(
+            onRefresh: () => provider.fetchDashboardData(),
+            child: SingleChildScrollView(
+              physics: AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Overview',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 16),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(
+                        child: SummaryCard(
+                          title: 'Total Profiles',
+                          value: '${data.totalProfile}',
+                          icon: Icons.people,
+                          color: Colors.blue,
                         ),
                       ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: Card(
-                        child: Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              Text(
-                                'Total Posts',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                '${data.totalPost}',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
+                      SizedBox(height: 16),
+                      Expanded(
+                        child: SummaryCard(
+                          title: 'Total Posts',
+                          value: '${data.totalPost}',
+                          icon: Icons.post_add,
+                          color: Colors.green,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 24),
-
-                // Post Status
-                Text(
-                  'Post Status',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8),
-                ...data.totalPostStatus.entries.map(
-                  (entry) => ListTile(
-                    title: Text(entry.key),
-                    trailing: Text(
-                      '${entry.value}',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    ],
                   ),
-                ),
-                SizedBox(height: 16),
+                  SizedBox(height: 24),
 
-                // Post Categories
-                Text(
-                  'Post Categories',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8),
-                ...data.totalPostCategory.entries.map(
-                  (entry) => ListTile(
-                    title: Text(entry.key),
-                    trailing: Text(
-                      '${entry.value}',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  Text(
+                    'Analytics',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
-                ),
-                SizedBox(height: 16),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(
+                        child: ChartPie(
+                          data: data.totalPostStatus,
+                          title: 'Report Status',
+                          customColors: {
+                            'Pending': Colors.orange,
+                            'On Progress': Colors.blue,
+                            'Resolved': Colors.green,
+                          },
+                          centerSpaceRadius: 50,
+                          showPercentage: true,
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      Expanded(
+                        child: ChartPie(
+                          data: data.totalPostUrgency,
+                          title: 'Urgency Levels',
+                          customColors: {
+                            'High': Colors.red,
+                            'Medium': Colors.orange,
+                            'Low': Colors.green,
+                          },
+                          centerSpaceRadius: 0,
+                          showPercentage: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
 
-                // Post Locations
-                Text(
-                  'Post Locations',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8),
-                ...data.totalPostLocation.entries.map(
-                  (entry) => ListTile(
-                    title: Text(entry.key),
-                    trailing: Text(
-                      '${entry.value}',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  ChartBarVertical(
+                    data: data.totalPostCategory,
+                    title: 'Reports by Category',
                   ),
-                ),
-              ],
+                  SizedBox(height: 16),
+
+                  ChartBarHorizontal(
+                    data: data.totalPostLocation,
+                    title: 'All Locations',
+                    maxItems: 10,
+                  ),
+                ],
+              ),
             ),
           );
         },
