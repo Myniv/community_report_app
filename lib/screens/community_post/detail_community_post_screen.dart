@@ -281,6 +281,67 @@ Widget _buildDiscussionTab(
                   ),
                 ),
               ),
+
+              // Input Discussion
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: discussionProvider.messageController,
+                        decoration: InputDecoration(
+                          hintText: "Write a comment...",
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.send, color: Colors.blue),
+                      onPressed: () {
+                        final message = discussionProvider
+                            .messageController
+                            .text
+                            .trim();
+                        if (message.isNotEmpty && profile != null) {
+                          discussionProvider
+                              .createDiscussion(
+                                userId: profile.uid,
+                                communityPostId: postId,
+                                message: message,
+                              )
+                              .then((_) {
+                                discussionProvider.messageController.clear();
+                                Provider.of<CommunityPostProvider>(
+                                  context,
+                                  listen: false,
+                                ).fetchPost(postId);
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Comment posted successfully!",
+                                    ),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              });
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
   );
