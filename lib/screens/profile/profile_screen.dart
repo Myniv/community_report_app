@@ -297,6 +297,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     settingPostScreen: false,
                                     postImage: post.photo,
                                     editPost: true,
+                                    onPostDeleted: () {
+                                      final profileProvider = context
+                                          .read<ProfileProvider>();
+                                      context
+                                          .read<CommunityPostProvider>()
+                                          .fetchPostsList(
+                                            userId:
+                                                widget.profileId ??
+                                                profileProvider.profile?.uid,
+                                            status: selectStatus,
+                                            category: selectCategory,
+                                            location: selectLocation,
+                                            urgency: selectUrgency,
+                                          );
+                                    },
                                   );
                                 },
                               ),

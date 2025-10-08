@@ -405,6 +405,7 @@ class CommunityPostProvider with ChangeNotifier {
     notifyListeners();
     try {
       await _communityPostServices.deletePost(postId!);
+      _postsListProfile.removeWhere((post) => post.id == postId);
       _errorMessage = null;
       notifyListeners();
       print("Post deleted successfully");

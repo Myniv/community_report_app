@@ -10,6 +10,7 @@ import 'package:community_report_app/screens/auth/login_screen.dart';
 // import 'package:community_report_app/screens/auth/login_test.dart';
 import 'package:community_report_app/screens/auth/register_screen.dart';
 import 'package:community_report_app/screens/community_post/create_community_post_screen.dart';
+import 'package:community_report_app/screens/dashboad_screen.dart';
 import 'package:community_report_app/screens/home_screen.dart';
 import 'package:community_report_app/screens/profile/profile_list_screen.dart';
 import 'package:community_report_app/screens/profile/profile_screen.dart';
@@ -138,15 +139,15 @@ class _MainScreenState extends State<MainScreen> {
       Icons.person,
     ];
 
-    final List<String> _titleScreenAdmin = ["Home", "Regist", "Profile"];
+    final List<String> _titleScreenAdmin = ["Dashboard", "Home", "Profile"];
     final List<Widget> _screensAdmin = [
+      DashboardScreen(),
       HomeScreen(),
-      RegisterScreen(),
       ProfileListScreen(),
     ];
     final List<IconData> _iconScreenAdmin = [
+      Icons.dashboard,
       Icons.home,
-      Icons.app_registration,
       Icons.person_search,
     ];
 

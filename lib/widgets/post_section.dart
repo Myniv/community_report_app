@@ -25,6 +25,7 @@ class PostSection extends StatelessWidget {
   bool? settingPostScreen = false;
   int? discussionCount;
   bool? editPost = false;
+  final VoidCallback? onPostDeleted;
 
   final CustomTheme _theme = CustomTheme();
 
@@ -47,6 +48,7 @@ class PostSection extends StatelessWidget {
     this.settingPostScreen,
     this.discussionCount,
     this.editPost,
+    this.onPostDeleted,
   }) : super(key: key);
 
   void _showOptions(BuildContext context) {
@@ -77,22 +79,33 @@ class PostSection extends StatelessWidget {
                 style: TextStyle(color: Colors.red),
               ),
               onTap: () async {
+                final communityPostProvider =
+                    Provider.of<CommunityPostProvider>(context, listen: false);
+
                 Navigator.pop(context);
+
                 final shouldDelete = await _deleteDialog(context);
                 if (shouldDelete == true) {
-                  final communityPostProvider =
-                      Provider.of<CommunityPostProvider>(
-                        context,
-                        listen: false,
+                  try {
+                    await communityPostProvider.deletePost(postId);
+
+                    if (context.mounted) {
+                      onPostDeleted?.call();
+
+                      CustomTheme().customScaffoldMessage(
+                        context: context,
+                        message: "Post deleted successfully",
+                        backgroundColor: Colors.green,
                       );
-                  await communityPostProvider.deletePost(postId);
-                  if (context.mounted) {
-                    communityPostProvider.fetchPostsList();
-                    CustomTheme().customScaffoldMessage(
-                      context: context,
-                      message: "Post deleted successfully",
-                      backgroundColor: Colors.green,
-                    );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      CustomTheme().customScaffoldMessage(
+                        context: context,
+                        message: "Failed to delete post: $e",
+                        backgroundColor: Colors.red,
+                      );
+                    }
                   }
                 }
               },
@@ -160,7 +173,7 @@ class PostSection extends StatelessWidget {
               ),
               SizedBox(width: 12),
               Text(
-                'Logout',
+                'Report',
                 style: _theme
                     .mediumFont(Colors.grey[800]!, FontWeight.bold, context)
                     .copyWith(letterSpacing: 0),
@@ -168,7 +181,7 @@ class PostSection extends StatelessWidget {
             ],
           ),
           content: Text(
-            'Are you sure you want to logout from your account?',
+            'Are you sure you want to Delete this report?',
             style: _theme.smallFont(
               Colors.grey[700]!,
               FontWeight.w400,
@@ -276,7 +289,8 @@ class PostSection extends StatelessWidget {
               TextContainer(text: urgency),
               SizedBox(width: 10),
               TextContainer(text: status),
-              if (editPost == true || profileProvider.profile?.role == 'admin') ...[
+              if (editPost == true ||
+                  profileProvider.profile?.role == 'admin') ...[
                 IconButton(
                   icon: const Icon(Icons.more_vert),
                   onPressed: () {

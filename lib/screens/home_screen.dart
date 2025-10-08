@@ -92,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final communityPostProvider = context.watch<CommunityPostProvider>();
+    final profileProvider = context.read<ProfileProvider>();
     final communityPost = communityPostProvider.postListProfile;
 
     final allCategory = [
@@ -111,21 +112,23 @@ class _HomeScreenState extends State<HomeScreen> {
       ...LocationItem.values.map((e) => e.displayName).toList(),
     ];
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: CustomTheme.green,
-        child: const Icon(Icons.add, color: Colors.white),
-        onPressed: () async {
-          await Navigator.pushNamed(context, '/edit_post');
-          if (mounted) {
-            context.read<CommunityPostProvider>().fetchPostsList(
-              location: selectLocation,
-              category: selectCategory,
-              status: selectStatus,
-              urgency: selectUrgency,
-            );
-          }
-        },
-      ),
+      floatingActionButton: profileProvider.profile?.role == 'admin'
+          ? FloatingActionButton(
+              backgroundColor: CustomTheme.green,
+              child: const Icon(Icons.add, color: Colors.white),
+              onPressed: () async {
+                await Navigator.pushNamed(context, '/edit_post');
+                if (mounted) {
+                  context.read<CommunityPostProvider>().fetchPostsList(
+                    location: selectLocation,
+                    category: selectCategory,
+                    status: selectStatus,
+                    urgency: selectUrgency,
+                  );
+                }
+              },
+            )
+          : null,
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -381,6 +384,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         createdAt: post.created_at ?? DateTime.now(),
                         settingPostScreen: false,
                         postImage: post.photo,
+                        onPostDeleted: () {
+                          final profileProvider = context
+                              .read<ProfileProvider>();
+                          context.read<CommunityPostProvider>().fetchPostsList(
+                            location: selectLocation,
+                            category: selectCategory,
+                            status: selectStatus,
+                            urgency: selectUrgency,
+                          );
+                        },
                       );
                     },
                   ),
