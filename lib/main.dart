@@ -3,6 +3,7 @@ import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/provider/auth_provider.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
 import 'package:community_report_app/provider/community_post_update_provider.dart';
+import 'package:community_report_app/provider/dashboard_provider.dart';
 import 'package:community_report_app/provider/discussion_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/routes.dart';
@@ -11,8 +12,10 @@ import 'package:community_report_app/screens/auth/login_screen.dart';
 // import 'package:community_report_app/screens/auth/login_test.dart';
 import 'package:community_report_app/screens/auth/register_screen.dart';
 import 'package:community_report_app/screens/community_post/create_community_post_screen.dart';
+import 'package:community_report_app/screens/dashboard_screen.dart';
 import 'package:community_report_app/screens/community_post/list_community_post_screen.dart';
 import 'package:community_report_app/screens/home_screen.dart';
+import 'package:community_report_app/screens/profile/profile_list_screen.dart';
 import 'package:community_report_app/screens/profile/profile_screen.dart';
 import 'package:community_report_app/widgets/custom_drawer.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -52,11 +55,13 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProxyProvider<ProfileProvider, CommunityPostProvider>(
-          create: (_) => CommunityPostProvider(ProfileProvider()),
-          update: (_, profileProvider, __) =>
-              CommunityPostProvider(profileProvider),
+          create: (context) =>
+              CommunityPostProvider(context.read<ProfileProvider>()),
+          update: (context, profileProvider, previous) =>
+              previous ?? CommunityPostProvider(profileProvider),
         ),
         ChangeNotifierProvider(create: (_) => DiscussionProvider()),
+        ChangeNotifierProvider(create: (_) => DashboardProvider()),
         ChangeNotifierProvider(create: (_) => CommunityPostUpdateProvider()),
       ],
       child: MainApp(),
@@ -146,16 +151,16 @@ class _MainScreenState extends State<MainScreen> {
       Icons.person,
     ];
 
-    final List<String> _titleScreenAdmin = ["Home", "Regist", "Profile"];
+    final List<String> _titleScreenAdmin = ["Dashboard", "Home", "Profile"];
     final List<Widget> _screensAdmin = [
+      DashboardScreen(),
       HomeScreen(),
-      RegisterScreen(),
-      ProfileScreen(),
+      ProfileListScreen(),
     ];
     final List<IconData> _iconScreenAdmin = [
+      Icons.dashboard,
       Icons.home,
-      Icons.app_registration,
-      Icons.person,
+      Icons.person_search,
     ];
 
     if (profileProvider.profile!.role == 'member') {

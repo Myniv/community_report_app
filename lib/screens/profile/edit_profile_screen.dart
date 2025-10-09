@@ -47,18 +47,33 @@ class FormScreenState extends State<UpdateProfileScreen> {
 
     final locationItem = LocationItem.values.map((e) => e.displayName).toList();
 
+    final roleItem = RoleItem.values.map((e) => e.displayName).toList();
+
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
         backgroundColor: Colors.white,
         iconTheme: IconThemeData(color: CustomTheme.green),
-        title: Text(
-          "Edit Profile",
-          style: CustomTheme().smallFont(
-            CustomTheme.green,
-            FontWeight.bold,
-            context,
-          ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Edit Profile",
+              style: CustomTheme().smallFont(
+                CustomTheme.green,
+                FontWeight.bold,
+                context,
+              ),
+            ),
+            Text(
+              DateFormat('MMMM dd, yyyy').format(DateTime.now()),
+              style: CustomTheme().superSmallFont(
+                CustomTheme.green,
+                FontWeight.bold,
+                context,
+              ),
+            ),
+          ],
         ),
       ),
       body: Center(
@@ -188,18 +203,52 @@ class FormScreenState extends State<UpdateProfileScreen> {
                       _customTheme.customDropdown<String>(
                         context: context,
                         icon: Icons.location_on,
-                        value: widget.profileId != null
+                        value: widget.profileId != null && profileProvider.profile?.role == "admin"
                             ? profileProvider.otherUserProfile?.location
                             : profileProvider.profile?.location,
                         items: locationItem,
                         label: "Location",
                         hint: "Select Location",
-                        onChanged: (value) {
-                          profileProvider.setLocation(value, widget.profileId);
-                        },
+                        enabled: widget.profileId != null && profileProvider.profile?.role == "admin",
+                        onChanged: widget.profileId != null && profileProvider.profile?.role == "admin"
+                            ? (value) {
+                                profileProvider.setLocation(
+                                  value,
+                                  widget.profileId,
+                                );
+                              }
+                            : null,
                         validator: (value) {
                           if (value == null) {
                             return "Please select a location";
+                          }
+                          return null;
+                        },
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      _customTheme.customDropdown<String>(
+                        context: context,
+                        icon: Icons.settings_accessibility,
+                        value: widget.profileId != null && profileProvider.profile?.role == "admin"
+                            ? profileProvider.otherUserProfile?.role
+                            : profileProvider.profile?.role,
+                        items: roleItem,
+                        enabled: widget.profileId != null && profileProvider.profile?.role == "admin",
+                        label: "Role",
+                        hint: "Change Role",
+                        onChanged: widget.profileId != null && profileProvider.profile?.role == "admin"
+                            ? (value) {
+                                profileProvider.setRole(
+                                  value,
+                                  widget.profileId,
+                                );
+                              }
+                            : null,
+                        validator: (value) {
+                          if (value == null) {
+                            return "Please select a Role for user";
                           }
                           return null;
                         },

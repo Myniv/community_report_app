@@ -110,9 +110,27 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
       postProvider.getEditPost(postIndex);
     } else {
       postProvider.initializeNewPost();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _initializeDefaultLocation();
+      });
     }
 
     _isInitialized = true;
+  }
+
+  void _initializeDefaultLocation() {
+    final postProvider = context.read<CommunityPostProvider>();
+    final profileProvider = context.read<ProfileProvider>();
+
+    if (postProvider.currentPost?.location?.isNotEmpty == true) {
+      //
+      return;
+    }
+
+    //set to location profilll
+    if (profileProvider.profile?.location?.isNotEmpty == true) {
+      postProvider.setLocation(profileProvider.profile!.location);
+    }
   }
 
   @override
@@ -655,6 +673,11 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
       return;
     }
 
+    final profileProvider = Provider.of<ProfileProvider>(
+      context,
+      listen: false,
+    );
+
     bool hasLocalImage = _capturedImage != null;
     bool hasNetworkImage =
         postProvider.currentPost?.photo != null &&
@@ -686,6 +709,9 @@ class _CreateCommunityPostScreenState extends State<CreateCommunityPostScreen> {
 
       if (widget.onTabSelected != null && postIndex == null) {
         widget.onTabSelected!(2);
+      } else if (widget.onTabSelected != null &&
+          profileProvider.profile!.role == 'admin') {
+        Navigator.pop(context);
       } else {
         Navigator.pop(context);
       }

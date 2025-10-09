@@ -36,6 +36,8 @@ class CommunityPostProvider with ChangeNotifier {
   File? get selectedImageFile => _selectedImageFile;
   final _picker = ImagePicker();
 
+  bool _isDisposed = false;
+
   final CommunityPostServices _communityPostServices = CommunityPostServices();
   final ProfileProvider profileProvider;
   CommunityPostProvider(this.profileProvider);
@@ -48,8 +50,13 @@ class CommunityPostProvider with ChangeNotifier {
     bool? isReport,
     String? urgency,
   }) async {
+    print("=== FETCH POSTS START ===");
+    print("userId: $userId");
+    print("Current posts count: ${_postsListProfile.length}");
+    
     _isLoading = true;
-    notifyListeners();
+    _safeNotifyListeners();
+    print("Set isLoading = true, notified listeners");
 
     try {
       _postsListProfile = await _communityPostServices.getPosts(
@@ -60,12 +67,17 @@ class CommunityPostProvider with ChangeNotifier {
         isReport: isReport,
         urgency: urgency,
       );
+      print("Fetched posts: $_postsListProfile");
+      print("New posts count: ${_postsListProfile.length}");
     } catch (e) {
       print("Error in provider: $e");
       _postsListProfile = [];
     } finally {
       _isLoading = false;
-      notifyListeners();
+      print("Set isLoading = false");
+      _safeNotifyListeners();
+      print("=== FETCH POSTS END ===");
+      print("Final posts count: ${_postsListProfile.length}");
     }
   }
 
@@ -393,6 +405,7 @@ class CommunityPostProvider with ChangeNotifier {
     notifyListeners();
     try {
       await _communityPostServices.deletePost(postId!);
+      _postsListProfile.removeWhere((post) => post.id == postId);
       _errorMessage = null;
       notifyListeners();
       print("Post deleted successfully");
@@ -417,8 +430,16 @@ class CommunityPostProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void _safeNotifyListeners() {
+    if (!_isDisposed) {
+      notifyListeners();
+    }
+  }
+
   @override
   void dispose() {
+    print("=== CommunityPostProvider DISPOSING ===");
+    _isDisposed = true;
     titleController.dispose();
     descriptionController.dispose();
     super.dispose();

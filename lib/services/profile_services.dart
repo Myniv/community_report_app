@@ -50,6 +50,18 @@ class ProfileService {
     return null;
   }
 
+  Future<List<Profile>> getAllUserProfiles() async {
+    try {
+      final querySnapshot = await profiles.get();
+      return querySnapshot.docs.map((doc) {
+        return Profile.fromMap(doc.data() as Map<String, dynamic>);
+      }).toList();
+    } catch (e) {
+      print("Error getting all user profiles: $e");
+      rethrow;
+    }
+  }
+
   Future<void> updateUserProfile(Profile profile) async {
     await profiles.doc(profile.uid).update(profile.toMap());
     await updateUserDB(profile);

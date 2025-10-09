@@ -1,4 +1,5 @@
 enum LocationItem { binongPermai, bintaro, kalibata, karawaci, kemanggisanBaru }
+
 extension LocationItemExtension on LocationItem {
   String get displayName {
     switch (this) {
@@ -17,6 +18,7 @@ extension LocationItemExtension on LocationItem {
 }
 
 enum UrgencyItem { low, medium, high }
+
 extension UrgencyExtension on UrgencyItem {
   String get displayName {
     switch (this) {
@@ -31,6 +33,7 @@ extension UrgencyExtension on UrgencyItem {
 }
 
 enum StatusItem { pending, onProgress, resolved }
+
 extension StatusExtension on StatusItem {
   String get displayName {
     switch (this) {
@@ -45,6 +48,7 @@ extension StatusExtension on StatusItem {
 }
 
 enum CategoryItem { waste, water, electricity, gas, other }
+
 extension CategoryExtension on CategoryItem {
   String get displayName {
     switch (this) {
@@ -58,6 +62,21 @@ extension CategoryExtension on CategoryItem {
         return "Gas";
       case CategoryItem.other:
         return "Other";
+    }
+  }
+}
+
+enum RoleItem { admin, leader, member }
+
+extension RoleExtension on RoleItem {
+  String get displayName {
+    switch (this) {
+      case RoleItem.admin:
+        return "admin";
+      case RoleItem.leader:
+        return "leader";
+      case RoleItem.member:
+        return "member";
     }
   }
 }
