@@ -286,9 +286,6 @@ class PostSection extends StatelessWidget {
 
               TextContainer(text: category, category: true),
               SizedBox(width: 10),
-              TextContainer(text: urgency),
-              SizedBox(width: 10),
-              TextContainer(text: status),
               if (editPost == true ||
                   profileProvider.profile?.role == 'admin') ...[
                 IconButton(
@@ -420,6 +417,10 @@ class PostSection extends StatelessWidget {
                   ],
                 ),
               ),
+              SizedBox(width: 10),
+              TextContainer(text: urgency),
+              SizedBox(width: 10),
+              TextContainer(text: status),
             ],
           ),
         ),
