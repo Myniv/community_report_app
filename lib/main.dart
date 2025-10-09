@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/provider/auth_provider.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
+import 'package:community_report_app/provider/community_post_update_provider.dart';
 import 'package:community_report_app/provider/discussion_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/routes.dart';
@@ -56,6 +57,7 @@ void main() async {
               CommunityPostProvider(profileProvider),
         ),
         ChangeNotifierProvider(create: (_) => DiscussionProvider()),
+        ChangeNotifierProvider(create: (_) => CommunityPostUpdateProvider()),
       ],
       child: MainApp(),
     ),

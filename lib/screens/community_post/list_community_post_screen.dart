@@ -33,6 +33,7 @@ class _ListCommunityPostScreenState extends State<ListCommunityPostScreen> {
         category: selectCategory,
         status: selectStatus,
         urgency: selectUrgency,
+        userId: profile!.uid,
       );
     });
   }
