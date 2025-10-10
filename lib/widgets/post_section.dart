@@ -284,7 +284,7 @@ class PostSection extends StatelessWidget {
 
               const Spacer(),
 
-              TextContainer(text: category, category: true),
+              TextContainer(text: category, category: true, useIcon: false),
               SizedBox(width: 10),
               if (editPost == true ||
                   profileProvider.profile?.role == 'admin') ...[
@@ -418,7 +418,7 @@ class PostSection extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 10),
-              TextContainer(text: urgency),
+              TextContainer(text: urgency, icon: Icons.warning),
               SizedBox(width: 10),
               TextContainer(text: status),
             ],
