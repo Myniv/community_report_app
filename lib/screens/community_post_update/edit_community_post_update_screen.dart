@@ -10,23 +10,28 @@ import 'package:community_report_app/main.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 
-class CreateCommunityPostUpdateScreen extends StatefulWidget {
+class EditCommunityPostUpdateScreen extends StatefulWidget {
   final int postId;
+  final int communityPostUpdateId;
 
-  const CreateCommunityPostUpdateScreen({super.key, required this.postId});
+  const EditCommunityPostUpdateScreen({
+    super.key,
+    required this.postId,
+    required this.communityPostUpdateId,
+  });
 
   @override
-  State<CreateCommunityPostUpdateScreen> createState() =>
-      _CreateCommunityPostUpdateScreenState();
+  State<EditCommunityPostUpdateScreen> createState() =>
+      _EditCommunityPostUpdateScreenState();
 }
 
-class _CreateCommunityPostUpdateScreenState
-    extends State<CreateCommunityPostUpdateScreen> {
+class _EditCommunityPostUpdateScreenState
+    extends State<EditCommunityPostUpdateScreen> {
   CameraController? _cameraController;
   Future<void>? _initializeControllerFuture;
   final CustomTheme _customTheme = CustomTheme();
   final ImagePicker _imagePicker = ImagePicker();
-  bool isPhotoTaken = false;
+  bool isRetakePhoto = false;
 
   XFile? _capturedImage;
   bool _cameraStatusPermission = false;
@@ -34,10 +39,24 @@ class _CreateCommunityPostUpdateScreenState
   bool _isSubmitting = false;
   bool _isInitialized = false;
 
+  bool _isFetched = false;
   @override
   void initState() {
     super.initState();
     _initAsync();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isFetched) {
+      final communityPostUpdateProvider =
+          Provider.of<CommunityPostUpdateProvider>(context, listen: false);
+      communityPostUpdateProvider.fetchCommunityPostUpdate(
+        widget.communityPostUpdateId,
+      );
+      _isFetched = true;
+    }
   }
 
   Future<void> _initAsync() async {
@@ -77,25 +96,6 @@ class _CreateCommunityPostUpdateScreenState
       );
     }
   }
-
-  // @override
-  // void initState() {
-  //   super.initState();
-
-  //   // Panggil initForm dari provider
-  //   final employeeProvider = Provider.of<EmployeeProvider>(
-  //     context,
-  //     listen: false,
-  //   );
-  //   if (widget.employeeId != null) {
-  //     employeeProvider.loadEmployeeEditedUser(widget.employeeId!);
-  //   } else {
-  //     final employeeId = employeeProvider.employee?.employeeId;
-  //     if (employeeId != null) {
-  //       employeeProvider.loadEmployee(employeeId);
-  //     }
-  //   }
-  // }
 
   @override
   void dispose() {
@@ -154,7 +154,7 @@ class _CreateCommunityPostUpdateScreenState
       if (mounted) {
         await _cameraController?.pausePreview();
       }
-      isPhotoTaken = true;
+      isRetakePhoto = false;
     } catch (e) {
       print('Error taking photo: $e');
       CustomTheme().customScaffoldMessage(
@@ -181,7 +181,7 @@ class _CreateCommunityPostUpdateScreenState
             _cameraController!.value.isInitialized) {
           await _cameraController?.pausePreview();
         }
-        isPhotoTaken = true;
+        isRetakePhoto = false;
       }
     } catch (e) {
       print('Error picking image: $e');
@@ -272,8 +272,15 @@ class _CreateCommunityPostUpdateScreenState
         .read<CommunityPostUpdateProvider>();
 
     bool hasLocalImage = _capturedImage != null;
+    bool hasNetworkImage =
+        !hasLocalImage &&
+        communityPostUpdateProvider.currentCommunityPostUpdate?.photo != null &&
+        communityPostUpdateProvider
+            .currentCommunityPostUpdate!
+            .photo!
+            .isNotEmpty;
 
-    if (!hasLocalImage) {
+    if (!hasLocalImage && !hasNetworkImage) {
       return Container(
         height: 300,
         color: CustomTheme.green.withOpacity(0.3),
@@ -304,63 +311,64 @@ class _CreateCommunityPostUpdateScreenState
       ),
       child: ClipRRect(
         borderRadius: CustomTheme.borderRadius,
-        child: Image.file(
-          File(_capturedImage!.path),
-          height: 300,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        ),
-        // : Image.network(
-        //     postProvider.currentPost!.photo!,
-        //     height: 300,
-        //     width: double.infinity,
-        //     fit: BoxFit.cover,
-        //     loadingBuilder: (context, child, loadingProgress) {
-        //       if (loadingProgress == null) return child;
-        //       return Container(
-        //         height: 300,
-        //         color: CustomTheme.green.withOpacity(0.3),
-        //         child: Center(
-        //           child: CircularProgressIndicator(
-        //             value: loadingProgress.expectedTotalBytes != null
-        //                 ? loadingProgress.cumulativeBytesLoaded /
-        //                       loadingProgress.expectedTotalBytes!
-        //                 : null,
-        //             valueColor: AlwaysStoppedAnimation<Color>(
-        //               CustomTheme.lightGreen,
-        //             ),
-        //           ),
-        //         ),
-        //       );
-        //     },
-        //     errorBuilder: (context, error, stackTrace) {
-        //       return Container(
-        //         height: 300,
-        //         color: CustomTheme.green.withOpacity(0.3),
-        //         child: Center(
-        //           child: Column(
-        //             mainAxisAlignment: MainAxisAlignment.center,
-        //             children: [
-        //               Icon(
-        //                 Icons.error_outline,
-        //                 color: Colors.red,
-        //                 size: 48,
-        //               ),
-        //               const SizedBox(height: 8),
-        //               Text(
-        //                 "Failed to load image",
-        //                 style: CustomTheme().smallFont(
-        //                   Colors.red,
-        //                   FontWeight.w400,
-        //                   context,
-        //                 ),
-        //               ),
-        //             ],
-        //           ),
-        //         ),
-        //       );
-        //     },
-        //   ),
+        child: hasLocalImage
+            ? Image.file(
+                File(_capturedImage!.path),
+                height: 300,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              )
+            : Image.network(
+                communityPostUpdateProvider.currentCommunityPostUpdate!.photo!,
+                height: 300,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    height: 300,
+                    color: CustomTheme.green.withOpacity(0.3),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                            : null,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          CustomTheme.lightGreen,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    height: 300,
+                    color: CustomTheme.green.withOpacity(0.3),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: Colors.red,
+                            size: 48,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Failed to load image",
+                            style: CustomTheme().smallFont(
+                              Colors.red,
+                              FontWeight.w400,
+                              context,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
       ),
     );
   }
@@ -368,7 +376,6 @@ class _CreateCommunityPostUpdateScreenState
   Future<void> _submitPost(
     String? userId,
     CommunityPostUpdateProvider communityPostProvider,
-    int? postId,
   ) async {
     if (!communityPostProvider.postKey.currentState!.validate()) {
       CustomTheme().customScaffoldMessage(
@@ -379,26 +386,17 @@ class _CreateCommunityPostUpdateScreenState
       return;
     }
 
-    bool hasLocalImage = _capturedImage != null;
-
-    if (!hasLocalImage) {
-      CustomTheme().customScaffoldMessage(
-        context: context,
-        message: "Please capture or select an image",
-        backgroundColor: Colors.orange,
-      );
-      return;
-    }
-
     setState(() {
       _isSubmitting = true;
     });
 
     try {
-      await communityPostProvider.createCommunityPostUpdate(
+      await communityPostProvider.updateCommunityPostUpdate(
         userId,
-        postId!,
-        File(_capturedImage!.path),
+        widget.communityPostUpdateId,
+        _capturedImage != null ? File(_capturedImage!.path) : null,
+        communityPostProvider.currentCommunityPostUpdate!.photo!,
+        widget.postId,
       );
 
       CustomTheme().customScaffoldMessage(
@@ -429,7 +427,7 @@ class _CreateCommunityPostUpdateScreenState
       await _cameraController?.resumePreview();
       setState(() {
         _capturedImage = null;
-        isPhotoTaken = false;
+        isRetakePhoto = true;
       });
     }
   }
@@ -446,7 +444,7 @@ class _CreateCommunityPostUpdateScreenState
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "Add Post Update",
+              "Edit Post Update",
               style: CustomTheme().smallFont(
                 CustomTheme.green,
                 FontWeight.bold,
@@ -519,7 +517,7 @@ class _CreateCommunityPostUpdateScreenState
                     children: [
                       Center(
                         child: Text(
-                          "Add Post Update",
+                          "Edit Post Update",
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.w700,
@@ -598,98 +596,95 @@ class _CreateCommunityPostUpdateScreenState
 
                       const SizedBox(height: 20),
 
-                      _customTheme.customDropdown<bool>(
-                        context: context,
-                        value: postProvider.isResolved,
-                        items: const [false, true],
-                        label: "Is Resolved",
-                        hint: "Select status",
-                        // enabled: !isEdit,
-                        onChanged: (value) {
-                          postProvider.setIsResolved(value!);
-                        },
-                        validator: (value) {
-                          if (value == null) {
-                            return "Please select a category";
-                          }
-                          return null;
-                        },
-                      ),
-                      if (isPhotoTaken) ...[
-                        Container(
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: CustomTheme.borderRadius,
-                            border: Border.all(
-                              color: CustomTheme.green.withOpacity(0.3),
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Icon(
-                                    Icons.photo,
-                                    color: CustomTheme.lightGreen,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    "Photo",
-                                    style: CustomTheme().smallFont(
-                                      CustomTheme.lightGreen,
-                                      FontWeight.w600,
-                                      context,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              _buildCameraTaken(),
-                            ],
+                      // _customTheme.customDropdown<bool>(
+                      //   context: context,
+                      //   value: postProvider.isResolved,
+                      //   items: const [false, true],
+                      //   label: "Is Resolved",
+                      //   hint: "Select status",
+                      //   // enabled: !isEdit,
+                      //   onChanged: (value) {
+                      //     postProvider.setIsResolved(value!);
+                      //   },
+                      //   validator: (value) {
+                      //     if (value == null) {
+                      //       return "Please select a category";
+                      //     }
+                      //     return null;
+                      //   },
+                      // ),
+                      Container(
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: CustomTheme.borderRadius,
+                          border: Border.all(
+                            color: CustomTheme.green.withOpacity(0.3),
+                            width: 1,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Row(
+                        child: Column(
                           children: [
-                            Expanded(
-                              child: CustomTheme().customActionButton(
-                                text: "Retake",
-                                icon: Icons.camera_alt_outlined,
-                                onPressed: _retakePhoto,
-                                backgroundColor: CustomTheme.lightGreen,
-                                foregroundColor: CustomTheme.whiteKindaGreen,
-                                context: context,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.photo,
+                                  color: CustomTheme.lightGreen,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  "Photo",
+                                  style: CustomTheme().smallFont(
+                                    CustomTheme.lightGreen,
+                                    FontWeight.w600,
+                                    context,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 16),
-
-                            Expanded(
-                              flex: 2,
-                              child: CustomTheme().customActionButton(
-                                text: "Submit Post",
-                                icon: Icons.check_circle_outline,
-                                onPressed: _isSubmitting
-                                    ? null
-                                    : () => _submitPost(
-                                        profileProvider.profile!.uid,
-                                        postProvider,
-                                        widget.postId,
-                                      ),
-                                isLoading: _isSubmitting,
-                                context: context,
-                              ),
-                            ),
+                            const SizedBox(height: 12),
+                            _buildCameraTaken(),
                           ],
                         ),
-                      ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: CustomTheme().customActionButton(
+                              text: "Retake",
+                              icon: Icons.camera_alt_outlined,
+                              onPressed: _retakePhoto,
+                              backgroundColor: CustomTheme.lightGreen,
+                              foregroundColor: CustomTheme.whiteKindaGreen,
+                              context: context,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+
+                          Expanded(
+                            flex: 2,
+                            child: CustomTheme().customActionButton(
+                              text: "Submit Post",
+                              icon: Icons.check_circle_outline,
+                              onPressed: _isSubmitting
+                                  ? null
+                                  : () => _submitPost(
+                                      profileProvider.profile!.uid,
+                                      postProvider,
+                                    ),
+                              isLoading: _isSubmitting,
+                              context: context,
+                            ),
+                          ),
+                        ],
+                      ),
 
                       const SizedBox(height: 20),
-                      if (!isPhotoTaken) ...[
+                      if (isRetakePhoto) ...[
                         _buildCameraPreview(),
                         const SizedBox(height: 20),
 

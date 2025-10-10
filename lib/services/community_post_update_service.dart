@@ -16,11 +16,11 @@ class CommunityPostUpdateService {
       final fileName = "${postId}_$timeStamp$ext";
 
       await _supabase.storage
-          .from('post_community_app_update')
+          .from('post_community_app')
           .upload(fileName, file, fileOptions: const FileOptions(upsert: true));
 
       final url = _supabase.storage
-          .from('post_community_app_update')
+          .from('post_community_app')
           .getPublicUrl(fileName);
 
       // await profiles.doc(uid).update({'profilePicturePath': url});
@@ -28,6 +28,23 @@ class CommunityPostUpdateService {
       return url;
     } catch (e) {
       print("Error in upload community update photo: $e");
+      rethrow;
+    }
+  }
+
+  Future<CommunityPostUpdate> getPostById(int id) async {
+    try {
+      final response = await http.get(Uri.parse("$baseUrl/$id"));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return CommunityPostUpdate.fromMap(data);
+      } else {
+        throw Exception(
+          "Failed to load post update. Status code: ${response.statusCode}, body: ${response.body}",
+        );
+      }
+    } catch (e) {
+      print("Error fetching post update: $e");
       rethrow;
     }
   }
@@ -53,6 +70,25 @@ class CommunityPostUpdateService {
     }
   }
 
+  Future<void> updateCommunityPostUpdate(
+    CommunityPostUpdate communityPostUpdate,
+    int communityPostUpdateId,
+  ) async {
+    try {
+      final response = await http.put(
+        Uri.parse("$baseUrl/$communityPostUpdateId"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(communityPostUpdate.toMap()),
+      );
+      if (response.statusCode != 200) {
+        throw Exception("Failed to update community post update");
+      }
+    } catch (e) {
+      print("Error creating community post update: $e");
+      rethrow;
+    }
+  }
+
   Future<void> deleteCommunityPostUpdate(int id) async {
     try {
       final response = await http.delete(Uri.parse("$baseUrl/$id"));
@@ -65,29 +101,20 @@ class CommunityPostUpdateService {
     }
   }
 
-  // Future<Discussion?> getDiscussionbyId(int id) async {
-  //   final response = await http.get(Uri.parse("$baseUrl/discussion/$id"));
-  //   if (response.statusCode == 200) {
-  //     final data = jsonDecode(response.body);
-  //     return Discussion.fromMap(data);
-  //   } else {
-  //     throw Exception("Failed to load discussion");
-  //   }
-  // }
+  Future<void> deleteOldComunityPostUpdatePhoto(String oldUrl) async {
+    try {
+      if (oldUrl.isEmpty) return;
 
-  // Future<void> updateDiscussion(Discussion discussion, int discussionId) async {
-  //   try {
-  //     final response = await http.put(
-  //       Uri.parse("$baseUrl/$discussionId"),
-  //       headers: {"Content-Type": "application/json"},
-  //       body: jsonEncode(discussion.toMap()),
-  //     );
-  //     if (response.statusCode != 200) {
-  //       throw Exception("Failed to update discussion");
-  //     }
-  //   } catch (e) {
-  //     print("Error updating discussion: $e");
-  //     throw Exception("Failed to update discussion");
-  //   }
-  // }
+      final uri = Uri.parse(oldUrl);
+      final pathSegments = uri.pathSegments;
+
+      if (pathSegments.length >= 2) {
+        final fileName = pathSegments.last;
+        await _supabase.storage.from('post_community_app').remove([fileName]);
+        print("Deleted old comunity post update photo: $fileName");
+      }
+    } catch (e) {
+      print("Error deleting old profile photo: $e");
+    }
+  }
 }

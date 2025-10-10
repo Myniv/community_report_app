@@ -2,6 +2,7 @@ import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/models/community_post_update.dart';
 import 'package:community_report_app/models/discussion.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
+import 'package:community_report_app/provider/community_post_update_provider.dart';
 import 'package:community_report_app/provider/discussion_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/routes.dart';
@@ -556,6 +557,37 @@ Widget buildPostUpdateSection(
                   borderRadius: BorderRadius.circular(5),
                 ),
               ),
+            ),
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'edit') {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.editCommunityPostUpdate,
+                    arguments: {
+                      'postId': communityPostUpdate.communityPostId,
+                      'communityPostUpdateId':
+                          communityPostUpdate.communityPostUpdateId,
+                    },
+                  );
+                } else if (value == 'delete') {
+                  CommunityPostUpdateProvider()
+                      .deleteCommunityPostUpdate(
+                        communityPostUpdate.communityPostUpdateId!,
+                      )
+                      .then((_) {
+                        // Refresh the post to reflect deletion
+                        Provider.of<CommunityPostProvider>(
+                          context,
+                          listen: false,
+                        ).fetchPost(communityPostUpdate.communityPostId);
+                      });
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(value: 'edit', child: Text("Edit")),
+                const PopupMenuItem(value: 'delete', child: Text("Delete")),
+              ],
             ),
           ],
         ),

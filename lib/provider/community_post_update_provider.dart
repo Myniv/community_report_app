@@ -147,8 +147,6 @@ class CommunityPostUpdateProvider with ChangeNotifier {
 
     try {
       final url = await uploadPhoto(file, communityPostId);
-      print('awkakwka');
-      print(url);
       final communityPostUpdate = CommunityPostUpdate(
         title: titleController.text,
         description: descriptionController.text,
@@ -170,7 +168,69 @@ class CommunityPostUpdateProvider with ChangeNotifier {
     }
   }
 
-  Future<void> deleteDiscussion(int communityPostUpdateId) async {
+  Future<void> fetchCommunityPostUpdate(int? communityPostUpdateId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      _currentCommunityPostUpdate = await _communityPostUpdateService
+          .getPostById(communityPostUpdateId!);
+      titleController.text = _currentCommunityPostUpdate?.title ?? '';
+      descriptionController.text =
+          _currentCommunityPostUpdate?.description ?? '';
+      print("Fetched post: $_currentCommunityPostUpdate");
+    } catch (e) {
+      print("Error in provider: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateCommunityPostUpdate(
+    String? userId,
+    int communityPostUpdateId,
+    File? file,
+    String oldPhotoUrl,
+    int communityPostId,
+  ) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      String? url = oldPhotoUrl;
+      print('anaxa');
+      print(file);
+      if (file != null) {
+        await _communityPostUpdateService.deleteOldComunityPostUpdatePhoto(
+          oldPhotoUrl,
+        );
+        url = await uploadPhoto(file, communityPostUpdateId);
+      }
+
+      final communityPostUpdate = CommunityPostUpdate(
+        title: titleController.text,
+        description: descriptionController.text,
+        isResolved: _isResolved,
+        photo: url,
+        userId: userId,
+        communityPostId: communityPostId,
+      );
+      await _communityPostUpdateService.updateCommunityPostUpdate(
+        communityPostUpdate,
+        communityPostUpdateId,
+      );
+      titleController.clear();
+      descriptionController.clear();
+    } catch (e) {
+      print("Error in provider while creating discussion: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteCommunityPostUpdate(int communityPostUpdateId) async {
     _isLoading = true;
     notifyListeners();
 

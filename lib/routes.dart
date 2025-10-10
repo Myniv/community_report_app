@@ -4,6 +4,7 @@ import 'package:community_report_app/screens/auth/register_screen.dart';
 import 'package:community_report_app/screens/community_post/create_community_post_screen.dart';
 import 'package:community_report_app/screens/community_post/detail_community_post_screen.dart';
 import 'package:community_report_app/screens/community_post_update/create_community_post_update_screen.dart';
+import 'package:community_report_app/screens/community_post_update/edit_community_post_update_screen.dart';
 import 'package:community_report_app/screens/profile/edit_profile_screen.dart';
 import 'package:community_report_app/screens/profile/profile_list_screen.dart';
 import 'package:community_report_app/screens/profile/profile_screen.dart';
@@ -20,6 +21,7 @@ class AppRoutes {
   static const String discussionDetail = '/discussion_detail';
   static const String editPost = '/edit_post';
   static const String addCommunityPostUpdate = '/add_community_post_update';
+  static const String editCommunityPostUpdate = '/edit_community_post_update';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     // final args = settings.arguments;
@@ -76,6 +78,16 @@ class AppRoutes {
               CreateCommunityPostUpdateScreen(postId: args['postId'] as int),
           settings: settings,
         );
+      case editCommunityPostUpdate:
+        final args = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => EditCommunityPostUpdateScreen(
+            postId: args['postId'],
+            communityPostUpdateId: args['communityPostUpdateId'],
+          ),
+          settings: settings,
+        );
+
       default:
         return MaterialPageRoute(
           builder: (_) => LoginScreen(),
