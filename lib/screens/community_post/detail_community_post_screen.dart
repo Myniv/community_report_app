@@ -400,6 +400,7 @@ Widget _buildPostUpdatesTab(
                       context,
                       communityPostUpdate,
                       communityPostStatus,
+                      profile!.role,
                     );
                   },
                 ),
@@ -439,6 +440,7 @@ Widget buildPostUpdateSection(
   BuildContext context,
   CommunityPostUpdate communityPostUpdate,
   String communityPostStatus,
+  String role,
 ) {
   final screenWidth = MediaQuery.of(context).size.width;
   final horizontalPadding = screenWidth * 0.07;
@@ -567,48 +569,51 @@ Widget buildPostUpdateSection(
                     ),
                   ),
                 ),
-                Positioned(
-                  top: 5,
-                  right: 5,
-                  child: PopupMenuButton<String>(
-                    icon: const Icon(
-                      Icons.more_vert,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                    onSelected: (value) {
-                      if (value == 'edit') {
-                        Navigator.pushNamed(
-                          context,
-                          AppRoutes.editCommunityPostUpdate,
-                          arguments: {
-                            'postId': communityPostUpdate.communityPostId,
-                            'communityPostUpdateId':
-                                communityPostUpdate.communityPostUpdateId,
-                          },
-                        );
-                      } else if (value == 'delete') {
-                        CommunityPostUpdateProvider()
-                            .deleteCommunityPostUpdate(
-                              communityPostUpdate.communityPostUpdateId!,
-                            )
-                            .then((_) {
-                              Provider.of<CommunityPostProvider>(
-                                context,
-                                listen: false,
-                              ).fetchPost(communityPostUpdate.communityPostId);
-                            });
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(value: 'edit', child: Text("Edit")),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Text("Delete"),
+                if (RoleItem.leader.displayName == role)
+                  Positioned(
+                    top: 5,
+                    right: 5,
+                    child: PopupMenuButton<String>(
+                      icon: const Icon(
+                        Icons.more_vert,
+                        color: Colors.white,
+                        size: 24,
                       ),
-                    ],
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.editCommunityPostUpdate,
+                            arguments: {
+                              'postId': communityPostUpdate.communityPostId,
+                              'communityPostUpdateId':
+                                  communityPostUpdate.communityPostUpdateId,
+                            },
+                          );
+                        } else if (value == 'delete') {
+                          CommunityPostUpdateProvider()
+                              .deleteCommunityPostUpdate(
+                                communityPostUpdate.communityPostUpdateId!,
+                              )
+                              .then((_) {
+                                Provider.of<CommunityPostProvider>(
+                                  context,
+                                  listen: false,
+                                ).fetchPost(
+                                  communityPostUpdate.communityPostId,
+                                );
+                              });
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(value: 'edit', child: Text("Edit")),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Text("Delete"),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
           ],
