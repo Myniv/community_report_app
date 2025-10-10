@@ -122,8 +122,8 @@ class _MainScreenState extends State<MainScreen> {
     //TODO CHAGNE THE SCREENS BASED ON THE CORRESPONDED
     final List<String> _titleScreenMember = [
       "Home",
-      "Report",
-      "List Reports",
+      "Create Report",
+      "History",
       "Profile",
     ];
     final List<Widget> _screensMember = [

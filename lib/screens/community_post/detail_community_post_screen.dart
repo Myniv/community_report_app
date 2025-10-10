@@ -1,6 +1,7 @@
 import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/models/community_post_update.dart';
 import 'package:community_report_app/models/discussion.dart';
+import 'package:community_report_app/models/enum_list.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
 import 'package:community_report_app/provider/community_post_update_provider.dart';
 import 'package:community_report_app/provider/discussion_provider.dart';
@@ -38,6 +39,7 @@ class _DetailCommunityPostScreenState extends State<DetailCommunityPostScreen> {
   @override
   Widget build(BuildContext context) {
     final communityPost = context.watch<CommunityPostProvider>().currentPost;
+    print(communityPost!.status!);
 
     return DefaultTabController(
       length: 2,
@@ -110,6 +112,7 @@ class _DetailCommunityPostScreenState extends State<DetailCommunityPostScreen> {
                         context,
                         communityPost.communityPostUpdates,
                         widget.postId,
+                        communityPost.status!,
                       ),
                     ],
                   ),
@@ -333,9 +336,9 @@ Widget _buildPostUpdatesTab(
   BuildContext context,
   List<CommunityPostUpdate> communityPostUpdates,
   int postId,
+  String communityPostStatus,
 ) {
-  // final discussionProvider = Provider.of<DiscussionProvider>(context);
-  // final profile = context.watch<ProfileProvider>().profile;
+  final profile = context.watch<ProfileProvider>().profile;
   return Expanded(
     child: communityPostUpdates.isEmpty
         ? Column(
@@ -393,34 +396,40 @@ Widget _buildPostUpdatesTab(
                   itemCount: communityPostUpdates.length,
                   itemBuilder: (context, index) {
                     final communityPostUpdate = communityPostUpdates[index];
-                    return buildPostUpdateSection(context, communityPostUpdate);
+                    return buildPostUpdateSection(
+                      context,
+                      communityPostUpdate,
+                      communityPostStatus,
+                    );
                   },
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.addCommunityPostUpdate,
-                        arguments: {'postId': postId},
-                      );
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text("Add Post Update"),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+              if (profile!.role == RoleItem.leader.displayName &&
+                  communityPostStatus != StatusItem.resolved.displayName)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.addCommunityPostUpdate,
+                          arguments: {'postId': postId},
+                        );
+                      },
+                      icon: const Icon(Icons.add),
+                      label: const Text("Add Post Update"),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
   );
@@ -429,12 +438,20 @@ Widget _buildPostUpdatesTab(
 Widget buildPostUpdateSection(
   BuildContext context,
   CommunityPostUpdate communityPostUpdate,
+  String communityPostStatus,
 ) {
   final screenWidth = MediaQuery.of(context).size.width;
   final horizontalPadding = screenWidth * 0.07;
+
+  final imageWidth = screenWidth - (horizontalPadding + 50 + horizontalPadding);
+  final imageHeight = imageWidth * 0.6;
+
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
+      // ============================
+      // Header (Profile & Status)
+      // ============================
       Padding(
         padding: EdgeInsets.fromLTRB(
           horizontalPadding,
@@ -451,7 +468,6 @@ Widget buildPostUpdateSection(
                       communityPostUpdate.userPhoto!.isNotEmpty)
                   ? NetworkImage(communityPostUpdate.userPhoto!)
                   : null,
-              // child: const Icon(Icons.person, size: 20),
               child:
                   (communityPostUpdate.userPhoto == null ||
                       communityPostUpdate.userPhoto!.isEmpty)
@@ -460,7 +476,7 @@ Widget buildPostUpdateSection(
             ),
             const SizedBox(width: 10),
             Text(
-              communityPostUpdate.username!,
+              communityPostUpdate.username ?? '',
               style: const TextStyle(
                 color: Colors.black,
                 fontSize: 16,
@@ -468,9 +484,7 @@ Widget buildPostUpdateSection(
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(width: 10),
-
             Text(
               CustomTheme().timeAgo(communityPostUpdate.createdAt!),
               style: const TextStyle(
@@ -480,26 +494,19 @@ Widget buildPostUpdateSection(
                 fontWeight: FontWeight.w500,
               ),
             ),
-
             const Spacer(),
-
             TextContainer(
               text: communityPostUpdate.isResolved!
                   ? 'resolved'
                   : 'not resolved',
             ),
-            SizedBox(width: 10),
-            // if (editPost == true) ...[
-            //   IconButton(
-            //     icon: const Icon(Icons.more_vert),
-            //     onPressed: () {
-            //       _showOptions(context);
-            //     },
-            //   ),
-            // ],
           ],
         ),
       ),
+
+      // ============================
+      // Title & Description
+      // ============================
       Padding(
         padding: EdgeInsets.fromLTRB(
           horizontalPadding + 50,
@@ -510,8 +517,9 @@ Widget buildPostUpdateSection(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 10),
             Text(
-              communityPostUpdate.title!,
+              communityPostUpdate.title ?? '',
               style: const TextStyle(
                 color: Colors.black,
                 fontSize: 16,
@@ -522,11 +530,11 @@ Widget buildPostUpdateSection(
             SizedBox(
               width: double.infinity,
               child: Text(
-                communityPostUpdate.description!,
+                communityPostUpdate.description ?? '',
                 overflow: TextOverflow.ellipsis,
                 maxLines: 6,
                 style: TextStyle(
-                  color: Colors.black /* Black */,
+                  color: Colors.black,
                   fontSize: MediaQuery.of(context).size.width > 600 ? 16 : 13,
                   fontFamily: 'Roboto',
                   fontWeight: FontWeight.w400,
@@ -535,58 +543,72 @@ Widget buildPostUpdateSection(
               ),
             ),
             const SizedBox(height: 7),
-            Container(
-              width:
-                  MediaQuery.of(context).size.width -
-                  (horizontalPadding + 50 + horizontalPadding),
-              height:
-                  (MediaQuery.of(context).size.width -
-                      (horizontalPadding + 50 + horizontalPadding)) *
-                  0.6,
-              decoration: ShapeDecoration(
-                image: DecorationImage(
-                  image:
-                      (communityPostUpdate.photo != null &&
-                          communityPostUpdate.photo!.isNotEmpty)
-                      ? NetworkImage(communityPostUpdate.photo!)
-                            as ImageProvider
-                      : AssetImage('assets/images/no_image.png'),
-                  fit: BoxFit.cover,
+
+            // ============================
+            // Gambar + PopupMenu di kanan atas
+            // ============================
+            Stack(
+              children: [
+                Container(
+                  width: imageWidth,
+                  height: imageHeight,
+                  decoration: ShapeDecoration(
+                    image: DecorationImage(
+                      image:
+                          (communityPostUpdate.photo != null &&
+                              communityPostUpdate.photo!.isNotEmpty)
+                          ? NetworkImage(communityPostUpdate.photo!)
+                          : const AssetImage('assets/images/no_image.png')
+                                as ImageProvider,
+                      fit: BoxFit.cover,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-              ),
-            ),
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == 'edit') {
-                  Navigator.pushNamed(
-                    context,
-                    AppRoutes.editCommunityPostUpdate,
-                    arguments: {
-                      'postId': communityPostUpdate.communityPostId,
-                      'communityPostUpdateId':
-                          communityPostUpdate.communityPostUpdateId,
-                    },
-                  );
-                } else if (value == 'delete') {
-                  CommunityPostUpdateProvider()
-                      .deleteCommunityPostUpdate(
-                        communityPostUpdate.communityPostUpdateId!,
-                      )
-                      .then((_) {
-                        // Refresh the post to reflect deletion
-                        Provider.of<CommunityPostProvider>(
+                Positioned(
+                  top: 5,
+                  right: 5,
+                  child: PopupMenuButton<String>(
+                    icon: const Icon(
+                      Icons.more_vert,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        Navigator.pushNamed(
                           context,
-                          listen: false,
-                        ).fetchPost(communityPostUpdate.communityPostId);
-                      });
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(value: 'edit', child: Text("Edit")),
-                const PopupMenuItem(value: 'delete', child: Text("Delete")),
+                          AppRoutes.editCommunityPostUpdate,
+                          arguments: {
+                            'postId': communityPostUpdate.communityPostId,
+                            'communityPostUpdateId':
+                                communityPostUpdate.communityPostUpdateId,
+                          },
+                        );
+                      } else if (value == 'delete') {
+                        CommunityPostUpdateProvider()
+                            .deleteCommunityPostUpdate(
+                              communityPostUpdate.communityPostUpdateId!,
+                            )
+                            .then((_) {
+                              Provider.of<CommunityPostProvider>(
+                                context,
+                                listen: false,
+                              ).fetchPost(communityPostUpdate.communityPostId);
+                            });
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(value: 'edit', child: Text("Edit")),
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Text("Delete"),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ],

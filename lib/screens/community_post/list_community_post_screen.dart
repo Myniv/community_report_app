@@ -2,6 +2,7 @@ import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/models/enum_list.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
+import 'package:community_report_app/routes.dart';
 import 'package:community_report_app/widgets/no_item.dart';
 import 'package:community_report_app/widgets/text_container.dart';
 import 'package:flutter/material.dart';
@@ -225,8 +226,16 @@ class _ListCommunityPostScreenState extends State<ListCommunityPostScreen> {
                             ),
                           ],
                         ),
-
-                        trailing: Icon(Icons.arrow_forward_ios),
+                        trailing: IconButton(
+                          icon: Icon(Icons.arrow_forward_ios),
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.discussionDetail,
+                              arguments: post.id,
+                            );
+                          },
+                        ),
                       );
                     },
                     separatorBuilder: (context, index) {

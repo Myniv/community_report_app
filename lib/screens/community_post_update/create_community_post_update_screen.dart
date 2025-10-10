@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:community_report_app/custom_theme.dart';
+import 'package:community_report_app/provider/community_post_provider.dart';
 import 'package:community_report_app/provider/community_post_update_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:intl/intl.dart';
@@ -310,67 +311,16 @@ class _CreateCommunityPostUpdateScreenState
           width: double.infinity,
           fit: BoxFit.cover,
         ),
-        // : Image.network(
-        //     postProvider.currentPost!.photo!,
-        //     height: 300,
-        //     width: double.infinity,
-        //     fit: BoxFit.cover,
-        //     loadingBuilder: (context, child, loadingProgress) {
-        //       if (loadingProgress == null) return child;
-        //       return Container(
-        //         height: 300,
-        //         color: CustomTheme.green.withOpacity(0.3),
-        //         child: Center(
-        //           child: CircularProgressIndicator(
-        //             value: loadingProgress.expectedTotalBytes != null
-        //                 ? loadingProgress.cumulativeBytesLoaded /
-        //                       loadingProgress.expectedTotalBytes!
-        //                 : null,
-        //             valueColor: AlwaysStoppedAnimation<Color>(
-        //               CustomTheme.lightGreen,
-        //             ),
-        //           ),
-        //         ),
-        //       );
-        //     },
-        //     errorBuilder: (context, error, stackTrace) {
-        //       return Container(
-        //         height: 300,
-        //         color: CustomTheme.green.withOpacity(0.3),
-        //         child: Center(
-        //           child: Column(
-        //             mainAxisAlignment: MainAxisAlignment.center,
-        //             children: [
-        //               Icon(
-        //                 Icons.error_outline,
-        //                 color: Colors.red,
-        //                 size: 48,
-        //               ),
-        //               const SizedBox(height: 8),
-        //               Text(
-        //                 "Failed to load image",
-        //                 style: CustomTheme().smallFont(
-        //                   Colors.red,
-        //                   FontWeight.w400,
-        //                   context,
-        //                 ),
-        //               ),
-        //             ],
-        //           ),
-        //         ),
-        //       );
-        //     },
-        //   ),
       ),
     );
   }
 
   Future<void> _submitPost(
     String? userId,
-    CommunityPostUpdateProvider communityPostProvider,
+    CommunityPostUpdateProvider communityPostUpdateProvider,
     int? postId,
   ) async {
-    if (!communityPostProvider.postKey.currentState!.validate()) {
+    if (!communityPostUpdateProvider.postKey.currentState!.validate()) {
       CustomTheme().customScaffoldMessage(
         context: context,
         message: "Please fill all required fields",
@@ -395,11 +345,16 @@ class _CreateCommunityPostUpdateScreenState
     });
 
     try {
-      await communityPostProvider.createCommunityPostUpdate(
+      await communityPostUpdateProvider.createCommunityPostUpdate(
         userId,
         postId!,
         File(_capturedImage!.path),
       );
+
+      await Provider.of<CommunityPostProvider>(
+        context,
+        listen: false,
+      ).fetchPost(postId);
 
       CustomTheme().customScaffoldMessage(
         context: context,

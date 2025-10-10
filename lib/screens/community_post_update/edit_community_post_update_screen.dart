@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:community_report_app/custom_theme.dart';
+import 'package:community_report_app/provider/community_post_provider.dart';
 import 'package:community_report_app/provider/community_post_update_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:intl/intl.dart';
@@ -398,6 +399,11 @@ class _EditCommunityPostUpdateScreenState
         communityPostProvider.currentCommunityPostUpdate!.photo!,
         widget.postId,
       );
+
+      await Provider.of<CommunityPostProvider>(
+        context,
+        listen: false,
+      ).fetchPost(widget.postId);
 
       CustomTheme().customScaffoldMessage(
         context: context,
