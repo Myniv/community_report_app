@@ -37,6 +37,42 @@ class FormScreenState extends State<UpdateProfileScreen> {
     }
   }
 
+  Future<bool> _showLocationChangeWarning(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+            const SizedBox(width: 8),
+            const Text('Warning'),
+          ],
+        ),
+        content: const Text(
+          'You are about to change your location. Please note that once changed, '
+          'you will NOT be able to change it again for the next 30 days.\n\n'
+          'Are you sure you want to proceed?',
+          style: TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text(
+              'Yes, Change Location',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final profileProvider = Provider.of<ProfileProvider>(context);
@@ -203,24 +239,33 @@ class FormScreenState extends State<UpdateProfileScreen> {
                       _customTheme.customDropdown<String>(
                         context: context,
                         icon: Icons.location_on,
-                        value: widget.profileId != null && profileProvider.profile?.role == "admin"
+                        value: profileProvider.profile?.role == "admin"
                             ? profileProvider.otherUserProfile?.location
                             : profileProvider.profile?.location,
                         items: locationItem,
                         label: "Location",
                         hint: "Select Location",
-                        enabled: widget.profileId != null && profileProvider.profile?.role == "admin",
-                        onChanged: widget.profileId != null && profileProvider.profile?.role == "admin"
-                            ? (value) {
-                                profileProvider.setLocation(
-                                  value,
-                                  widget.profileId,
-                                );
-                              }
-                            : null,
+                        enabled: true,
+                        onChanged: (value) {
+                          profileProvider.setLocation(value, widget.profileId);
+                        },
+
                         validator: (value) {
                           if (value == null) {
                             return "Please select a location";
+                          }
+
+                          if (widget.profileId == null) {
+                            final updatedAt =
+                                profileProvider.profile?.updated_at;
+                            if (updatedAt != null) {
+                              final daysSinceUpdate = DateTime.now()
+                                  .difference(updatedAt)
+                                  .inDays;
+                              if (daysSinceUpdate < 30) {
+                                return "You must wait ${30 - daysSinceUpdate} more days to change your location";
+                              }
+                            }
                           }
                           return null;
                         },
@@ -231,14 +276,20 @@ class FormScreenState extends State<UpdateProfileScreen> {
                       _customTheme.customDropdown<String>(
                         context: context,
                         icon: Icons.settings_accessibility,
-                        value: widget.profileId != null && profileProvider.profile?.role == "admin"
+                        value:
+                            widget.profileId != null &&
+                                profileProvider.profile?.role == "admin"
                             ? profileProvider.otherUserProfile?.role
                             : profileProvider.profile?.role,
                         items: roleItem,
-                        enabled: widget.profileId != null && profileProvider.profile?.role == "admin",
+                        enabled:
+                            widget.profileId != null &&
+                            profileProvider.profile?.role == "admin",
                         label: "Role",
                         hint: "Change Role",
-                        onChanged: widget.profileId != null && profileProvider.profile?.role == "admin"
+                        onChanged:
+                            widget.profileId != null &&
+                                profileProvider.profile?.role == "admin"
                             ? (value) {
                                 profileProvider.setRole(
                                   value,
@@ -317,6 +368,29 @@ class FormScreenState extends State<UpdateProfileScreen> {
                                   if (profileProvider.validateForm(
                                     widget.profileId,
                                   )) {
+                                    bool shouldShowWarning = false;
+                                    if (widget.profileId == null) {
+                                      final currentLocation =
+                                          profileProvider.profile?.location;
+                                      final originalLocation =
+                                          profileProvider.currentLocation;
+
+                                      if (originalLocation != null &&
+                                          originalLocation != currentLocation) {
+                                        shouldShowWarning = true;
+                                      }
+                                    }
+
+                                    if (shouldShowWarning) {
+                                      final confirmed =
+                                          await _showLocationChangeWarning(
+                                            context,
+                                          );
+                                      if (!confirmed) {
+                                        return; 
+                                      }
+                                    }
+
                                     widget.profileId != null
                                         ? await profileProvider
                                               .updateOtherProfile()
