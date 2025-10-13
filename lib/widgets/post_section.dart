@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 class PostSection extends StatelessWidget {
   int? postId;
   String? profilePhoto;
+  String? profilePostId;
   String username;
   String title;
   String description;
@@ -33,6 +34,7 @@ class PostSection extends StatelessWidget {
     Key? key,
     this.postId,
     this.profilePhoto,
+    this.profilePostId,
     required this.username,
     required this.title,
     required this.description,
@@ -94,7 +96,7 @@ class PostSection extends StatelessWidget {
 
                       CustomTheme().customScaffoldMessage(
                         context: context,
-                        message: "Post deleted successfully",
+                        message: "Report deleted successfully",
                         backgroundColor: Colors.green,
                       );
                     }
@@ -102,7 +104,7 @@ class PostSection extends StatelessWidget {
                     if (context.mounted) {
                       CustomTheme().customScaffoldMessage(
                         context: context,
-                        message: "Failed to delete post: $e",
+                        message: "Failed to delete report: $e",
                         backgroundColor: Colors.red,
                       );
                     }
@@ -247,26 +249,41 @@ class PostSection extends StatelessWidget {
           ),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundImage:
-                    (profilePhoto != null && profilePhoto!.isNotEmpty)
-                    ? NetworkImage(profilePhoto!)
-                    : null,
-                // child: const Icon(Icons.person, size: 20),
-                child: (profilePhoto == null || profilePhoto!.isEmpty)
-                    ? const Icon(Icons.person, size: 20)
-                    : null,
-              ),
-              const SizedBox(width: 10),
+              InkWell(
+                onTap: () {
+                  if (profilePostId != null) {
+                    Navigator.pushNamed(
+                      context,
+                      '/profile',
+                      arguments: {'uid': profilePostId},
+                    );
+                  }
+                },
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundImage:
+                          (profilePhoto != null && profilePhoto!.isNotEmpty)
+                          ? NetworkImage(profilePhoto!)
+                          : null,
+                      // child: const Icon(Icons.person, size: 20),
+                      child: (profilePhoto == null || profilePhoto!.isEmpty)
+                          ? const Icon(Icons.person, size: 20)
+                          : null,
+                    ),
+                    const SizedBox(width: 10),
 
-              Text(
-                username,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.bold,
+                    Text(
+                      username,
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
