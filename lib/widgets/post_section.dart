@@ -26,6 +26,7 @@ class PostSection extends StatelessWidget {
   int? discussionCount;
   bool? editPost = false;
   final VoidCallback? onPostDeleted;
+  bool? isNavigateDisable;
 
   final CustomTheme _theme = CustomTheme();
 
@@ -49,6 +50,7 @@ class PostSection extends StatelessWidget {
     this.discussionCount,
     this.editPost,
     this.onPostDeleted,
+    this.isNavigateDisable,
   }) : super(key: key);
 
   void _showOptions(BuildContext context) {
@@ -368,6 +370,7 @@ class PostSection extends StatelessWidget {
             children: [
               InkWell(
                 onTap: () {
+                  if (isNavigateDisable == true) return;
                   Navigator.pushNamed(
                     context,
                     AppRoutes.discussionDetail,

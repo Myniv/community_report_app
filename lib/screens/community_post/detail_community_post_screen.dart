@@ -81,6 +81,7 @@ class _DetailCommunityPostScreenState extends State<DetailCommunityPostScreen> {
                             settingPostScreen: false,
                             postImage: communityPost.photo,
                             discussionCount: communityPost.discussions.length,
+                            isNavigateDisable: true,
                           ),
                           const SizedBox(height: 30),
                         ],
