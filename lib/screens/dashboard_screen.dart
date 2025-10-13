@@ -114,38 +114,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                        child: ChartPie(
-                          data: data.totalPostStatus,
-                          title: 'Report Status',
-                          customColors: {
-                            'Pending': Colors.orange,
-                            'On Progress': Colors.blue,
-                            'Resolved': Colors.green,
-                          },
-                          centerSpaceRadius: 50,
-                          showPercentage: true,
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      Expanded(
-                        child: ChartPie(
-                          data: data.totalPostUrgency,
-                          title: 'Urgency Levels',
-                          customColors: {
-                            'High': Colors.red,
-                            'Medium': Colors.orange,
-                            'Low': Colors.green,
-                          },
-                          centerSpaceRadius: 0,
-                          showPercentage: true,
-                        ),
-                      ),
-                    ],
+
+                  ChartPie(
+                    data: data.totalPostStatus,
+                    title: 'Report Status',
+                    customColors: {
+                      'Pending': Colors.orange,
+                      'On Progress': Colors.blue,
+                      'Resolved': Colors.green,
+                    },
+                    centerSpaceRadius: 50,
+                    showPercentage: true,
                   ),
+
+                  SizedBox(height: 16),
+                  
+                  ChartPie(
+                    data: data.totalPostUrgency,
+                    title: 'Urgency Levels',
+                    customColors: {
+                      'High': Colors.red,
+                      'Medium': Colors.orange,
+                      'Low': Colors.green,
+                    },
+                    centerSpaceRadius: 0,
+                    showPercentage: true,
+                  ),
+
                   SizedBox(height: 16),
 
                   ChartBarVertical(

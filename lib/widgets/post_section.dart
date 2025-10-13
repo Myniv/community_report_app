@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 class PostSection extends StatelessWidget {
   int? postId;
   String? profilePhoto;
+  String? profilePostId;
   String username;
   String title;
   String description;
@@ -34,6 +35,7 @@ class PostSection extends StatelessWidget {
     Key? key,
     this.postId,
     this.profilePhoto,
+    this.profilePostId,
     required this.username,
     required this.title,
     required this.description,
@@ -96,7 +98,7 @@ class PostSection extends StatelessWidget {
 
                       CustomTheme().customScaffoldMessage(
                         context: context,
-                        message: "Post deleted successfully",
+                        message: "Report deleted successfully",
                         backgroundColor: Colors.green,
                       );
                     }
@@ -104,7 +106,7 @@ class PostSection extends StatelessWidget {
                     if (context.mounted) {
                       CustomTheme().customScaffoldMessage(
                         context: context,
-                        message: "Failed to delete post: $e",
+                        message: "Failed to delete report: $e",
                         backgroundColor: Colors.red,
                       );
                     }
@@ -249,26 +251,41 @@ class PostSection extends StatelessWidget {
           ),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundImage:
-                    (profilePhoto != null && profilePhoto!.isNotEmpty)
-                    ? NetworkImage(profilePhoto!)
-                    : null,
-                // child: const Icon(Icons.person, size: 20),
-                child: (profilePhoto == null || profilePhoto!.isEmpty)
-                    ? const Icon(Icons.person, size: 20)
-                    : null,
-              ),
-              const SizedBox(width: 10),
+              InkWell(
+                onTap: () {
+                  if (profilePostId != null) {
+                    Navigator.pushNamed(
+                      context,
+                      '/profile',
+                      arguments: {'uid': profilePostId},
+                    );
+                  }
+                },
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundImage:
+                          (profilePhoto != null && profilePhoto!.isNotEmpty)
+                          ? NetworkImage(profilePhoto!)
+                          : null,
+                      // child: const Icon(Icons.person, size: 20),
+                      child: (profilePhoto == null || profilePhoto!.isEmpty)
+                          ? const Icon(Icons.person, size: 20)
+                          : null,
+                    ),
+                    const SizedBox(width: 10),
 
-              Text(
-                username,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.bold,
+                    Text(
+                      username,
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
@@ -300,62 +317,73 @@ class PostSection extends StatelessWidget {
             ],
           ),
         ),
-        Padding(
-          padding: EdgeInsets.fromLTRB(
-            horizontalPadding + 50,
-            0,
-            horizontalPadding,
-            0,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(
-                width: double.infinity,
-                child: Text(
-                  description,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 6,
-                  style: TextStyle(
-                    color: Colors.black /* Black */,
-                    fontSize: MediaQuery.of(context).size.width > 600 ? 16 : 13,
+        InkWell(
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              AppRoutes.discussionDetail,
+              arguments: postId,
+            );
+          },
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              horizontalPadding + 50,
+              0,
+              horizontalPadding,
+              0,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
                     fontFamily: 'Roboto',
-                    fontWeight: FontWeight.w400,
-                    height: 1.92,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-              const SizedBox(height: 7),
-              Container(
-                width:
-                    MediaQuery.of(context).size.width -
-                    (horizontalPadding + 50 + horizontalPadding),
-                height:
-                    (MediaQuery.of(context).size.width -
-                        (horizontalPadding + 50 + horizontalPadding)) *
-                    0.6,
-                decoration: ShapeDecoration(
-                  image: DecorationImage(
-                    image: (postImage != null && postImage!.isNotEmpty)
-                        ? NetworkImage(postImage!) as ImageProvider
-                        : AssetImage('assets/images/no_image.png'),
-                    fit: BoxFit.cover,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
+                SizedBox(
+                  width: double.infinity,
+                  child: Text(
+                    description,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 6,
+                    style: TextStyle(
+                      color: Colors.black /* Black */,
+                      fontSize: MediaQuery.of(context).size.width > 600
+                          ? 16
+                          : 13,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w400,
+                      height: 1.92,
+                    ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 7),
+                Container(
+                  width:
+                      MediaQuery.of(context).size.width -
+                      (horizontalPadding + 50 + horizontalPadding),
+                  height:
+                      (MediaQuery.of(context).size.width -
+                          (horizontalPadding + 50 + horizontalPadding)) *
+                      0.6,
+                  decoration: ShapeDecoration(
+                    image: DecorationImage(
+                      image: (postImage != null && postImage!.isNotEmpty)
+                          ? NetworkImage(postImage!) as ImageProvider
+                          : AssetImage('assets/images/no_image.png'),
+                      fit: BoxFit.cover,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         SizedBox(height: 10),

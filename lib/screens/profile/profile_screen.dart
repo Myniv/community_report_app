@@ -92,6 +92,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+        appBar: widget.profileId != null
+            ? AppBar(
+                backgroundColor: Colors.white,
+                iconTheme: IconThemeData(color: CustomTheme.green),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Profile ${profile?.username ?? ""}",
+                      style: CustomTheme().smallFont(
+                        CustomTheme.green,
+                        FontWeight.bold,
+                        context,
+                      ),
+                    ),
+                    Text(
+                      DateFormat('MMMM dd, yyyy').format(DateTime.now()),
+                      style: CustomTheme().superSmallFont(
+                        CustomTheme.green,
+                        FontWeight.bold,
+                        context,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : null,
         body: Column(
           children: [
             SizedBox(height: 260, child: buildProfileSection(profile, context)),
@@ -334,14 +361,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
 
-        Positioned(
-          right: 0,
-          top: 90,
-          child: Material(
-            color: Colors.transparent,
-            child: buildEditProfileButton(context),
+        if (widget.profileId == null ||
+            context.read<ProfileProvider>().profile?.role == 'admin') ...[
+          Positioned(
+            right: 0,
+            top: 90,
+            child: Material(
+              color: Colors.transparent,
+              child: buildEditProfileButton(context),
+            ),
           ),
-        ),
+        ],
       ],
     );
   }

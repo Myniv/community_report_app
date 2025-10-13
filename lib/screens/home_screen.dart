@@ -371,6 +371,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       final post = communityPost[index];
                       return PostSection(
                         postId: post.id,
+                        profilePostId: post.user_id,
                         profilePhoto: post.user_photo,
                         username: post.username ?? "",
                         title: post.title ?? "",

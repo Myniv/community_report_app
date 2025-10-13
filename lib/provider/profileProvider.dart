@@ -13,6 +13,9 @@ class ProfileProvider extends ChangeNotifier {
   Profile? _profile;
   Profile? get profile => _profile;
 
+  String? _currentLocation;
+  String? get currentLocation => _currentLocation;
+
   Profile? _otherUserProfile;
   Profile? get otherUserProfile => _otherUserProfile;
 
@@ -57,6 +60,7 @@ class ProfileProvider extends ChangeNotifier {
         lastNameController.text = _profile!.last_name ?? '';
         phoneController.text = _profile!.phone ?? '';
         locationController.text = _profile!.location ?? '';
+        _currentLocation = _profile!.location;
       }
       notifyListeners();
     } catch (e) {
@@ -114,6 +118,11 @@ class ProfileProvider extends ChangeNotifier {
         photo: pathPhoto,
         role: _profile!.role,
       );
+      //Make updated at just if location changed
+      if(profile!.location != _currentLocation){
+        // updated.location = locationController.text;
+        updated.updated_at = DateTime.now();
+      }
 
       await _profileService.updateUserProfile(updated);
       _profile = updated;
