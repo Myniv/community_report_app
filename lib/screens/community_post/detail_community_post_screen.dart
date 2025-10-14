@@ -345,30 +345,31 @@ Widget _buildPostUpdatesTab(
                 title: "No Progress Yet",
                 subTitle: "There are no progress on this post.",
               ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.addCommunityPostUpdate,
-                        arguments: {'postId': postId},
-                      );
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text("Add Progress"),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+              if (profile?.role == RoleItem.leader.displayName)
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.addCommunityPostUpdate,
+                          arguments: {'postId': postId},
+                        );
+                      },
+                      icon: const Icon(Icons.add),
+                      label: const Text("Add Progress"),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
             ],
           )
         : Column(
@@ -487,7 +488,9 @@ Widget buildPostUpdateSection(
                       ),
                     ),
                     const SizedBox(width: 4),
-                    if (communityPostStatus != StatusItem.resolved.displayName)
+                    if (communityPostStatus !=
+                            StatusItem.resolved.displayName &&
+                        userRole == RoleItem.leader.displayName)
                       PopupMenuButton<String>(
                         icon: const Icon(
                           Icons.more_vert,
