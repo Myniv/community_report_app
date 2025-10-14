@@ -27,21 +27,28 @@ class _ListCommunityPostScreenState extends State<ListCommunityPostScreen> {
   void initState() {
     super.initState();
     final profile = context.read<ProfileProvider>().profile;
+    final postProvider = context.read<CommunityPostProvider>();
+    final isMember = profile?.role == RoleItem.member.displayName;
+    final isLeader = profile?.role == RoleItem.leader.displayName;
     selectLocation = profile?.location;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      context.read<CommunityPostProvider>().fetchPostsList(
-        location: selectLocation,
-        category: selectCategory,
-        status: selectStatus,
-        urgency: selectUrgency,
-        userId: profile!.uid,
-      );
+      if (isMember || isLeader) {
+        postProvider.fetchPostsList(
+          location: isMember ? selectLocation : profile?.location,
+          category: selectCategory,
+          status: selectStatus,
+          urgency: selectUrgency,
+          userId: isMember ? profile?.uid : null,
+        );
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final communityPostProvider = context.watch<CommunityPostProvider>();
+    final profile = context.watch<ProfileProvider>().profile;
+
     final communityPost = communityPostProvider.postListProfile;
 
     final allCategory = [
@@ -60,6 +67,8 @@ class _ListCommunityPostScreenState extends State<ListCommunityPostScreen> {
       'All',
       ...LocationItem.values.map((e) => e.displayName).toList(),
     ];
+
+    final roleItem = RoleItem.values.map((e) => e.displayName).toList();
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -131,6 +140,7 @@ class _ListCommunityPostScreenState extends State<ListCommunityPostScreen> {
                       hint: "Location",
                       value: selectLocation,
                       items: allLocation,
+                      enabled: profile?.role != RoleItem.leader.displayName,
                       onChanged: (value) async {
                         setState(
                           () => selectLocation = value == 'All' ? null : value!,
@@ -201,21 +211,10 @@ class _ListCommunityPostScreenState extends State<ListCommunityPostScreen> {
                                 TextContainer(
                                   text: post.category ?? '',
                                   category: true,
+                                  useIcon: false,
                                 ),
                                 const SizedBox(width: 8),
-                                Text(
-                                  post.status ?? '',
-                                  style: TextStyle(
-                                    color: post.status == 'pending'
-                                        ? Colors.red
-                                        : post.status == 'in_progress'
-                                        ? Colors.orange
-                                        : Colors.green,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                    fontFamily: 'Roboto',
-                                  ),
-                                ),
+                                TextContainer(text: post.status ?? ''),
                                 const SizedBox(width: 8),
                                 Text(
                                   post.created_at != null

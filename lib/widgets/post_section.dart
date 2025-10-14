@@ -319,6 +319,7 @@ class PostSection extends StatelessWidget {
         ),
         InkWell(
           onTap: () {
+            if (isNavigateDisable == true) return;
             Navigator.pushNamed(
               context,
               AppRoutes.discussionDetail,

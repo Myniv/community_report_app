@@ -326,23 +326,29 @@ class CustomTheme {
     required String? value,
     required List<String> items,
     required Function(String?) onChanged,
+    bool enabled = true,
   }) {
     return GestureDetector(
-      onTap: () {
-        _showDropdownBottomSheet(
-          context: context,
-          hint: hint,
-          value: value,
-          items: items,
-          onChanged: onChanged,
-        );
-      },
+      onTap: enabled
+          ? () {
+              _showDropdownBottomSheet(
+                context: context,
+                hint: hint,
+                value: value,
+                items: items,
+                onChanged: onChanged,
+              );
+            }
+          : null,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: enabled ? Colors.white : Colors.grey.shade300,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFF249A00), width: 1.5),
+          border: Border.all(
+            color: enabled ? Color(0xFF249A00) : Colors.grey,
+            width: 1.5,
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -351,13 +357,13 @@ class CustomTheme {
               value ?? hint,
               style: TextStyle(
                 fontSize: 14,
-                color: const Color(0xFF249A00),
+                color: enabled ? const Color(0xFF249A00) : Colors.grey,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const Icon(
+            Icon(
               Icons.keyboard_arrow_down_rounded,
-              color: Color(0xFF249A00),
+              color: enabled ? const Color(0xFF249A00) : Colors.grey,
               size: 20,
             ),
           ],
@@ -374,7 +380,7 @@ class CustomTheme {
     required Function(String?) onChanged,
   }) {
     showModalBottomSheet(
-      context: context, 
+      context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),

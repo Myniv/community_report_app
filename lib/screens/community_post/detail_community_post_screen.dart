@@ -39,7 +39,6 @@ class _DetailCommunityPostScreenState extends State<DetailCommunityPostScreen> {
   @override
   Widget build(BuildContext context) {
     final communityPost = context.watch<CommunityPostProvider>().currentPost;
-    print(communityPost!.status!);
 
     return DefaultTabController(
       length: 2,
@@ -48,7 +47,7 @@ class _DetailCommunityPostScreenState extends State<DetailCommunityPostScreen> {
           backgroundColor: Colors.white,
           iconTheme: IconThemeData(color: CustomTheme.green),
           title: Text(
-            "Detail Post",
+            "Detail Report",
             style: CustomTheme().smallFont(
               CustomTheme.green,
               FontWeight.bold,
@@ -61,32 +60,6 @@ class _DetailCommunityPostScreenState extends State<DetailCommunityPostScreen> {
             : SafeArea(
                 child: NestedScrollView(
                   headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                    SliverToBoxAdapter(
-                      child: Column(
-                        children: [
-                          PostSection(
-                            postId: communityPost.id,
-                            profilePhoto: communityPost.user_photo,
-                            username: communityPost.username ?? "",
-                            title: communityPost.title ?? "",
-                            description: communityPost.description ?? "",
-                            category: communityPost.category ?? "",
-                            urgency: communityPost.urgency ?? "",
-                            status: communityPost.status ?? "",
-                            location: communityPost.location ?? "",
-                            latitude: communityPost.latitude ?? 0.0,
-                            longitude: communityPost.longitude ?? 0.0,
-                            createdAt:
-                                communityPost.created_at ?? DateTime.now(),
-                            settingPostScreen: false,
-                            postImage: communityPost.photo,
-                            discussionCount: communityPost.discussions.length,
-                            isNavigateDisable: true,
-                          ),
-                          const SizedBox(height: 30),
-                        ],
-                      ),
-                    ),
                     SliverPersistentHeader(
                       pinned: true,
                       delegate: TabBarDelegate(
@@ -96,7 +69,7 @@ class _DetailCommunityPostScreenState extends State<DetailCommunityPostScreen> {
                           indicatorColor: Colors.green,
                           tabs: [
                             Tab(text: "Discussions"),
-                            Tab(text: "Post Updates"),
+                            Tab(text: "Progress"),
                           ],
                         ),
                       ),
@@ -108,6 +81,7 @@ class _DetailCommunityPostScreenState extends State<DetailCommunityPostScreen> {
                         context,
                         communityPost.discussions,
                         widget.postId,
+                        communityPost,
                       ),
                       _buildPostUpdatesTab(
                         context,
@@ -128,28 +102,51 @@ Widget _buildDiscussionTab(
   BuildContext context,
   List<Discussion> discussions,
   int postId,
+  communityPost,
 ) {
   final discussionProvider = Provider.of<DiscussionProvider>(context);
   final profile = context.watch<ProfileProvider>().profile;
   return Expanded(
     child: Column(
       children: [
+        PostSection(
+          postId: communityPost.id,
+          profilePhoto: communityPost.user_photo,
+          username: communityPost.username ?? "",
+          title: communityPost.title ?? "",
+          description: communityPost.description ?? "",
+          category: communityPost.category ?? "",
+          urgency: communityPost.urgency ?? "",
+          status: communityPost.status ?? "",
+          location: communityPost.location ?? "",
+          latitude: communityPost.latitude ?? 0.0,
+          longitude: communityPost.longitude ?? 0.0,
+          createdAt: communityPost.created_at ?? DateTime.now(),
+          settingPostScreen: false,
+          postImage: communityPost.photo,
+          discussionCount: communityPost.discussions.length,
+          isNavigateDisable: true,
+        ),
+
         const SizedBox(height: 30),
-        Text(
-          "Discussions (${discussions.length})",
-          style: CustomTheme().smallFont(
-            Colors.black,
-            FontWeight.bold,
-            context,
+        Padding(
+          padding: EdgeInsetsGeometry.fromLTRB(20, 0, 0, 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                "Discussions (${discussions.length})",
+                style: CustomTheme().superSmallFont(
+                  Colors.black,
+                  FontWeight.bold,
+                  context,
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 16),
-        const Divider(
-          thickness: 1,
-          color: Colors.grey,
-          indent: 16,
-          endIndent: 16,
-        ),
+        const SizedBox(height: 5),
+        Divider(thickness: 1, color: Colors.grey, indent: 16, endIndent: 16),
         Expanded(
           child: ListView.separated(
             shrinkWrap: true,
@@ -345,8 +342,8 @@ Widget _buildPostUpdatesTab(
         ? Column(
             children: [
               const NoItem(
-                title: "No Post Updates Yet",
-                subTitle: "There are no post updates on this post.",
+                title: "No Progress Yet",
+                subTitle: "There are no progress on this post.",
               ),
               Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -361,7 +358,7 @@ Widget _buildPostUpdatesTab(
                       );
                     },
                     icon: const Icon(Icons.add),
-                    label: const Text("Add Post Update"),
+                    label: const Text("Add Progress"),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       textStyle: const TextStyle(
@@ -377,16 +374,24 @@ Widget _buildPostUpdatesTab(
         : Column(
             children: [
               const SizedBox(height: 30),
-              Text(
-                "Post Updates (${communityPostUpdates.length})",
-                style: CustomTheme().smallFont(
-                  Colors.black,
-                  FontWeight.bold,
-                  context,
+              Padding(
+                padding: EdgeInsetsGeometry.fromLTRB(20, 0, 0, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Progress (${communityPostUpdates.length})",
+                      style: CustomTheme().superSmallFont(
+                        Colors.black,
+                        FontWeight.bold,
+                        context,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
-              const Divider(
+              const SizedBox(height: 5),
+              Divider(
                 thickness: 1,
                 color: Colors.grey,
                 indent: 16,
@@ -421,7 +426,7 @@ Widget _buildPostUpdatesTab(
                         );
                       },
                       icon: const Icon(Icons.add),
-                      label: const Text("Add Post Update"),
+                      label: const Text("Add Progress"),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         textStyle: const TextStyle(
