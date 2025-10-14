@@ -247,6 +247,11 @@ class CommunityPostUpdateProvider with ChangeNotifier {
     }
   }
 
+  void clearControllers() {
+    titleController.clear();
+    descriptionController.clear();
+  }
+
   @override
   void dispose() {
     titleController.dispose();

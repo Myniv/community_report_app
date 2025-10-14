@@ -444,187 +444,158 @@ Widget _buildPostUpdatesTab(
 
 Widget buildPostUpdateSection(
   BuildContext context,
-  CommunityPostUpdate communityPostUpdate,
+  CommunityPostUpdate update,
   String communityPostStatus,
-  String role,
+  String userRole,
 ) {
-  final screenWidth = MediaQuery.of(context).size.width;
-  final horizontalPadding = screenWidth * 0.07;
-
-  final imageWidth = screenWidth - (horizontalPadding + 50 + horizontalPadding);
-  final imageHeight = imageWidth * 0.6;
-
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      // ============================
-      // Header (Profile & Status)
-      // ============================
-      Padding(
-        padding: EdgeInsets.fromLTRB(
-          horizontalPadding,
-          30,
-          horizontalPadding,
-          0,
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundImage:
-                  (communityPostUpdate.userPhoto != null &&
-                      communityPostUpdate.userPhoto!.isNotEmpty)
-                  ? NetworkImage(communityPostUpdate.userPhoto!)
-                  : null,
-              child:
-                  (communityPostUpdate.userPhoto == null ||
-                      communityPostUpdate.userPhoto!.isEmpty)
-                  ? const Icon(Icons.person, size: 20)
-                  : null,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              communityPostUpdate.username ?? '',
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              CustomTheme().timeAgo(communityPostUpdate.createdAt!),
-              style: const TextStyle(
-                color: Color(0xFF249A00),
-                fontSize: 13,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const Spacer(),
-            TextContainer(
-              text: communityPostUpdate.isResolved!
-                  ? 'resolved'
-                  : 'not resolved',
-            ),
-          ],
-        ),
-      ),
-
-      // ============================
-      // Title & Description
-      // ============================
-      Padding(
-        padding: EdgeInsets.fromLTRB(
-          horizontalPadding + 50,
-          0,
-          horizontalPadding,
-          0,
-        ),
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    child: Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 10),
-            Text(
-              communityPostUpdate.title ?? '',
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(
-              width: double.infinity,
-              child: Text(
-                communityPostUpdate.description ?? '',
-                overflow: TextOverflow.ellipsis,
-                maxLines: 6,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: MediaQuery.of(context).size.width > 600 ? 16 : 13,
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.w400,
-                  height: 1.92,
-                ),
-              ),
-            ),
-            const SizedBox(height: 7),
-
-            // ============================
-            // Gambar + PopupMenu di kanan atas
-            // ============================
-            Stack(
+            // 📝 Header: Title or Date
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: imageWidth,
-                  height: imageHeight,
-                  decoration: ShapeDecoration(
-                    image: DecorationImage(
-                      image:
-                          (communityPostUpdate.photo != null &&
-                              communityPostUpdate.photo!.isNotEmpty)
-                          ? NetworkImage(communityPostUpdate.photo!)
-                          : const AssetImage('assets/images/no_image.png')
-                                as ImageProvider,
-                      fit: BoxFit.cover,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
+                Text(
+                  update.title ?? "Progress Update",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
-                if (RoleItem.leader.displayName == role)
-                  Positioned(
-                    top: 5,
-                    right: 5,
-                    child: PopupMenuButton<String>(
-                      icon: const Icon(
-                        Icons.more_vert,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                      onSelected: (value) {
-                        if (value == 'edit') {
-                          Navigator.pushNamed(
-                            context,
-                            AppRoutes.editCommunityPostUpdate,
-                            arguments: {
-                              'postId': communityPostUpdate.communityPostId,
-                              'communityPostUpdateId':
-                                  communityPostUpdate.communityPostUpdateId,
-                            },
-                          );
-                        } else if (value == 'delete') {
-                          CommunityPostUpdateProvider()
-                              .deleteCommunityPostUpdate(
-                                communityPostUpdate.communityPostUpdateId!,
-                              )
-                              .then((_) {
-                                Provider.of<CommunityPostProvider>(
-                                  context,
-                                  listen: false,
-                                ).fetchPost(
-                                  communityPostUpdate.communityPostId,
-                                );
-                              });
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(value: 'edit', child: Text("Edit")),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Text("Delete"),
-                        ),
-                      ],
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextContainer(
+                      text: update.isResolved! ? 'Resolved' : 'Not Resolved',
+                      // useIcon: update.isResolved! ? true : false,
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Text(
+                      CustomTheme().timeAgo(update.createdAt!),
+                      style: const TextStyle(
+                        color: Color(0xFF249A00),
+                        fontSize: 13,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    if (communityPostStatus != StatusItem.resolved.displayName)
+                      PopupMenuButton<String>(
+                        icon: const Icon(
+                          Icons.more_vert,
+                          color: Colors.black,
+                          size: 24,
+                        ),
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.editCommunityPostUpdate,
+                              arguments: {
+                                'postId': update.communityPostId,
+                                'communityPostUpdateId':
+                                    update.communityPostUpdateId,
+                              },
+                            );
+                          } else if (value == 'delete') {
+                            CommunityPostUpdateProvider()
+                                .deleteCommunityPostUpdate(
+                                  update.communityPostUpdateId!,
+                                )
+                                .then((_) {
+                                  Provider.of<CommunityPostProvider>(
+                                    context,
+                                    listen: false,
+                                  ).fetchPost(update.communityPostId);
+                                });
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Text("Edit"),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Text("Delete"),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
               ],
             ),
+            const SizedBox(height: 8),
+
+            // 📃 Description
+            Text(
+              update.description ?? "",
+              style: const TextStyle(fontSize: 14),
+            ),
+
+            const SizedBox(height: 12),
+
+            // 📸 Image preview (optional)
+            if (update.photo != null && update.photo!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[200],
+                    foregroundColor: Colors.black87,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    _showImagePopup(context, update.photo!);
+                  },
+                  icon: const Icon(Icons.image_outlined),
+                  label: const Text(
+                    'Show Image',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
-    ],
+    ),
+  );
+}
+
+void _showImagePopup(BuildContext context, String imageUrl) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Stack(
+          alignment: Alignment.topRight,
+          children: [
+            InteractiveViewer(
+              // zoom in / out
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(imageUrl, fit: BoxFit.contain),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      );
+    },
   );
 }

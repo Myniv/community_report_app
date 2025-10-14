@@ -38,6 +38,7 @@ class _CreateCommunityPostUpdateScreenState
   @override
   void initState() {
     super.initState();
+    context.read<CommunityPostUpdateProvider>().clearControllers();
     _initAsync();
   }
 
