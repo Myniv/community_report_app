@@ -139,15 +139,22 @@ class _MainScreenState extends State<MainScreen> {
       Icons.person,
     ];
 
-    final List<String> _titleScreenLeader = ["Home", "Regist", "Profile"];
+    final List<String> _titleScreenLeader = [
+      "Home",
+      "Create Report",
+      "History",
+      "Profile",
+    ];
     final List<Widget> _screensLeader = [
       HomeScreen(),
-      RegisterScreen(),
+      CreateCommunityPostScreen(onTabSelected: _changeTab),
+      ListCommunityPostScreen(),
       ProfileScreen(),
     ];
     final List<IconData> _iconScreenLeader = [
       Icons.home,
-      Icons.app_registration,
+      Icons.add_box_outlined,
+      Icons.assignment,
       Icons.person,
     ];
 
