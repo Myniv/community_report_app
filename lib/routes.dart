@@ -5,6 +5,7 @@ import 'package:community_report_app/screens/community_post/create_community_pos
 import 'package:community_report_app/screens/community_post/detail_community_post_screen.dart';
 import 'package:community_report_app/screens/community_post_update/create_community_post_update_screen.dart';
 import 'package:community_report_app/screens/community_post_update/edit_community_post_update_screen.dart';
+import 'package:community_report_app/screens/discussion/discussion_detail_screen.dart';
 import 'package:community_report_app/screens/profile/edit_profile_screen.dart';
 import 'package:community_report_app/screens/profile/profile_list_screen.dart';
 import 'package:community_report_app/screens/profile/profile_screen.dart';
@@ -22,6 +23,7 @@ class AppRoutes {
   static const String editPost = '/edit_post';
   static const String addCommunityPostUpdate = '/add_community_post_update';
   static const String editCommunityPostUpdate = '/edit_community_post_update';
+  static const String discussionUserWithPost = '/discussion_detail_post';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     // final args = settings.arguments;
@@ -85,6 +87,13 @@ class AppRoutes {
             postId: args['postId'],
             communityPostUpdateId: args['communityPostUpdateId'],
           ),
+          settings: settings,
+        );
+
+      case discussionUserWithPost:
+        final discussionId = settings.arguments as int;
+        return MaterialPageRoute(
+          builder: (_) => DetailDiscussionScreen(discussionId: discussionId),
           settings: settings,
         );
 

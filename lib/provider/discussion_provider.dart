@@ -8,7 +8,7 @@ class DiscussionProvider with ChangeNotifier {
   final messageController = TextEditingController();
   final editMessageController = TextEditingController();
 
-  final List<Discussion> _discussionsList = [];
+  List<Discussion> _discussionsList = [];
   List<Discussion> get discussionListProfile => _discussionsList;
 
   Discussion? _currentDiscussion;
@@ -25,34 +25,22 @@ class DiscussionProvider with ChangeNotifier {
 
   final DiscussionService _discussionService = DiscussionService();
 
-  // Future<void> fetchPostsList({
-  //   String? userId,
-  //   String? status,
-  //   String? category,
-  //   String? location,
-  //   bool? isReport,
-  //   String? urgency,
-  // }) async {
-  //   _isLoading = true;
-  //   notifyListeners();
+  Future<void> fetchDiscussionsList({String? userId}) async {
+    _isLoading = true;
+    notifyListeners();
 
-  //   try {
-  //     _postsListProfile = await _communityPostServices.getPosts(
-  //       userId: userId,
-  //       status: status,
-  //       category: category,
-  //       location: location,
-  //       isReport: isReport,
-  //       urgency: urgency,
-  //     );
-  //   } catch (e) {
-  //     print("Error in provider: $e");
-  //     _postsListProfile = [];
-  //   } finally {
-  //     _isLoading = false;
-  //     notifyListeners();
-  //   }
-  // }
+    try {
+      _discussionsList = await _discussionService.getDiscussions(
+        userId: userId,
+      );
+    } catch (e) {
+      print("Error in provider: $e");
+      _discussionsList = [];
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> fetchDiscussion(int? discussionId) async {
     _isLoading = true;
@@ -66,6 +54,24 @@ class DiscussionProvider with ChangeNotifier {
     } catch (e) {
       print("Error in provider: $e");
       // _postsListProfile = [];
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchDiscussionWithCommunityPost(int? discussionId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final data = await _discussionService.getDiscussionbyIdWithCommunityPost(
+        discussionId!,
+      );
+      _currentDiscussion = data;
+    } catch (e, stackTrace) {
+      print("❌ Error in provider: $e");
+      print("❌ Full StackTrace: $stackTrace");
     } finally {
       _isLoading = false;
       notifyListeners();

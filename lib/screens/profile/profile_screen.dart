@@ -1,8 +1,10 @@
 import 'package:community_report_app/custom_theme.dart';
 import 'package:community_report_app/models/community_post.dart';
+import 'package:community_report_app/models/discussion.dart';
 import 'package:community_report_app/models/enum_list.dart';
 import 'package:community_report_app/models/profile.dart';
 import 'package:community_report_app/provider/community_post_provider.dart';
+import 'package:community_report_app/provider/discussion_provider.dart';
 import 'package:community_report_app/provider/profileProvider.dart';
 import 'package:community_report_app/routes.dart';
 import 'package:community_report_app/widgets/no_item.dart';
@@ -45,6 +47,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             location: selectLocation,
             urgency: selectUrgency,
           );
+
+          await context.read<DiscussionProvider>().fetchDiscussionsList(
+            userId: widget.profileId,
+          );
         } else {
           print("Loading own profile");
 
@@ -55,6 +61,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               category: selectCategory,
               location: selectLocation,
               urgency: selectUrgency,
+            );
+
+            await context.read<DiscussionProvider>().fetchDiscussionsList(
+              userId: profileProvider.profile?.uid,
             );
           }
         }
@@ -71,6 +81,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         : profileProvider.otherUserProfile;
     final communityPostProvider = context.watch<CommunityPostProvider>();
     final communityPost = communityPostProvider.postListProfile;
+    final discussionProvider = context.watch<DiscussionProvider>();
+    final discussionLists = discussionProvider.discussionListProfile;
 
     final allCategory = [
       'All',
@@ -129,7 +141,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               indicatorColor: Colors.green,
               tabs: [
                 Tab(text: "Posts"),
-                Tab(text: "Likes"),
+                Tab(text: "Discussions"),
               ],
             ),
 
@@ -288,15 +300,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
 
-                  ListView.builder(
-                    itemCount: 5,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        leading: const Icon(Icons.favorite, color: Colors.red),
-                        title: Text("Liked Post #$index"),
-                        subtitle: const Text("This is a liked post"),
-                      );
-                    },
+                  Expanded(
+                    child: discussionProvider.isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : discussionLists.isEmpty
+                        ? const NoItem(
+                            title: "No Discussion",
+                            subTitle: "You have no discussion yet",
+                          )
+                        : ListView.separated(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            itemCount: discussionLists.length,
+                            separatorBuilder: (context, index) => const Divider(
+                              height: 20,
+                              thickness: 0.5,
+                              color: Colors.grey,
+                            ),
+                            itemBuilder: (context, index) {
+                              final discussion = discussionLists[index];
+                              return buildDiscussionTab(
+                                context: context,
+                                profile: profile,
+                                discussion: discussion,
+                              );
+                            },
+                          ),
                   ),
                 ],
               ),
@@ -555,27 +583,76 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-// class _TabBarDelegate extends SliverPersistentHeaderDelegate {
-//   final TabBar tabBar;
-//   _TabBarDelegate(this.tabBar);
-
-//   @override
-//   double get minExtent => tabBar.preferredSize.height;
-//   @override
-//   double get maxExtent => tabBar.preferredSize.height;
-
-//   @override
-//   Widget build(
-//     BuildContext context,
-//     double shrinkOffset,
-//     bool overlapsContent,
-//   ) {
-//     return Container(
-//       color: ColorScheme.fromSeed(seedColor: Colors.deepPurple).surface,
-//       child: tabBar,
-//     );
-//   }
-
-//   @override
-//   bool shouldRebuild(_TabBarDelegate oldDelegate) => false;
-// }
+Widget buildDiscussionTab({
+  BuildContext? context,
+  Profile? profile,
+  Discussion? discussion,
+}) {
+  return InkWell(
+    onTap: () {
+      if (discussion.discussionId != null) {
+        Navigator.pushNamed(
+          context!,
+          AppRoutes.discussionUserWithPost,
+          arguments: discussion.discussionId,
+        );
+      }
+    },
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(12, 17, 12, 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Foto user
+          CircleAvatar(
+            radius: 22,
+            backgroundImage:
+                (profile?.photo != null && profile!.photo!.isNotEmpty)
+                ? NetworkImage(profile.photo!)
+                : null,
+            child: (profile?.photo == null || profile!.photo!.isEmpty)
+                ? const Icon(Icons.person, size: 22)
+                : null,
+          ),
+          const SizedBox(width: 12),
+          // Isi komentar
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Username + Waktu
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      profile?.username ?? '',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      CustomTheme().timeAgo(discussion!.createdAt!),
+                      style: const TextStyle(
+                        color: Color(0xFF249A00),
+                        fontSize: 13,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                // Pesan / komentar
+                Text(
+                  discussion.message ?? '',
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
