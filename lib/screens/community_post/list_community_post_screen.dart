@@ -46,6 +46,7 @@ class _ListCommunityPostScreenState extends State<ListCommunityPostScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final customTheme = CustomTheme();
     final communityPostProvider = context.watch<CommunityPostProvider>();
     final profile = context.watch<ProfileProvider>().profile;
 
@@ -157,94 +158,184 @@ class _ListCommunityPostScreenState extends State<ListCommunityPostScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 30),
 
+            // const SizedBox(height: 8),
             communityPostProvider.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : communityPost.isEmpty
-                ? const NoItem(
-                    title: "No Post",
-                    subTitle: "You have no post yet",
+                ? Center(
+                    child: NoItem(
+                      title: "No Post",
+                      subTitle: "You have no history yet",
+                    ),
                   )
-                : ListView.separated(
+                : ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     itemCount: communityPost.length,
                     itemBuilder: (context, index) {
                       final post = communityPost[index];
-                      return ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 25,
-                          vertical: 10,
-                        ),
-                        leading: ClipOval(
-                          child: Image.network(
-                            post.photo ?? '',
-                            width: 50,
-                            height: 50,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Image.asset(
-                                'assets/images/default_profile.png',
-                                width: 50,
-                                height: 50,
-                                fit: BoxFit.cover,
-                              );
-                            },
-                          ),
-                        ),
-                        title: Text(
-                          post.title!,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                            fontFamily: 'Roboto',
-                          ),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 7),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                TextContainer(
-                                  text: post.category ?? '',
-                                  category: true,
-                                  useIcon: false,
-                                ),
-                                const SizedBox(width: 8),
-                                TextContainer(text: post.status ?? ''),
-                                const SizedBox(width: 8),
-                                Text(
-                                  post.created_at != null
-                                      ? ' • ${DateFormat('d MMM').format(post.created_at!)}'
-                                      : '',
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        trailing: IconButton(
-                          icon: Icon(Icons.arrow_forward_ios),
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              AppRoutes.discussionDetail,
-                              arguments: post.id,
-                            );
-                          },
-                        ),
-                      );
-                    },
-                    separatorBuilder: (context, index) {
-                      return const Padding(
-                        padding: EdgeInsetsGeometry.symmetric(horizontal: 25),
-                        child: Divider(thickness: 1, color: Colors.grey),
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _buildPostCard(context, customTheme, post),
                       );
                     },
                   ),
           ],
+        ),
+      ),
+    );
+  }
+
+  IconData _getCategoryIcon(String? category) {
+    switch (category?.toLowerCase()) {
+      case 'waste':
+        return Icons.delete_outline;
+      case 'water':
+        return Icons.water_drop_outlined;
+      case 'electricity':
+        return Icons.electrical_services_outlined;
+      case 'gas':
+        return Icons.local_fire_department_outlined;
+      case 'other':
+      default:
+        return Icons.category_outlined;
+    }
+  }
+
+  Widget _buildPostCard(
+    BuildContext context,
+    CustomTheme customTheme,
+    dynamic post,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: CustomTheme.borderRadius,
+        boxShadow: [
+          BoxShadow(
+            color: CustomTheme.green.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: CustomTheme.borderRadius,
+        child: InkWell(
+          borderRadius: CustomTheme.borderRadius,
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              AppRoutes.discussionDetail,
+              arguments: post.id,
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: CustomTheme.green, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: CustomTheme.green.withOpacity(0.2),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  // child: CircleAvatar(
+                  //   radius: 28,
+                  //   backgroundImage:
+                  //       (post.photo != null && post.photo!.isNotEmpty)
+                  //       ? NetworkImage(post.photo!)
+                  //       : const AssetImage('assets/images/default_profile.png')
+                  //             as ImageProvider,
+                  //   backgroundColor: CustomTheme.whiteKindaGreen.withOpacity(
+                  //     0.3,
+                  //   ),
+                  //   child: (post.photo == null || post.photo!.isEmpty)
+                  //       ? Icon(
+                  //           Icons.person,
+                  //           size: 32,
+                  //           color: CustomTheme.whiteKindaGreen,
+                  //         )
+                  //       : null,
+                  // ),
+                  child: CircleAvatar(
+                    radius: 28,
+                    backgroundColor: CustomTheme.green,
+                    child: Icon(
+                      _getCategoryIcon(post.category),
+                      size: 28,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        post.title ?? '',
+                        style: customTheme.mediumFont(
+                          CustomTheme.green,
+                          FontWeight.w700,
+                          context,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          TextContainer(
+                            text: post.category ?? '',
+                            category: true,
+                            useIcon: false,
+                          ),
+                          const SizedBox(width: 8),
+                          TextContainer(text: post.status ?? ''),
+                          const SizedBox(width: 8),
+                          Text(
+                            post.created_at != null
+                                ? '• ${DateFormat('d MMM').format(post.created_at!)}'
+                                : '',
+                            style: customTheme.smallFont(
+                              CustomTheme.green,
+                              FontWeight.w500,
+                              context,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: CustomTheme.lightGreen.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.keyboard_arrow_right_rounded,
+                    color: CustomTheme.lightGreen,
+                    size: 24,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
