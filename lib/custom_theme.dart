@@ -252,6 +252,7 @@ class CustomTheme {
     required String hint,
     required void Function(T?)? onChanged,
     String? Function(T?)? validator,
+    String Function(T)? itemLabel, // Add this parameter
     IconData? icon,
     Color? iconColor,
     bool enabled = true,
@@ -265,7 +266,9 @@ class CustomTheme {
               (item) => DropdownMenuItem<T>(
                 value: item,
                 child: Text(
-                  item.toString(),
+                  itemLabel != null
+                      ? itemLabel(item)
+                      : item.toString(), // Use custom label if provided
                   style: superSmallFont(
                     enabled ? Colors.black87 : Colors.black45,
                     FontWeight.w400,

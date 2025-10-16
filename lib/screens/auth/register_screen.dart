@@ -148,9 +148,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     if (value == null || value.trim().isEmpty) {
                       return "Please enter a phone number";
                     }
-                    if (int.tryParse(value.trim()) == null) {
-                      return "Employee ID must be a number";
-                    }
+                    // if (int.tryParse(value.trim()) == null) {
+                    //   return "Employee ID must be a number";
+                    // }
                     if (value.trim().length < 10) {
                       return "Phone number must be at least 10 characters";
                     }

@@ -558,15 +558,17 @@ class _CreateCommunityPostUpdateScreenState
                         context: context,
                         value: postProvider.isResolved,
                         items: const [false, true],
+                        itemLabel: (value) => value
+                            ? "Resolved"
+                            : "On Progress", // Add custom labels
                         label: "Is Resolved",
                         hint: "Select status",
-                        // enabled: !isEdit,
                         onChanged: (value) {
                           postProvider.setIsResolved(value!);
                         },
                         validator: (value) {
                           if (value == null) {
-                            return "Please select a category";
+                            return "Please select a status";
                           }
                           return null;
                         },
