@@ -39,6 +39,7 @@ class _DetailCommunityPostScreenState extends State<DetailCommunityPostScreen> {
   @override
   Widget build(BuildContext context) {
     final communityPost = context.watch<CommunityPostProvider>().currentPost;
+    final communityPostProvider = context.watch<CommunityPostProvider>();
 
     return DefaultTabController(
       length: 2,
@@ -55,7 +56,7 @@ class _DetailCommunityPostScreenState extends State<DetailCommunityPostScreen> {
             ),
           ),
         ),
-        body: communityPost == null
+        body: communityPostProvider.isLoading
             ? const Center(child: CircularProgressIndicator())
             : SafeArea(
                 child: NestedScrollView(
@@ -79,13 +80,13 @@ class _DetailCommunityPostScreenState extends State<DetailCommunityPostScreen> {
                     children: [
                       _buildDiscussionTab(
                         context,
-                        communityPost.discussions,
+                        communityPost!.discussions,
                         widget.postId,
                         communityPost,
                       ),
                       _buildPostUpdatesTab(
                         context,
-                        communityPost.communityPostUpdates,
+                        communityPost!.communityPostUpdates,
                         widget.postId,
                         communityPost.status!,
                       ),
