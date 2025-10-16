@@ -75,12 +75,13 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Community Report App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: AuthWrapper(),
       onGenerateRoute: AppRoutes.generateRoute,
+      initialRoute: AppRoutes.splash,
     );
   }
 }

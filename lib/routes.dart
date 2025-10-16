@@ -5,6 +5,7 @@ import 'package:community_report_app/screens/community_post/create_community_pos
 import 'package:community_report_app/screens/community_post/detail_community_post_screen.dart';
 import 'package:community_report_app/screens/community_post_update/create_community_post_update_screen.dart';
 import 'package:community_report_app/screens/community_post_update/edit_community_post_update_screen.dart';
+import 'package:community_report_app/screens/custom_splash_screen.dart';
 import 'package:community_report_app/screens/discussion/discussion_detail_screen.dart';
 import 'package:community_report_app/screens/profile/edit_profile_screen.dart';
 import 'package:community_report_app/screens/profile/profile_list_screen.dart';
@@ -24,6 +25,8 @@ class AppRoutes {
   static const String addCommunityPostUpdate = '/add_community_post_update';
   static const String editCommunityPostUpdate = '/edit_community_post_update';
   static const String discussionUserWithPost = '/discussion_detail_post';
+  static const String splash = '/splash';
+
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     // final args = settings.arguments;
@@ -65,6 +68,11 @@ class AppRoutes {
       case editPost:
         return MaterialPageRoute(
           builder: (_) => CreateCommunityPostScreen(onTabSelected: null),
+          settings: settings,
+        );
+      case splash:
+        return MaterialPageRoute(
+          builder: (_) => CustomSplashScreen(),
           settings: settings,
         );
       case discussionDetail:

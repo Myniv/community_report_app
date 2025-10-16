@@ -33,14 +33,18 @@ class AuthWrapper extends StatelessWidget {
           }
 
           if (profileProvider.profile == null && profileProvider.isLoading) {
-            return const Scaffold(
+            return Scaffold(
               body: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(),
+                    Image.asset(
+                      'assets/images/logo.png',
+                      width: 200,
+                      height: 200,
+                    ),
                     SizedBox(height: 16),
-                    Text('Loading profile...'),
+                    CircularProgressIndicator(),
                   ],
                 ),
               ),
