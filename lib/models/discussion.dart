@@ -1,3 +1,5 @@
+import 'package:community_report_app/models/community_post.dart';
+
 class Discussion {
   final int? discussionId;
   final String? userId;
@@ -8,6 +10,7 @@ class Discussion {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final DateTime? deletedAt;
+  final CommunityPost? communityPost;
 
   Discussion({
     this.discussionId,
@@ -19,6 +22,7 @@ class Discussion {
     this.createdAt,
     this.updatedAt,
     this.deletedAt,
+    this.communityPost,
   });
 
   factory Discussion.fromMap(Map<String, dynamic> map) {
@@ -34,6 +38,23 @@ class Discussion {
       userId: map['userId'] ?? '',
       communityPostId: map['communityPostId'] as int,
       message: map['message'] ?? '',
+    );
+  }
+
+  factory Discussion.fromMapWithCommunityPost(Map<String, dynamic> map) {
+    return Discussion(
+      discussionId: map['discussionId'] as int,
+      createdAt: DateTime.parse(map['createdAt']),
+      updatedAt: DateTime.parse(map['updatedAt']),
+      deletedAt: map['deletedAt'] != null
+          ? DateTime.parse(map['deletedAt'])
+          : null,
+      userId: map['userId'] ?? '',
+      communityPostId: map['communityPostId'] as int,
+      message: map['message'] ?? '',
+      communityPost: map['communityPost'] != null
+          ? CommunityPost.fromAPIWithDiscussions(map['communityPost'])
+          : null,
     );
   }
 
