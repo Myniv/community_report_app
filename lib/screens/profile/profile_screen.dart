@@ -323,7 +323,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget buildCoverProfile() {
-    return Container(height: 195, color: const Color(0xFFD9D9D9));
+    return Container(
+      height: 195,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [CustomTheme.green, const Color(0xFF1B7A00)],
+        ),
+      ),
+      child: CustomPaint(painter: PatternPainter(), size: Size.infinite),
+    );
   }
 
   Widget buildProfileHeader(Profile? profile, BuildContext context) {
@@ -555,27 +565,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-// class _TabBarDelegate extends SliverPersistentHeaderDelegate {
-//   final TabBar tabBar;
-//   _TabBarDelegate(this.tabBar);
+class PatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.1)
+      ..style = PaintingStyle.fill;
 
-//   @override
-//   double get minExtent => tabBar.preferredSize.height;
-//   @override
-//   double get maxExtent => tabBar.preferredSize.height;
+    for (int i = 0; i < 5; i++) {
+      canvas.drawCircle(
+        Offset(size.width * (i * 0.25), size.height * 0.3),
+        40,
+        paint,
+      );
+    }
 
-//   @override
-//   Widget build(
-//     BuildContext context,
-//     double shrinkOffset,
-//     bool overlapsContent,
-//   ) {
-//     return Container(
-//       color: ColorScheme.fromSeed(seedColor: Colors.deepPurple).surface,
-//       child: tabBar,
-//     );
-//   }
+    canvas.drawCircle(Offset(size.width * 0.8, size.height * 0.7), 60, paint);
+    canvas.drawCircle(Offset(size.width * 0.2, size.height * 0.8), 30, paint);
+  }
 
-//   @override
-//   bool shouldRebuild(_TabBarDelegate oldDelegate) => false;
-// }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
