@@ -407,7 +407,7 @@ class _EditCommunityPostUpdateScreenState
 
       CustomTheme().customScaffoldMessage(
         context: context,
-        message: "Post submitted successfully!",
+        message: "Progress editted successfully!",
         backgroundColor: Colors.green,
       );
 

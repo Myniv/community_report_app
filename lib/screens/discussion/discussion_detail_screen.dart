@@ -54,6 +54,7 @@ class _DetailDiscussionScreenState extends State<DetailDiscussionScreen> {
 
 Widget _buildDetailDiscussion(BuildContext context, Discussion discussion) {
   final profile = context.watch<ProfileProvider>().profile;
+  final discussionProvider = Provider.of<DiscussionProvider>(context);
   return Expanded(
     child: Column(
       children: [
@@ -85,59 +86,136 @@ Widget _buildDetailDiscussion(BuildContext context, Discussion discussion) {
 
         // Bagian Komentar Detail
         Padding(
-          padding: const EdgeInsets.fromLTRB(12, 17, 12, 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Foto user
-              CircleAvatar(
-                radius: 22,
-                backgroundImage:
-                    (profile?.photo != null && profile!.photo!.isNotEmpty)
-                    ? NetworkImage(profile.photo!)
-                    : null,
-                child: (profile?.photo == null || profile!.photo!.isEmpty)
-                    ? const Icon(Icons.person, size: 22)
-                    : null,
-              ),
-              const SizedBox(width: 12),
-              // Isi komentar
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Username + Waktu
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          profile?.username ?? '',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          CustomTheme().timeAgo(discussion!.createdAt!),
-                          style: const TextStyle(
-                            color: Color(0xFF249A00),
-                            fontSize: 13,
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+          child: ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: CircleAvatar(
+              radius: 24,
+              backgroundImage:
+                  (profile?.photo != null && profile!.photo!.isNotEmpty)
+                  ? NetworkImage(profile.photo!)
+                  : null,
+              child: (profile?.photo == null || profile!.photo!.isEmpty)
+                  ? const Icon(Icons.person, size: 22)
+                  : null,
+            ),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    profile?.username ?? '',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
-                    const SizedBox(height: 4),
-                    // Pesan / komentar
-                    Text(
-                      discussion.message ?? '',
-                      style: const TextStyle(fontSize: 14),
-                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  CustomTheme().timeAgo(discussion!.createdAt!),
+                  style: const TextStyle(
+                    color: Color(0xFF249A00),
+                    fontSize: 13,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                PopupMenuButton<String>(
+                  padding: EdgeInsets.zero,
+                  icon: const Icon(Icons.more_vert, size: 20),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      discussionProvider.editMessageController.text =
+                          discussion.message ?? '';
+
+                      showDialog(
+                        context: context,
+                        builder: (ctx) {
+                          return AlertDialog(
+                            title: const Text("Edit Comment"),
+                            content: TextField(
+                              controller:
+                                  discussionProvider.editMessageController,
+                              decoration: const InputDecoration(
+                                hintText: "Update your comment...",
+                              ),
+                              maxLines: null,
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(),
+                                child: const Text("Cancel"),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  final newMessage = discussionProvider
+                                      .editMessageController
+                                      .text
+                                      .trim();
+                                  if (newMessage.isNotEmpty) {
+                                    discussionProvider
+                                        .updateDiscussion(
+                                          discussionId: discussion.discussionId,
+                                          userId: discussion.userId,
+                                          communityPostId:
+                                              discussion.communityPostId,
+                                          message: newMessage,
+                                        )
+                                        .then((_) {
+                                          Provider.of<DiscussionProvider>(
+                                            context,
+                                            listen: false,
+                                          ).fetchDiscussionWithCommunityPost(
+                                            discussion.discussionId,
+                                          );
+                                        });
+
+                                    if (context.mounted) {
+                                      Navigator.of(ctx).pop();
+                                      CustomTheme().customScaffoldMessage(
+                                        context: context,
+                                        message:
+                                            "Discussion editted successfully!",
+                                        backgroundColor: Colors.green,
+                                      );
+                                    }
+                                  }
+                                },
+                                child: const Text("Save"),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    } else if (value == 'delete') {
+                      discussionProvider
+                          .deleteDiscussion(discussion.discussionId!)
+                          .then((_) {
+                            Provider.of<DiscussionProvider>(
+                              context,
+                              listen: false,
+                            ).fetchDiscussionsList(userId: discussion.userId);
+                            Navigator.of(context).pop();
+                            CustomTheme().customScaffoldMessage(
+                              context: context,
+                              message: "Discussion deleted successfully!",
+                              backgroundColor: Colors.green,
+                            );
+                          });
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(value: 'edit', child: Text("Edit")),
+                    const PopupMenuItem(value: 'delete', child: Text("Delete")),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
+            subtitle: Text(
+              discussion.message ?? '',
+              style: const TextStyle(fontSize: 16),
+            ),
           ),
         ),
       ],

@@ -156,112 +156,134 @@ Widget _buildDiscussionTab(
             itemBuilder: (context, index) {
               final comment = discussions[index];
               return ListTile(
+                contentPadding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
                 leading: CircleAvatar(
-                  radius: 20,
+                  radius: 24,
                   backgroundImage:
-                      (comment.userPhoto != null &&
-                          comment.userPhoto!.isNotEmpty)
-                      ? NetworkImage(comment.userPhoto!)
+                      (profile?.photo != null && profile!.photo!.isNotEmpty)
+                      ? NetworkImage(profile.photo!)
                       : null,
-                  child:
-                      (comment.userPhoto == null || comment.userPhoto!.isEmpty)
-                      ? const Icon(Icons.person, size: 20)
+                  child: (profile?.photo == null || profile!.photo!.isEmpty)
+                      ? const Icon(Icons.person, size: 22)
                       : null,
                 ),
-                title: Text(comment.username ?? 'Unknown'),
-                subtitle: Text(comment.message ?? ''),
-                trailing: (profile?.uid == comment.userId)
-                    ? PopupMenuButton<String>(
-                        onSelected: (value) {
-                          if (value == 'edit') {
-                            discussionProvider.editMessageController.text =
-                                comment.message ?? '';
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        profile?.username ?? '',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Text(
+                      CustomTheme().timeAgo(comment.createdAt!),
+                      style: const TextStyle(
+                        color: Color(0xFF249A00),
+                        fontSize: 13,
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    PopupMenuButton<String>(
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          discussionProvider.editMessageController.text =
+                              comment.message ?? '';
 
-                            showDialog(
-                              context: context,
-                              builder: (ctx) {
-                                return AlertDialog(
-                                  title: const Text("Edit Comment"),
-                                  content: TextField(
-                                    controller: discussionProvider
-                                        .editMessageController,
-                                    decoration: const InputDecoration(
-                                      hintText: "Update your comment...",
-                                    ),
-                                    maxLines: null,
+                          showDialog(
+                            context: context,
+                            builder: (ctx) {
+                              return AlertDialog(
+                                title: const Text("Edit Comment"),
+                                content: TextField(
+                                  controller:
+                                      discussionProvider.editMessageController,
+                                  decoration: const InputDecoration(
+                                    hintText: "Update your comment...",
                                   ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(ctx).pop(),
-                                      child: const Text("Cancel"),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        final newMessage = discussionProvider
-                                            .editMessageController
-                                            .text
-                                            .trim();
-                                        if (newMessage.isNotEmpty) {
-                                          discussionProvider
-                                              .updateDiscussion(
-                                                discussionId:
-                                                    comment.discussionId,
-                                                userId: comment.userId,
-                                                communityPostId:
-                                                    comment.communityPostId,
-                                                message: newMessage,
-                                              )
-                                              .then((_) {
-                                                Provider.of<
-                                                      CommunityPostProvider
-                                                    >(context, listen: false)
-                                                    .fetchPost(postId);
-                                              });
+                                  maxLines: null,
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(ctx).pop(),
+                                    child: const Text("Cancel"),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      final newMessage = discussionProvider
+                                          .editMessageController
+                                          .text
+                                          .trim();
+                                      if (newMessage.isNotEmpty) {
+                                        discussionProvider
+                                            .updateDiscussion(
+                                              discussionId:
+                                                  comment.discussionId,
+                                              userId: comment.userId,
+                                              communityPostId:
+                                                  comment.communityPostId,
+                                              message: newMessage,
+                                            )
+                                            .then((_) {
+                                              Provider.of<
+                                                    CommunityPostProvider
+                                                  >(context, listen: false)
+                                                  .fetchPost(postId);
+                                            });
 
-                                          if (context.mounted) {
-                                            Navigator.of(ctx).pop();
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  "Comment updated!",
-                                                ),
-                                              ),
-                                            );
-                                          }
+                                        if (context.mounted) {
+                                          Navigator.of(ctx).pop();
+                                          CustomTheme().customScaffoldMessage(
+                                            context: context,
+                                            message:
+                                                "Discussion editted successfully!",
+                                            backgroundColor: Colors.green,
+                                          );
                                         }
-                                      },
-                                      child: const Text("Save"),
-                                    ),
-                                  ],
+                                      }
+                                    },
+                                    child: const Text("Save"),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        } else if (value == 'delete') {
+                          discussionProvider
+                              .deleteDiscussion(comment.discussionId!)
+                              .then((_) {
+                                // Refresh the post to reflect deletion
+                                Provider.of<CommunityPostProvider>(
+                                  context,
+                                  listen: false,
+                                ).fetchPost(postId);
+                                CustomTheme().customScaffoldMessage(
+                                  context: context,
+                                  message: "Discussion deleted successfully!",
+                                  backgroundColor: Colors.green,
                                 );
-                              },
-                            );
-                          } else if (value == 'delete') {
-                            discussionProvider
-                                .deleteDiscussion(comment.discussionId!)
-                                .then((_) {
-                                  // Refresh the post to reflect deletion
-                                  Provider.of<CommunityPostProvider>(
-                                    context,
-                                    listen: false,
-                                  ).fetchPost(postId);
-                                });
-                          }
-                        },
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
-                            value: 'edit',
-                            child: Text("Edit"),
-                          ),
-                          const PopupMenuItem(
-                            value: 'delete',
-                            child: Text("Delete"),
-                          ),
-                        ],
-                      )
-                    : null,
+                              });
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(value: 'edit', child: Text("Edit")),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Text("Delete"),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                subtitle: Text(
+                  comment.message ?? '',
+                  style: const TextStyle(fontSize: 16),
+                ),
               );
             },
             separatorBuilder: (context, index) => const Divider(
@@ -313,11 +335,10 @@ Widget _buildDiscussionTab(
                             listen: false,
                           ).fetchPost(postId);
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Comment posted successfully!"),
-                              duration: Duration(seconds: 2),
-                            ),
+                          CustomTheme().customScaffoldMessage(
+                            context: context,
+                            message: "Discussion posted successfully!",
+                            backgroundColor: Colors.green,
                           );
                         });
                   }

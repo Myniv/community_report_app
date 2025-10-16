@@ -359,7 +359,7 @@ class _CreateCommunityPostUpdateScreenState
 
       CustomTheme().customScaffoldMessage(
         context: context,
-        message: "Post submitted successfully!",
+        message: "Progress submitted successfully!",
         backgroundColor: Colors.green,
       );
 
