@@ -160,10 +160,12 @@ Widget _buildDiscussionTab(
                 leading: CircleAvatar(
                   radius: 24,
                   backgroundImage:
-                      (profile?.photo != null && profile!.photo!.isNotEmpty)
-                      ? NetworkImage(profile.photo!)
+                      (comment.userPhoto != null &&
+                          comment.userPhoto!.isNotEmpty)
+                      ? NetworkImage(comment.userPhoto!)
                       : null,
-                  child: (profile?.photo == null || profile!.photo!.isEmpty)
+                  child:
+                      (comment.userPhoto == null || comment.userPhoto!.isEmpty)
                       ? const Icon(Icons.person, size: 22)
                       : null,
                 ),
@@ -172,7 +174,7 @@ Widget _buildDiscussionTab(
                   children: [
                     Expanded(
                       child: Text(
-                        profile?.username ?? '',
+                        comment.username ?? '',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -189,95 +191,99 @@ Widget _buildDiscussionTab(
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    PopupMenuButton<String>(
-                      onSelected: (value) {
-                        if (value == 'edit') {
-                          discussionProvider.editMessageController.text =
-                              comment.message ?? '';
+                    if (profile!.uid == comment.userId)
+                      PopupMenuButton<String>(
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            discussionProvider.editMessageController.text =
+                                comment.message ?? '';
 
-                          showDialog(
-                            context: context,
-                            builder: (ctx) {
-                              return AlertDialog(
-                                title: const Text("Edit Comment"),
-                                content: TextField(
-                                  controller:
-                                      discussionProvider.editMessageController,
-                                  decoration: const InputDecoration(
-                                    hintText: "Update your comment...",
+                            showDialog(
+                              context: context,
+                              builder: (ctx) {
+                                return AlertDialog(
+                                  title: const Text("Edit Comment"),
+                                  content: TextField(
+                                    controller: discussionProvider
+                                        .editMessageController,
+                                    decoration: const InputDecoration(
+                                      hintText: "Update your comment...",
+                                    ),
+                                    maxLines: null,
                                   ),
-                                  maxLines: null,
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.of(ctx).pop(),
-                                    child: const Text("Cancel"),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      final newMessage = discussionProvider
-                                          .editMessageController
-                                          .text
-                                          .trim();
-                                      if (newMessage.isNotEmpty) {
-                                        discussionProvider
-                                            .updateDiscussion(
-                                              discussionId:
-                                                  comment.discussionId,
-                                              userId: comment.userId,
-                                              communityPostId:
-                                                  comment.communityPostId,
-                                              message: newMessage,
-                                            )
-                                            .then((_) {
-                                              Provider.of<
-                                                    CommunityPostProvider
-                                                  >(context, listen: false)
-                                                  .fetchPost(postId);
-                                            });
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(ctx).pop(),
+                                      child: const Text("Cancel"),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        final newMessage = discussionProvider
+                                            .editMessageController
+                                            .text
+                                            .trim();
+                                        if (newMessage.isNotEmpty) {
+                                          discussionProvider
+                                              .updateDiscussion(
+                                                discussionId:
+                                                    comment.discussionId,
+                                                userId: comment.userId,
+                                                communityPostId:
+                                                    comment.communityPostId,
+                                                message: newMessage,
+                                              )
+                                              .then((_) {
+                                                Provider.of<
+                                                      CommunityPostProvider
+                                                    >(context, listen: false)
+                                                    .fetchPost(postId);
+                                              });
 
-                                        if (context.mounted) {
-                                          Navigator.of(ctx).pop();
-                                          CustomTheme().customScaffoldMessage(
-                                            context: context,
-                                            message:
-                                                "Discussion editted successfully!",
-                                            backgroundColor: Colors.green,
-                                          );
+                                          if (context.mounted) {
+                                            Navigator.of(ctx).pop();
+                                            CustomTheme().customScaffoldMessage(
+                                              context: context,
+                                              message:
+                                                  "Discussion editted successfully!",
+                                              backgroundColor: Colors.green,
+                                            );
+                                          }
                                         }
-                                      }
-                                    },
-                                    child: const Text("Save"),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        } else if (value == 'delete') {
-                          discussionProvider
-                              .deleteDiscussion(comment.discussionId!)
-                              .then((_) {
-                                // Refresh the post to reflect deletion
-                                Provider.of<CommunityPostProvider>(
-                                  context,
-                                  listen: false,
-                                ).fetchPost(postId);
-                                CustomTheme().customScaffoldMessage(
-                                  context: context,
-                                  message: "Discussion deleted successfully!",
-                                  backgroundColor: Colors.green,
+                                      },
+                                      child: const Text("Save"),
+                                    ),
+                                  ],
                                 );
-                              });
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(value: 'edit', child: Text("Edit")),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Text("Delete"),
-                        ),
-                      ],
-                    ),
+                              },
+                            );
+                          } else if (value == 'delete') {
+                            discussionProvider
+                                .deleteDiscussion(comment.discussionId!)
+                                .then((_) {
+                                  // Refresh the post to reflect deletion
+                                  Provider.of<CommunityPostProvider>(
+                                    context,
+                                    listen: false,
+                                  ).fetchPost(postId);
+                                  CustomTheme().customScaffoldMessage(
+                                    context: context,
+                                    message: "Discussion deleted successfully!",
+                                    backgroundColor: Colors.green,
+                                  );
+                                });
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Text("Edit"),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Text("Delete"),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
                 subtitle: Text(

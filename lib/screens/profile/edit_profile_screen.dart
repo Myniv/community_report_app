@@ -387,7 +387,7 @@ class FormScreenState extends State<UpdateProfileScreen> {
                                             context,
                                           );
                                       if (!confirmed) {
-                                        return; 
+                                        return;
                                       }
                                     }
 
@@ -396,12 +396,10 @@ class FormScreenState extends State<UpdateProfileScreen> {
                                               .updateOtherProfile()
                                         : await profileProvider.updateProfile();
 
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Profile updated successfully!',
-                                        ),
-                                      ),
+                                    CustomTheme().customScaffoldMessage(
+                                      context: context,
+                                      message: "Profile edited successfully!",
+                                      backgroundColor: Colors.green,
                                     );
 
                                     if (context.mounted) {
