@@ -27,6 +27,7 @@ class PostSection extends StatelessWidget {
   int? discussionCount;
   bool? editPost = false;
   final VoidCallback? onPostDeleted;
+  final VoidCallback? onNavigateBack;
   bool? isNavigateDisable;
 
   final CustomTheme _theme = CustomTheme();
@@ -52,6 +53,7 @@ class PostSection extends StatelessWidget {
     this.discussionCount,
     this.editPost,
     this.onPostDeleted,
+    this.onNavigateBack,
     this.isNavigateDisable,
   }) : super(key: key);
 
@@ -74,6 +76,7 @@ class PostSection extends StatelessWidget {
                   AppRoutes.editPost,
                   arguments: {'postIndex': postId},
                 );
+                onNavigateBack?.call();
               },
             ),
             ListTile(
@@ -259,6 +262,7 @@ class PostSection extends StatelessWidget {
                       '/profile',
                       arguments: {'uid': profilePostId},
                     );
+                    onNavigateBack?.call();
                   }
                 },
                 child: Row(
@@ -325,6 +329,7 @@ class PostSection extends StatelessWidget {
               AppRoutes.discussionDetail,
               arguments: postId,
             );
+            onNavigateBack?.call();
           },
           child: Padding(
             padding: EdgeInsets.fromLTRB(
@@ -405,6 +410,7 @@ class PostSection extends StatelessWidget {
                     AppRoutes.discussionDetail,
                     arguments: postId,
                   );
+                  onNavigateBack?.call();
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

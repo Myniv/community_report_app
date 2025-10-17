@@ -40,7 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           print("Loading profile other user with id: ${widget.profileId}");
           await profileProvider.loadProfileOtherUser(widget.profileId!);
 
-          await context.read<CommunityPostProvider>().fetchPostsList(
+          await context.read<CommunityPostProvider>().fetchProfilePostsList(
             userId: widget.profileId,
             status: selectStatus,
             category: selectCategory,
@@ -55,7 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           print("Loading own profile");
 
           if (profileProvider.profile?.uid != null) {
-            await context.read<CommunityPostProvider>().fetchPostsList(
+            await context.read<CommunityPostProvider>().fetchProfilePostsList(
               userId: profileProvider.profile!.uid,
               status: selectStatus,
               category: selectCategory,
@@ -80,7 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ? profileProvider.profile
         : profileProvider.otherUserProfile;
     final communityPostProvider = context.watch<CommunityPostProvider>();
-    final communityPost = communityPostProvider.postListProfile;
+    final communityPost = communityPostProvider.profilePosts;
     final discussionProvider = context.watch<DiscussionProvider>();
     final discussionLists = discussionProvider.discussionListProfile;
 
@@ -173,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     .read<ProfileProvider>();
                                 context
                                     .read<CommunityPostProvider>()
-                                    .fetchPostsList(
+                                    .fetchProfilePostsList(
                                       userId: profileProvider.profile?.uid,
                                       status: selectStatus,
                                       category: selectCategory,
@@ -198,7 +198,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     .read<ProfileProvider>();
                                 context
                                     .read<CommunityPostProvider>()
-                                    .fetchPostsList(
+                                    .fetchProfilePostsList(
                                       userId: profileProvider.profile?.uid,
                                       status: selectStatus,
                                       category: selectCategory,
@@ -224,7 +224,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     .read<ProfileProvider>();
                                 context
                                     .read<CommunityPostProvider>()
-                                    .fetchPostsList(
+                                    .fetchProfilePostsList(
                                       userId: profileProvider.profile?.uid,
                                       status: selectStatus,
                                       category: selectCategory,
@@ -249,7 +249,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     .read<ProfileProvider>();
                                 context
                                     .read<CommunityPostProvider>()
-                                    .fetchPostsList(
+                                    .fetchProfilePostsList(
                                       userId: profileProvider.profile?.uid,
                                       status: selectStatus,
                                       category: selectCategory,
@@ -293,6 +293,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     settingPostScreen: false,
                                     postImage: post.photo,
                                     editPost: true,
+                                    onNavigateBack: () {
+                                      final profileProvider = context
+                                          .read<ProfileProvider>();
+                                      context
+                                          .read<CommunityPostProvider>()
+                                          .fetchProfilePostsList(
+                                            userId:
+                                                widget.profileId ??
+                                                profileProvider.profile?.uid,
+                                            status: selectStatus,
+                                            category: selectCategory,
+                                            location: selectLocation,
+                                            urgency: selectUrgency,
+                                          );
+                                    },
                                   );
                                 },
                               ),
@@ -425,7 +440,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         if (result == true) {
           // Refresh data setelah balik dari edit
-          context.read<CommunityPostProvider>().fetchPostsList(
+          context.read<CommunityPostProvider>().fetchProfilePostsList(
             userId: context.read<ProfileProvider>().profile?.uid,
             status: selectStatus,
             category: selectCategory,
@@ -494,7 +509,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   setState(
                     () => selectCategory = value == 'All' ? null : value!,
                   );
-                  context.read<CommunityPostProvider>().fetchPostsList(
+                  context.read<CommunityPostProvider>().fetchProfilePostsList(
                     status: selectStatus,
                     category: selectCategory,
                     location: selectLocation,
@@ -510,7 +525,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 items: allStatus,
                 onChanged: (value) async {
                   setState(() => selectStatus = value == 'All' ? null : value!);
-                  context.read<CommunityPostProvider>().fetchPostsList(
+                  context.read<CommunityPostProvider>().fetchProfilePostsList(
                     status: selectStatus,
                     category: selectCategory,
                     location: selectLocation,
@@ -528,7 +543,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   setState(
                     () => selectUrgency = value == 'All' ? null : value!,
                   );
-                  context.read<CommunityPostProvider>().fetchPostsList(
+                  context.read<CommunityPostProvider>().fetchProfilePostsList(
                     status: selectStatus,
                     category: selectCategory,
                     location: selectLocation,
@@ -546,7 +561,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   setState(
                     () => selectLocation = value == 'All' ? null : value!,
                   );
-                  context.read<CommunityPostProvider>().fetchPostsList(
+                  context.read<CommunityPostProvider>().fetchProfilePostsList(
                     status: selectStatus,
                     category: selectCategory,
                     location: selectLocation,

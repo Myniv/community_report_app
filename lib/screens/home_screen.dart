@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final profile = context.read<ProfileProvider>().profile;
     selectLocation = profile?.location;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      context.read<CommunityPostProvider>().fetchPostsList(
+      context.read<CommunityPostProvider>().fetchHomePostsList(
         location: selectLocation,
         category: selectCategory,
         status: selectStatus,
@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final communityPostProvider = context.watch<CommunityPostProvider>();
     final profileProvider = context.read<ProfileProvider>();
-    final communityPost = communityPostProvider.postListProfile;
+    final communityPost = communityPostProvider.homePosts;
 
     final allCategory = [
       'All',
@@ -119,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () async {
                 await Navigator.pushNamed(context, '/edit_post');
                 if (mounted) {
-                  context.read<CommunityPostProvider>().fetchPostsList(
+                  context.read<CommunityPostProvider>().fetchHomePostsList(
                     location: selectLocation,
                     category: selectCategory,
                     status: selectStatus,
@@ -151,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         await _getLatLonFromAddress(value);
                         _mapController.move(_currentPosition!, 16.0);
                       }
-                      context.read<CommunityPostProvider>().fetchPostsList(
+                      context.read<CommunityPostProvider>().fetchHomePostsList(
                         status: selectStatus,
                         category: selectCategory,
                         location: selectLocation,
@@ -173,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         await _getLatLonFromAddress(value);
                         _mapController.move(_currentPosition!, 16.0);
                       }
-                      context.read<CommunityPostProvider>().fetchPostsList(
+                      context.read<CommunityPostProvider>().fetchHomePostsList(
                         status: selectStatus,
                         category: selectCategory,
                         location: selectLocation,
@@ -195,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         await _getLatLonFromAddress(value);
                         _mapController.move(_currentPosition!, 16.0);
                       }
-                      context.read<CommunityPostProvider>().fetchPostsList(
+                      context.read<CommunityPostProvider>().fetchHomePostsList(
                         status: selectStatus,
                         category: selectCategory,
                         location: selectLocation,
@@ -217,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         await _getLatLonFromAddress(value);
                         _mapController.move(_currentPosition!, 16.0);
                       }
-                      context.read<CommunityPostProvider>().fetchPostsList(
+                      context.read<CommunityPostProvider>().fetchHomePostsList(
                         status: selectStatus,
                         category: selectCategory,
                         location: selectLocation,
@@ -241,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
             //         _mapController.move(_currentPosition!, 16.0);
             //       }
 
-            //       context.read<CommunityPostProvider>().fetchPostsList(
+            //       context.read<CommunityPostProvider>().fetchHomePostsList(
             //         location: value,
             //       );
 
@@ -388,7 +388,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         onPostDeleted: () {
                           final profileProvider = context
                               .read<ProfileProvider>();
-                          context.read<CommunityPostProvider>().fetchPostsList(
+                          context.read<CommunityPostProvider>().fetchHomePostsList(
+                            location: selectLocation,
+                            category: selectCategory,
+                            status: selectStatus,
+                            urgency: selectUrgency,
+                          );
+                        },
+                        onNavigateBack: () {
+                          context.read<CommunityPostProvider>().fetchHomePostsList(
                             location: selectLocation,
                             category: selectCategory,
                             status: selectStatus,

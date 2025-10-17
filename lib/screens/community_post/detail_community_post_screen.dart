@@ -496,7 +496,7 @@ Widget buildPostUpdateSection(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextContainer(
-                      text: update.isResolved! ? 'Resolved' : 'Not Resolved',
+                      text: update.isResolved! ? 'Resolved' : 'On Progress',
                       // useIcon: update.isResolved! ? true : false,
                     ),
                     const SizedBox(width: 8),

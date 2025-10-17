@@ -12,8 +12,15 @@ class CommunityPostProvider with ChangeNotifier {
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
 
-  List<CommunityPost> _postsListProfile = [];
-  List<CommunityPost> get postListProfile => _postsListProfile;
+  // SEPARATE LISTS FOR DIFFERENT SCREENS
+  List<CommunityPost> _homePosts = [];
+  List<CommunityPost> get homePosts => _homePosts;
+
+  List<CommunityPost> _profilePosts = [];
+  List<CommunityPost> get profilePosts => _profilePosts;
+
+  // Keep this for backward compatibility if needed
+  List<CommunityPost> get postListProfile => _profilePosts;
 
   CommunityPost? _currentPost;
   CommunityPost? get currentPost => _currentPost;
@@ -42,6 +49,82 @@ class CommunityPostProvider with ChangeNotifier {
   final ProfileProvider profileProvider;
   CommunityPostProvider(this.profileProvider);
 
+  // NEW: Fetch posts for HOME SCREEN (no userId filter)
+  Future<void> fetchHomePostsList({
+    String? status,
+    String? category,
+    String? location,
+    String? urgency,
+  }) async {
+    print("=== FETCH HOME POSTS START ===");
+    print("Current home posts count: ${_homePosts.length}");
+
+    _isLoading = true;
+    _safeNotifyListeners();
+    print("Set isLoading = true, notified listeners");
+
+    try {
+      _homePosts = await _communityPostServices.getPosts(
+        userId: null, // No user filter for home
+        status: status,
+        category: category,
+        location: location,
+        isReport: null,
+        urgency: urgency,
+      );
+      print("Fetched home posts: ${_homePosts.length}");
+    } catch (e) {
+      print("Error in provider: $e");
+      _homePosts = [];
+    } finally {
+      _isLoading = false;
+      print("Set isLoading = false");
+      _safeNotifyListeners();
+      print("=== FETCH HOME POSTS END ===");
+      print("Final home posts count: ${_homePosts.length}");
+    }
+  }
+
+  // NEW: Fetch posts for PROFILE SCREEN (with userId filter)
+  Future<void> fetchProfilePostsList({
+    String? userId,
+    String? status,
+    String? category,
+    String? location,
+    String? urgency,
+  }) async {
+    print("=== FETCH PROFILE POSTS START ===");
+    print("userId: $userId");
+    print("Current profile posts count: ${_profilePosts.length}");
+
+    _isLoading = true;
+    _safeNotifyListeners();
+    print("Set isLoading = true, notified listeners");
+
+    try {
+      _profilePosts = await _communityPostServices.getPosts(
+        userId: userId,
+        status: status,
+        category: category,
+        location: location,
+        isReport: null,
+        urgency: urgency,
+      );
+      print("Fetched profile posts: ${_profilePosts.length}");
+    } catch (e) {
+      print("Error in provider: $e");
+      _profilePosts = [];
+    } finally {
+      _isLoading = false;
+      print("Set isLoading = false");
+      _safeNotifyListeners();
+      print("=== FETCH PROFILE POSTS END ===");
+      print("Final profile posts count: ${_profilePosts.length}");
+    }
+  }
+
+  // DEPRECATED: Keep for backward compatibility, but redirect to appropriate method
+  @Deprecated('Use fetchHomePostsList or fetchProfilePostsList instead')
   Future<void> fetchPostsList({
     String? userId,
     String? status,
@@ -50,34 +133,21 @@ class CommunityPostProvider with ChangeNotifier {
     bool? isReport,
     String? urgency,
   }) async {
-    print("=== FETCH POSTS START ===");
-    print("userId: $userId");
-    print("Current posts count: ${_postsListProfile.length}");
-    
-    _isLoading = true;
-    _safeNotifyListeners();
-    print("Set isLoading = true, notified listeners");
-
-    try {
-      _postsListProfile = await _communityPostServices.getPosts(
+    if (userId != null) {
+      await fetchProfilePostsList(
         userId: userId,
         status: status,
         category: category,
         location: location,
-        isReport: isReport,
         urgency: urgency,
       );
-      print("Fetched posts: $_postsListProfile");
-      print("New posts count: ${_postsListProfile.length}");
-    } catch (e) {
-      print("Error in provider: $e");
-      _postsListProfile = [];
-    } finally {
-      _isLoading = false;
-      print("Set isLoading = false");
-      _safeNotifyListeners();
-      print("=== FETCH POSTS END ===");
-      print("Final posts count: ${_postsListProfile.length}");
+    } else {
+      await fetchHomePostsList(
+        status: status,
+        category: category,
+        location: location,
+        urgency: urgency,
+      );
     }
   }
 
@@ -90,7 +160,6 @@ class CommunityPostProvider with ChangeNotifier {
       print("Fetched post: $_currentPost");
     } catch (e) {
       print("Error in provider: $e");
-      // _postsListProfile = [];
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -112,11 +181,17 @@ class CommunityPostProvider with ChangeNotifier {
   }
 
   Future<void> getEditPost(int postId) async {
-    final index = _postsListProfile.indexWhere((post) => post.id == postId);
+    // Search in both lists
+    var post = _homePosts.firstWhere(
+      (post) => post.id == postId,
+      orElse: () => _profilePosts.firstWhere(
+        (post) => post.id == postId,
+        orElse: () => CommunityPost(),
+      ),
+    );
 
-    if (index != -1) {
+    if (post.id != null) {
       _postIndex = postId;
-      final post = _postsListProfile[index];
 
       titleController.text = post.title ?? '';
       descriptionController.text = post.description ?? '';
@@ -257,7 +332,6 @@ class CommunityPostProvider with ChangeNotifier {
       throw Exception("Post not initialized");
     }
 
-    // Get current values
     final title = titleController.text.trim();
     final description = descriptionController.text.trim();
 
@@ -275,8 +349,6 @@ class CommunityPostProvider with ChangeNotifier {
     print("Existing Photo: ${_currentPost!.photo}");
     print("New Image File: ${imageFile?.path}");
 
-    // Validate image is provided for NEW posts only
-    // For editing, allow keeping existing photo
     if (imageFile == null &&
         (_currentPost!.photo == null || _currentPost!.photo!.isEmpty)) {
       _errorMessage = "Photo is required";
@@ -284,7 +356,6 @@ class CommunityPostProvider with ChangeNotifier {
       throw Exception("Photo is required");
     }
 
-    // Validate required fields
     if (title.isEmpty) {
       _errorMessage = "Title is required";
       notifyListeners();
@@ -320,7 +391,6 @@ class CommunityPostProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // Update current post with all values
       _currentPost = _currentPost!.copyWith(
         title: title,
         description: description,
@@ -328,7 +398,6 @@ class CommunityPostProvider with ChangeNotifier {
       );
 
       if (_postIndex == null) {
-        // Creating new post - photo is required
         if (imageFile == null) {
           throw Exception("Photo is required for new posts");
         }
@@ -339,7 +408,6 @@ class CommunityPostProvider with ChangeNotifier {
         final tempPost = await _communityPostServices.createPost(_currentPost!);
         print("Temporary post created with ID: ${tempPost.id}");
 
-        // Step 2: Upload photo using the post ID
         print("Step 2: Uploading photo for post ${tempPost.id}...");
         final photoUrl = await _communityPostServices.uploadProfilePhoto(
           tempPost.id!,
@@ -348,20 +416,18 @@ class CommunityPostProvider with ChangeNotifier {
         );
         print("Photo uploaded successfully: $photoUrl");
 
-        // Step 3: Update the post with photo URL
         print("Step 3: Updating post with photo URL...");
         _currentPost = tempPost.copyWith(photo: photoUrl);
         await _communityPostServices.updatePost(_currentPost!);
         print("Post updated with photo URL");
 
-        print("Final post data: ${_currentPost!.toMap()}");
-        _postsListProfile.add(_currentPost!);
+        // Add to both lists
+        _homePosts.add(_currentPost!);
+        _profilePosts.add(_currentPost!);
       } else {
-        // Updating existing post
         print("Updating post: ${_currentPost!.id}");
         _currentPost = _currentPost!.copyWith(id: _postIndex);
 
-        // Only upload new photo if one was provided
         if (imageFile != null) {
           print("Uploading new photo...");
           final photoUrl = await _communityPostServices.uploadProfilePhoto(
@@ -378,11 +444,19 @@ class CommunityPostProvider with ChangeNotifier {
         await _communityPostServices.updatePost(_currentPost!);
         print("Post updated successfully");
 
-        final index = _postsListProfile.indexWhere(
+        // Update in both lists
+        final homeIndex = _homePosts.indexWhere(
           (post) => post.id == _postIndex,
         );
-        if (index != -1) {
-          _postsListProfile[index] = _currentPost!;
+        if (homeIndex != -1) {
+          _homePosts[homeIndex] = _currentPost!;
+        }
+
+        final profileIndex = _profilePosts.indexWhere(
+          (post) => post.id == _postIndex,
+        );
+        if (profileIndex != -1) {
+          _profilePosts[profileIndex] = _currentPost!;
         }
       }
 
@@ -405,7 +479,11 @@ class CommunityPostProvider with ChangeNotifier {
     notifyListeners();
     try {
       await _communityPostServices.deletePost(postId!);
-      _postsListProfile.removeWhere((post) => post.id == postId);
+
+      // Remove from both lists
+      _homePosts.removeWhere((post) => post.id == postId);
+      _profilePosts.removeWhere((post) => post.id == postId);
+
       _errorMessage = null;
       notifyListeners();
       print("Post deleted successfully");
